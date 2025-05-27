@@ -1,0 +1,111 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "revenue": "Revenue",
+    "demographics": "Customer Demographics",
+    "competition": "Competition"
+  },
+  "header": {
+    "title": "NBG Business Insights",
+    "language": "Language"
+  },
+  "filters": {
+    "title": "Filters",
+    "dateRange": "Date Range",
+    "channel": "Channel",
+    "demographics": "Demographics",
+    "gender": "Gender",
+    "ageGroup": "Age Group",
+    "customerLocation": "Customer Location",
+    "goForMore": "Go For More Customers",
+    "shoppingInterests": "Shopping Interests",
+    "store": "Store",
+    "apply": "Apply Filters",
+    "reset": "Reset"
+  },
+  "channels": {
+    "all": "All",
+    "physical": "Physical Stores",
+    "ecommerce": "E-Commerce"
+  },
+  "genders": {
+    "all": "All",
+    "male": "Male",
+    "female": "Female"
+  },
+  "ageGroups": {
+    "all": "All",
+    "genZ": "Generation Z (18-24)",
+    "millennials": "Millennials (25-40)",
+    "genX": "Generation X (41-56)",
+    "boomers": "Baby Boomers (57-75)",
+    "silent": "Silent Generation (76-96)"
+  },
+  "goForMoreOptions": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "dashboard": {
+    "title": "Metrics Dashboard",
+    "subtitle": "Overview of transaction volumes for the selected time period",
+    "merchant": "Merchant",
+    "competition": "Competition",
+    "totalTransactions": "Total Transactions",
+    "totalRevenue": "Total Revenue",
+    "avgTransaction": "Average Amount per Transaction",
+    "customers": "Customers",
+    "transactions": "Transactions",
+    "revenue": "Revenue",
+    "vsLastYear": "vs Last Year",
+    "vsCompetition": "vs Competition",
+    "changeFromLastYear": "Change from last year"
+  },
+  "revenue": {
+    "title": "Revenue Analytics",
+    "subtitle": "Deep dive in revenue analytics for the merchant and competition",
+    "totalRevenue": "Total Revenue",
+    "avgDailyRevenue": "Average Daily Revenue",
+    "avgTransaction": "Average Amount per Transaction",
+    "goForMoreRevenue": "Total Revenue from Go For More",
+    "goForMoreRewarded": "Total Rewarded Amount from Go For More",
+    "goForMoreRedeemed": "Total Redeemed Amount from Go For More",
+    "revenueTrend": "Revenue Trend",
+    "revenueChange": "Revenue % Change from Last Year",
+    "revenueByInterests": "Revenue by Shopping Interests",
+    "revenueByChannel": "Revenue by Channel"
+  },
+  "demographics": {
+    "title": "Customer Analytics",
+    "subtitle": "Customer demographics and behavioral patterns",
+    "totalCustomers": "Total Customers",
+    "newCustomers": "New Customers",
+    "returningCustomers": "Returning Customers",
+    "topSpenders": "Top Spenders",
+    "loyalCustomers": "Loyal Customers",
+    "atRiskCustomers": "At Risk Customers",
+    "customersByGender": "Customers by Gender",
+    "customersByAge": "Customers by Age Group",
+    "customersByFrequency": "Customers by Shopping Frequency",
+    "customersByInterests": "Customers by Shopping Interests"
+  },
+  "chartOptions": {
+    "bars": "Bars",
+    "line": "Line",
+    "table": "Table",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "yearly": "Yearly"
+  },
+  "common": {
+    "loading": "Loading...",
+    "noData": "No data available",
+    "error": "An error occurred",
+    "percentage": "%",
+    "currency": "€",
+    "close": "Close",
+    "open": "Open",
+    "merchantDataOnly": "Merchant data only (compliance requirement)"
+  }
+}

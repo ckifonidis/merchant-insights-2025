@@ -1,0 +1,290 @@
+{
+  "dashboard": {
+    "title": "dashboard.title",
+    "subtitle": "dashboard.subtitle",
+    "metrics": [
+      {
+        "id": "totalTransactions",
+        "name": "dashboard.totalTransactions",
+        "supportsCompetition": true,
+        "icon": "shopping-bag",
+        "color": "blue",
+        "merchant": {
+          "value": 45678,
+          "valueDiff": 8.2,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 52341,
+          "valueDiff": 4.5,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "totalRevenue",
+        "name": "dashboard.totalRevenue",
+        "supportsCompetition": true,
+        "icon": "dollar-sign",
+        "color": "green",
+        "valueType": "currency",
+        "merchant": {
+          "value": 2345678.90,
+          "valueDiff": 12.5,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 2789123.45,
+          "valueDiff": 5.8,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "avgTransaction",
+        "name": "dashboard.avgTransaction",
+        "supportsCompetition": true,
+        "icon": "pie-chart",
+        "color": "purple",
+        "valueType": "currency",
+        "merchant": {
+          "value": 51.34,
+          "valueDiff": 2.1,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 53.28,
+          "valueDiff": -1.2,
+          "valueDiffType": "percentage"
+        }
+      }
+    ],
+    "charts": [
+      {
+        "id": "transactionsOverTime",
+        "name": "dashboard.transactions",
+        "component": "TransactionsChart",
+        "supportsCompetition": true,
+        "supportsMultiView": true,
+        "supportsTimeline": true,
+        "defaultView": "bars",
+        "defaultTimeline": "daily"
+      },
+      {
+        "id": "revenueOverTime",
+        "name": "dashboard.revenue",
+        "component": "RevenueChart",
+        "supportsCompetition": true,
+        "supportsMultiView": true,
+        "supportsTimeline": true,
+        "defaultView": "bars",
+        "defaultTimeline": "daily"
+      },
+      {
+        "id": "customersOverTime",
+        "name": "dashboard.customers",
+        "component": "CustomersChart",
+        "supportsCompetition": false,
+        "supportsMultiView": true,
+        "supportsTimeline": true,
+        "defaultView": "bars",
+        "defaultTimeline": "daily",
+        "note": "dashboard.merchantDataOnly"
+      },
+      {
+        "id": "monthlyRevenue",
+        "name": "dashboard.monthlyRevenue",
+        "component": "MonthlyTurnoverHeatmap",
+        "supportsCompetition": false,
+        "supportsMultiView": false,
+        "supportsTimeline": false
+      },
+      {
+        "id": "geographicRevenue",
+        "name": "dashboard.geographicRevenue",
+        "component": "GeographicPerformance",
+        "supportsCompetition": false,
+        "supportsMultiView": false,
+        "supportsTimeline": false
+      }
+    ]
+  },
+  "revenue": {
+    "title": "revenue.title",
+    "subtitle": "revenue.subtitle",
+    "metrics": [
+      {
+        "id": "totalRevenue",
+        "name": "revenue.totalRevenue",
+        "supportsCompetition": true,
+        "icon": "dollar-sign",
+        "color": "green",
+        "valueType": "currency",
+        "merchant": {
+          "value": 2345678.90,
+          "valueDiff": 12.5,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 2789123.45,
+          "valueDiff": 5.8,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "avgDailyRevenue",
+        "name": "revenue.avgDailyRevenue",
+        "supportsCompetition": true,
+        "icon": "calendar",
+        "color": "blue",
+        "valueType": "currency",
+        "merchant": {
+          "value": 15678.52,
+          "valueDiff": 8.3,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 18234.67,
+          "valueDiff": 4.1,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "avgTransaction",
+        "name": "revenue.avgTransaction",
+        "supportsCompetition": true,
+        "icon": "pie-chart",
+        "color": "purple",
+        "valueType": "currency",
+        "merchant": {
+          "value": 51.34,
+          "valueDiff": 2.1,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 53.28,
+          "valueDiff": -1.2,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "goForMoreRevenue",
+        "name": "revenue.goForMoreRevenue",
+        "supportsCompetition": false,
+        "icon": "gift",
+        "color": "orange",
+        "valueType": "currency",
+        "conditional": "goForMore",
+        "merchant": {
+          "value": 456789.12,
+          "valueDiff": 15.7,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "goForMoreRewarded",
+        "name": "revenue.goForMoreRewarded",
+        "supportsCompetition": false,
+        "icon": "award",
+        "color": "yellow",
+        "valueType": "currency",
+        "conditional": "goForMore",
+        "merchant": {
+          "value": 23456.78,
+          "valueDiff": 22.1,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "goForMoreRedeemed",
+        "name": "revenue.goForMoreRedeemed",
+        "supportsCompetition": false,
+        "icon": "check-circle",
+        "color": "teal",
+        "valueType": "currency",
+        "conditional": "goForMore",
+        "merchant": {
+          "value": 18765.43,
+          "valueDiff": 18.9,
+          "valueDiffType": "percentage"
+        }
+      }
+    ]
+  },
+  "demographics": {
+    "title": "demographics.title",
+    "subtitle": "demographics.subtitle",
+    "metrics": [
+      {
+        "id": "totalCustomers",
+        "name": "demographics.totalCustomers",
+        "supportsCompetition": false,
+        "icon": "users",
+        "color": "blue",
+        "merchant": {
+          "value": 12456,
+          "valueDiff": 8.7,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "newCustomers",
+        "name": "demographics.newCustomers",
+        "supportsCompetition": false,
+        "icon": "user-plus",
+        "color": "green",
+        "merchant": {
+          "value": 2345,
+          "valueDiff": 15.2,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "returningCustomers",
+        "name": "demographics.returningCustomers",
+        "supportsCompetition": false,
+        "icon": "user-check",
+        "color": "purple",
+        "merchant": {
+          "value": 8765,
+          "valueDiff": 6.3,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "topSpenders",
+        "name": "demographics.topSpenders",
+        "supportsCompetition": false,
+        "icon": "star",
+        "color": "yellow",
+        "merchant": {
+          "value": 1234,
+          "valueDiff": 12.8,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "loyalCustomers",
+        "name": "demographics.loyalCustomers",
+        "supportsCompetition": false,
+        "icon": "heart",
+        "color": "red",
+        "merchant": {
+          "value": 3456,
+          "valueDiff": 9.1,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "atRiskCustomers",
+        "name": "demographics.atRiskCustomers",
+        "supportsCompetition": false,
+        "icon": "alert-triangle",
+        "color": "orange",
+        "merchant": {
+          "value": 567,
+          "valueDiff": -3.4,
+          "valueDiffType": "percentage"
+        }
+      }
+    ]
+  }
+}

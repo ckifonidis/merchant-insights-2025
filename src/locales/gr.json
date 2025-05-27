@@ -1,0 +1,111 @@
+{
+  "navigation": {
+    "dashboard": "Πίνακας Ελέγχου",
+    "revenue": "Έσοδα",
+    "demographics": "Δημογραφικά Πελατών",
+    "competition": "Ανταγωνισμός"
+  },
+  "header": {
+    "title": "NBG Business Insights",
+    "language": "Γλώσσα"
+  },
+  "filters": {
+    "title": "Φίλτρα",
+    "dateRange": "Χρονικό Διάστημα",
+    "channel": "Κανάλι",
+    "demographics": "Δημογραφικά",
+    "gender": "Φύλο",
+    "ageGroup": "Ηλικιακή Ομάδα",
+    "customerLocation": "Τοποθεσία Πελάτη",
+    "goForMore": "Πελάτες Go For More",
+    "shoppingInterests": "Ενδιαφέροντα Αγορών",
+    "store": "Κατάστημα",
+    "apply": "Εφαρμογή Φίλτρων",
+    "reset": "Επαναφορά"
+  },
+  "channels": {
+    "all": "Όλα",
+    "physical": "Φυσικά Καταστήματα",
+    "ecommerce": "Ηλεκτρονικό Εμπόριο"
+  },
+  "genders": {
+    "all": "Όλα",
+    "male": "Άνδρας",
+    "female": "Γυναίκα"
+  },
+  "ageGroups": {
+    "all": "Όλα",
+    "genZ": "Γενιά Z (18-24)",
+    "millennials": "Millennials (25-40)",
+    "genX": "Γενιά X (41-56)",
+    "boomers": "Baby Boomers (57-75)",
+    "silent": "Σιωπηλή Γενιά (76-96)"
+  },
+  "goForMoreOptions": {
+    "yes": "Ναι",
+    "no": "Όχι"
+  },
+  "dashboard": {
+    "title": "Πίνακας Μετρήσεων",
+    "subtitle": "Επισκόπηση όγκων συναλλαγών για την επιλεγμένη χρονική περίοδο",
+    "merchant": "Έμπορος",
+    "competition": "Ανταγωνισμός",
+    "totalTransactions": "Συνολικές Συναλλαγές",
+    "totalRevenue": "Συνολικά Έσοδα",
+    "avgTransaction": "Μέσο Ποσό ανά Συναλλαγή",
+    "customers": "Πελάτες",
+    "transactions": "Συναλλαγές",
+    "revenue": "Έσοδα",
+    "vsLastYear": "σε σχέση με πέρυσι",
+    "vsCompetition": "σε σχέση με ανταγωνισμό",
+    "changeFromLastYear": "Μεταβολή από πέρυσι"
+  },
+  "revenue": {
+    "title": "Αναλυτικά Εσόδων",
+    "subtitle": "Εις βάθος ανάλυση εσόδων για τον έμπορο και τον ανταγωνισμό",
+    "totalRevenue": "Συνολικά Έσοδα",
+    "avgDailyRevenue": "Μέσα Ημερήσια Έσοδα",
+    "avgTransaction": "Μέσο Ποσό ανά Συναλλαγή",
+    "goForMoreRevenue": "Συνολικά Έσοδα από Go For More",
+    "goForMoreRewarded": "Συνολικό Ποσό Ανταμοιβών από Go For More",
+    "goForMoreRedeemed": "Συνολικό Ποσό Εξαργύρωσης από Go For More",
+    "revenueTrend": "Τάση Εσόδων",
+    "revenueChange": "Μεταβολή Εσόδων % από Πέρυσι",
+    "revenueByInterests": "Έσοδα ανά Ενδιαφέροντα Αγορών",
+    "revenueByChannel": "Έσοδα ανά Κανάλι"
+  },
+  "demographics": {
+    "title": "Αναλυτικά Πελατών",
+    "subtitle": "Δημογραφικά και συμπεριφορικά πρότυπα πελατών",
+    "totalCustomers": "Συνολικοί Πελάτες",
+    "newCustomers": "Νέοι Πελάτες",
+    "returningCustomers": "Επαναλαμβάνοντες Πελάτες",
+    "topSpenders": "Κορυφαίοι Πελάτες",
+    "loyalCustomers": "Πιστοί Πελάτες",
+    "atRiskCustomers": "Πελάτες σε Κίνδυνο",
+    "customersByGender": "Πελάτες ανά Φύλο",
+    "customersByAge": "Πελάτες ανά Ηλικιακή Ομάδα",
+    "customersByFrequency": "Πελάτες ανά Συχνότητα Αγορών",
+    "customersByInterests": "Πελάτες ανά Ενδιαφέροντα Αγορών"
+  },
+  "chartOptions": {
+    "bars": "Μπάρες",
+    "line": "Γραμμή",
+    "table": "Πίνακας",
+    "daily": "Ημερήσια",
+    "weekly": "Εβδομαδιαία",
+    "monthly": "Μηνιαία",
+    "quarterly": "Τριμηνιαία",
+    "yearly": "Ετήσια"
+  },
+  "common": {
+    "loading": "Φόρτωση...",
+    "noData": "Δεν υπάρχουν δεδομένα",
+    "error": "Παρουσιάστηκε σφάλμα",
+    "percentage": "%",
+    "currency": "€",
+    "close": "Κλείσιμο",
+    "open": "Άνοιγμα",
+    "merchantDataOnly": "Δεδομένα εμπόρου μόνο (απαίτηση συμμόρφωσης)"
+  }
+}
