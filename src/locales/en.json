@@ -71,8 +71,8 @@
     "goForMoreRedeemed": "Total Redeemed Amount from Go For More",
     "revenueTrend": "Revenue Trend",
     "revenueChange": "Revenue % Change from Last Year",
-    "revenueByInterests": "Revenue by Shopping Interests",
-    "revenueByChannel": "Revenue by Channel"
+    "byShoppingInterests": "Revenue by Shopping Interests",
+    "byChannel": "Revenue by Channel"
   },
   "demographics": {
     "title": "Customer Analytics",

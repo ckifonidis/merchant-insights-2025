@@ -4,6 +4,7 @@ import Footer from './components/layout/Footer';
 import TabNavigation from './components/layout/TabNavigation';
 import FilterSidebar from './components/layout/FilterSidebar';
 import Dashboard from './components/dashboard/Dashboard';
+import Revenue from './components/revenue/Revenue';
 import { useFilters } from './hooks/useFilters';
 import { useResponsive } from './hooks/useResponsive';
 import './i18n';
@@ -33,7 +34,7 @@ function App() {
       case 'dashboard':
         return <Dashboard filters={filters} />;
       case 'revenue':
-        return <div className="p-8 text-center text-gray-500">Revenue tab - Coming soon</div>;
+        return <Revenue filters={filters} />;
       case 'demographics':
         return <div className="p-8 text-center text-gray-500">Demographics tab - Coming soon</div>;
       case 'competition':

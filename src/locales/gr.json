@@ -71,8 +71,8 @@
     "goForMoreRedeemed": "Συνολικό Ποσό Εξαργύρωσης από Go For More",
     "revenueTrend": "Τάση Εσόδων",
     "revenueChange": "Μεταβολή Εσόδων % από Πέρυσι",
-    "revenueByInterests": "Έσοδα ανά Ενδιαφέροντα Αγορών",
-    "revenueByChannel": "Έσοδα ανά Κανάλι"
+    "byShoppingInterests": "Έσοδα ανά Ενδιαφέροντα Αγορών",
+    "byChannel": "Έσοδα ανά Κανάλι"
   },
   "demographics": {
     "title": "Αναλυτικά Πελατών",
