@@ -15,6 +15,36 @@ const KeyMetrics = ({ filters, tabId = 'dashboard' }) => {
 
   // Render metrics in pairs (merchant vs competition) or single cards
   const renderMetrics = () => {
+    // Special handling for demographics tab - 3x2 grid layout
+    if (tabId === 'demographics') {
+      const metricCards = filteredMetrics.map((metric) => {
+        const iconElement = (
+          <div className={getColorClass(metric.color)}>
+            {getIcon(metric.icon, "w-5 h-5")}
+          </div>
+        );
+
+        return (
+          <MetricCard
+            key={metric.id}
+            title={t(metric.name)}
+            value={formatValue(metric.merchant.value, metric.valueType)}
+            subtitle={t('dashboard.merchant')}
+            change={formatValueDiff(metric.merchant.valueDiff, metric.merchant.valueDiffType)}
+            isPositive={metric.merchant.valueDiff > 0}
+            icon={iconElement}
+          />
+        );
+      });
+
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {metricCards}
+        </div>
+      );
+    }
+
+    // Default rendering for other tabs
     return filteredMetrics.map((metric) => {
       const iconElement = (
         <div className={getColorClass(metric.color)}>
@@ -58,7 +88,7 @@ const KeyMetrics = ({ filters, tabId = 'dashboard' }) => {
   };
 
   return (
-    <div className="space-y-6 mb-8">
+    <div className={`mb-8 ${tabId === 'demographics' ? '' : 'space-y-6'}`}>
       {renderMetrics()}
     </div>
   );

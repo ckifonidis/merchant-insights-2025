@@ -5,6 +5,7 @@ import TabNavigation from './components/layout/TabNavigation';
 import FilterSidebar from './components/layout/FilterSidebar';
 import Dashboard from './components/dashboard/Dashboard';
 import Revenue from './components/revenue/Revenue';
+import Demographics from './components/demographics/Demographics';
 import { useFilters } from './hooks/useFilters';
 import { useResponsive } from './hooks/useResponsive';
 import './i18n';
@@ -36,7 +37,7 @@ function App() {
       case 'revenue':
         return <Revenue filters={filters} />;
       case 'demographics':
-        return <div className="p-8 text-center text-gray-500">Demographics tab - Coming soon</div>;
+        return <Demographics filters={filters} />;
       case 'competition':
         return <div className="p-8 text-center text-gray-500">Competition tab - Coming soon</div>;
       default:
