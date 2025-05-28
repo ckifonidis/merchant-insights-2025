@@ -65,9 +65,6 @@ const RevenueChangeChart = ({ filters }) => {
               {t('dashboard.merchant')}: {formatPercentage(data.change)}
             </span>
           </div>
-          <div className="text-xs text-gray-600 mt-1">
-            Revenue: {formatCurrency(data.revenue)}
-          </div>
         </div>
       );
     }

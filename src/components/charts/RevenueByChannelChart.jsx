@@ -119,6 +119,31 @@ const RevenueByChannelChart = ({ filters }) => {
     return 80;
   };
 
+  // Custom label function with labels outside for all screen sizes
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+    const RADIAN = Math.PI / 180;
+
+    // Position labels outside the pie for all screen sizes
+    const labelRadius = outerRadius + 20;
+
+    const x = cx + labelRadius * Math.cos(-midAngle * RADIAN);
+    const y = cy + labelRadius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#374151" // Dark text for all screen sizes
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        fontSize="12"
+        fontWeight="bold"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   const renderChart = () => {
     if (chartType === 'pie') {
       return (
@@ -127,7 +152,7 @@ const RevenueByChannelChart = ({ filters }) => {
             {/* Merchant Pie Chart */}
             <div className="flex flex-col items-center min-h-0">
               <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.merchant')}</h4>
-              <div className={`w-full ${isMobile ? 'h-48' : 'h-full'} min-h-0`}>
+              <div className="w-full h-56 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -136,7 +161,7 @@ const RevenueByChannelChart = ({ filters }) => {
                       cy="50%"
                       outerRadius={getPieRadius()}
                       dataKey="value"
-                      label={(entry) => `${entry.percentage}%`}
+                      label={renderCustomLabel}
                       labelLine={false}
                     >
                       {merchantPieData.map((entry, index) => (
@@ -152,7 +177,7 @@ const RevenueByChannelChart = ({ filters }) => {
             {/* Competitor Pie Chart */}
             <div className="flex flex-col items-center min-h-0">
               <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.competition')}</h4>
-              <div className={`w-full ${isMobile ? 'h-48' : 'h-full'} min-h-0`}>
+              <div className="w-full h-56 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -161,7 +186,7 @@ const RevenueByChannelChart = ({ filters }) => {
                       cy="50%"
                       outerRadius={getPieRadius()}
                       dataKey="value"
-                      label={(entry) => `${entry.percentage}%`}
+                      label={renderCustomLabel}
                       labelLine={false}
                     >
                       {competitorPieData.map((entry, index) => (
