@@ -88,6 +88,19 @@
     "customersByFrequency": "Πελάτες ανά Συχνότητα Αγορών",
     "customersByInterests": "Πελάτες ανά Ενδιαφέροντα Αγορών"
   },
+  "competition": {
+    "title": "Αναλυτικά Ανταγωνισμού",
+    "subtitle": "Σύγκριση με τον Ανταγωνισμό για την επιλεγμένη χρονική περίοδο",
+    "revenue": "Έσοδα",
+    "transactions": "Συναλλαγές",
+    "avgTransactionAmount": "Μέσο Ποσό Συναλλαγής",
+    "comparedToLastYear": "Σε σχέση με πέρυσι",
+    "comparedToCompetition": "Σε σχέση με τον ανταγωνισμό",
+    "merchantVsCompetition": "Έμπορος vs Ανταγωνισμός",
+    "competitorChange": "Μεταβολή Ανταγωνισμού",
+    "weeklyTurnover": "Εβδομαδιαία Τάση Τζίρου",
+    "monthlyTurnover": "Μηνιαίο Ημερολόγιο Τζίρου"
+  },
   "chartOptions": {
     "bars": "Μπάρες",
     "line": "Γραμμή",

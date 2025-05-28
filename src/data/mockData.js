@@ -5,13 +5,13 @@ const generateDateRange = () => {
   const start = startOfYear(new Date(2023, 0, 1));
   const end = subDays(new Date(), 1);
   const dates = [];
-  
+
   let current = start;
   while (current <= end) {
     dates.push(new Date(current));
     current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
   }
-  
+
   return dates;
 };
 
@@ -74,11 +74,11 @@ const generateRandomData = (baseValue, trend = 0, variance = 0.2) => {
 export const generateTimeSeriesData = () => {
   const dates = generateDateRange();
   const data = [];
-  
+
   dates.forEach((date, index) => {
     const dayOfYear = index;
     const seasonalFactor = 1 + 0.3 * Math.sin((dayOfYear / 365) * 2 * Math.PI);
-    
+
     data.push({
       date: format(date, 'yyyy-MM-dd'),
       merchantTransactions: Math.floor(generateRandomData(150, 0.1, 0.3) * seasonalFactor),
@@ -88,7 +88,7 @@ export const generateTimeSeriesData = () => {
       merchantCustomers: Math.floor(generateRandomData(120, 0.12, 0.35) * seasonalFactor)
     });
   });
-  
+
   return data;
 };
 
@@ -217,6 +217,73 @@ export const revenueByInterests = shoppingInterests.map(interest => ({
   competitor: Math.floor(Math.random() * 120000) + 60000
 }));
 
+// Competition metrics data
+export const competitionMetrics = {
+  revenue: {
+    merchantChangeFromLastYear: 12.5, // merchant revenue change vs last year
+    competitionChangeFromLastYear: 5.8, // competition revenue change vs last year
+    merchantVsCompetition: -15.9 // merchant is 15.9% lower than competition
+  },
+  transactions: {
+    merchantChangeFromLastYear: 8.2, // merchant transactions change vs last year
+    competitionChangeFromLastYear: 4.5, // competition transactions change vs last year
+    merchantVsCompetition: -12.7 // merchant is 12.7% lower than competition
+  },
+  avgTransactionAmount: {
+    merchantChangeFromLastYear: 2.1, // merchant avg transaction change vs last year
+    competitionChangeFromLastYear: -1.2, // competition avg transaction change vs last year
+    merchantVsCompetition: -3.6 // merchant is 3.6% lower than competition
+  }
+};
+
+// Weekly turnover data for charts (percentage change vs same week last year)
+export const weeklyTurnoverData = {
+  merchant: [
+    { week: '2024-01-01', percentageChange: 5.2 },
+    { week: '2024-01-08', percentageChange: 7.8 },
+    { week: '2024-01-15', percentageChange: 3.1 },
+    { week: '2024-01-22', percentageChange: -2.4 },
+    { week: '2024-01-29', percentageChange: 8.9 },
+    { week: '2024-02-05', percentageChange: 12.3 },
+    { week: '2024-02-12', percentageChange: 6.7 },
+    { week: '2024-02-19', percentageChange: -1.8 },
+    { week: '2024-02-26', percentageChange: 4.5 },
+    { week: '2024-03-04', percentageChange: 9.2 },
+    { week: '2024-03-11', percentageChange: -5.6 },
+    { week: '2024-03-18', percentageChange: 2.8 },
+    { week: '2024-03-25', percentageChange: 11.4 },
+    { week: '2024-04-01', percentageChange: -3.2 },
+    { week: '2024-04-08', percentageChange: 6.9 },
+    { week: '2024-04-15', percentageChange: 8.1 },
+    { week: '2024-04-22', percentageChange: -7.3 },
+    { week: '2024-04-29', percentageChange: 4.6 },
+    { week: '2024-05-06', percentageChange: 13.7 },
+    { week: '2024-05-13', percentageChange: 2.4 }
+  ],
+  competition: [
+    { week: '2024-01-01', percentageChange: 3.8 },
+    { week: '2024-01-08', percentageChange: 5.2 },
+    { week: '2024-01-15', percentageChange: 1.9 },
+    { week: '2024-01-22', percentageChange: -1.1 },
+    { week: '2024-01-29', percentageChange: 6.4 },
+    { week: '2024-02-05', percentageChange: 8.7 },
+    { week: '2024-02-12', percentageChange: 4.3 },
+    { week: '2024-02-19', percentageChange: -0.9 },
+    { week: '2024-02-26', percentageChange: 2.8 },
+    { week: '2024-03-04', percentageChange: 6.1 },
+    { week: '2024-03-11', percentageChange: -3.2 },
+    { week: '2024-03-18', percentageChange: 1.5 },
+    { week: '2024-03-25', percentageChange: 7.8 },
+    { week: '2024-04-01', percentageChange: -2.1 },
+    { week: '2024-04-08', percentageChange: 4.6 },
+    { week: '2024-04-15', percentageChange: 5.9 },
+    { week: '2024-04-22', percentageChange: -4.8 },
+    { week: '2024-04-29', percentageChange: 3.2 },
+    { week: '2024-05-06', percentageChange: 9.3 },
+    { week: '2024-05-13', percentageChange: 1.7 }
+  ]
+};
+
 export default {
   merchantInfo,
   shoppingInterests,
@@ -228,5 +295,7 @@ export default {
   demographicsData,
   revenueByChannel,
   revenueByInterests,
+  competitionMetrics,
+  weeklyTurnoverData,
   generateTimeSeriesData
 };

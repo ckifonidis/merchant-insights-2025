@@ -88,6 +88,19 @@
     "customersByFrequency": "Customers by Shopping Frequency",
     "customersByInterests": "Customers by Shopping Interests"
   },
+  "competition": {
+    "title": "Competition Analytics",
+    "subtitle": "Comparison with Competition for the selected time period",
+    "revenue": "Revenue",
+    "transactions": "Transactions",
+    "avgTransactionAmount": "Average Transaction Amount",
+    "comparedToLastYear": "Compared to last year",
+    "comparedToCompetition": "Compared to competition",
+    "merchantVsCompetition": "Merchant vs Competition",
+    "competitorChange": "Competitor Change",
+    "weeklyTurnover": "Weekly Turnover Trend",
+    "monthlyTurnover": "Monthly Turnover Calendar"
+  },
   "chartOptions": {
     "bars": "Bars",
     "line": "Line",

@@ -17,29 +17,52 @@ body {
 }
 
 .heatmap-cell {
-  width: 2rem;
-  height: 2rem;
-  margin: 2px;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 1px;
   border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 500;
   border: 1px solid #e5e7eb;
+  color: white; /* All day numbers in white */
 }
 
+/* Larger heatmap cells on desktop */
+@media (min-width: 1024px) {
+  .heatmap-cell {
+    width: 2rem;
+    height: 2rem;
+    margin: 2px;
+    font-size: 0.75rem;
+  }
+}
+
+/* New improved color scale */
 .high {
-  background-color: #73AA3C;
+  background-color: #166534; /* Dark green */
+  color: white;
+}
+
+.good {
+  background-color: #16a34a; /* Light green */
   color: white;
 }
 
 .medium {
-  background-color: #F5F8F6;
-  color: #1f2937;
+  background-color: #fca5a5; /* Light red */
+  color: white;
 }
 
 .low {
-  background-color: #A0052D;
+  background-color: #dc2626; /* Dark red */
+  color: white;
+}
+
+.out-of-period {
+  background-color: #f3f4f6; /* Light gray */
   color: white;
 }
 
@@ -51,6 +74,7 @@ body {
 .empty {
   background-color: transparent;
   border: none;
+  color: #374151; /* Dark gray for headers */
 }
 
 .stat-card {
