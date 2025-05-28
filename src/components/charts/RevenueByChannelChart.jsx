@@ -6,7 +6,7 @@ import { revenueByChannel } from '../../data/mockData';
 
 const RevenueByChannelChart = ({ filters }) => {
   const { t } = useTranslation();
-  const [chartType, setChartType] = useState('bars');
+  const [chartType, setChartType] = useState('stackedBar');
 
   // Transform channel data for visualization
   const channelData = [
@@ -26,19 +26,25 @@ const RevenueByChannelChart = ({ filters }) => {
     }
   ];
 
-  // Data for pie charts - using actual revenue values
+  // Consistent colors for channels across merchant and competition
+  const channelColors = {
+    'Physical Store': '#007B85',
+    'E-commerce': '#7BB3C0'
+  };
+
+  // Data for pie charts - using consistent colors
   const merchantPieData = [
     {
       name: 'Physical Store',
       value: revenueByChannel.merchant.physical,
       percentage: Math.round((revenueByChannel.merchant.physical / (revenueByChannel.merchant.physical + revenueByChannel.merchant.ecommerce)) * 100),
-      color: '#007B85'
+      color: channelColors['Physical Store']
     },
     {
       name: 'E-commerce',
       value: revenueByChannel.merchant.ecommerce,
       percentage: Math.round((revenueByChannel.merchant.ecommerce / (revenueByChannel.merchant.physical + revenueByChannel.merchant.ecommerce)) * 100),
-      color: '#4A90A4'
+      color: channelColors['E-commerce']
     }
   ];
 
@@ -47,13 +53,13 @@ const RevenueByChannelChart = ({ filters }) => {
       name: 'Physical Store',
       value: revenueByChannel.competitor.physical,
       percentage: Math.round((revenueByChannel.competitor.physical / (revenueByChannel.competitor.physical + revenueByChannel.competitor.ecommerce)) * 100),
-      color: '#73AA3C'
+      color: channelColors['Physical Store']
     },
     {
       name: 'E-commerce',
       value: revenueByChannel.competitor.ecommerce,
       percentage: Math.round((revenueByChannel.competitor.ecommerce / (revenueByChannel.competitor.physical + revenueByChannel.competitor.ecommerce)) * 100),
-      color: '#8BC34A'
+      color: channelColors['E-commerce']
     }
   ];
 
@@ -94,13 +100,10 @@ const RevenueByChannelChart = ({ filters }) => {
 
   const PieTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const data = payload[0];
+      const data = payload[0].payload; // Access the payload data
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-black">{data.name}</p>
-          <p className="text-sm text-black">
-            {data.percentage}%
-          </p>
+          <p className="font-medium text-black">{data.name}: {data.percentage}%</p>
         </div>
       );
     }
@@ -110,51 +113,177 @@ const RevenueByChannelChart = ({ filters }) => {
   const renderChart = () => {
     if (chartType === 'pie') {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-          {/* Merchant Pie Chart */}
-          <div className="flex flex-col items-center">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.merchant')}</h4>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={merchantPieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={60}
-                  dataKey="value"
-                  label={(entry) => `${entry.name}: ${entry.percentage}%`}
-                  labelLine={false}
-                >
-                  {merchantPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<PieTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+        <div className="flex flex-col h-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+            {/* Merchant Pie Chart */}
+            <div className="flex flex-col items-center">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.merchant')}</h4>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={merchantPieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={60}
+                    dataKey="value"
+                    label={(entry) => `${entry.percentage}%`}
+                    labelLine={false}
+                  >
+                    {merchantPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Competitor Pie Chart */}
+            <div className="flex flex-col items-center">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.competition')}</h4>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={competitorPieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={60}
+                    dataKey="value"
+                    label={(entry) => `${entry.percentage}%`}
+                    labelLine={false}
+                  >
+                    {competitorPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Competitor Pie Chart */}
-          <div className="flex flex-col items-center">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.competition')}</h4>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={competitorPieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={60}
-                  dataKey="value"
-                  label={(entry) => `${entry.name}: ${entry.percentage}%`}
-                  labelLine={false}
-                >
-                  {competitorPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<PieTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+          {/* Common Color Legend */}
+          <div className="flex justify-center mt-4">
+            <div className="flex items-center space-x-6">
+              {Object.entries(channelColors).map(([channel, color]) => (
+                <div key={channel} className="flex items-center">
+                  <div
+                    className="w-3 h-3 rounded-full mr-2"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="text-sm text-gray-700">{channel}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (chartType === 'stackedBar') {
+      // Calculate total revenue for each entity
+      const totalMerchantRevenue = Math.round((revenueByChannel.merchant.physical / 100) * 2345678) +
+                                   Math.round((revenueByChannel.merchant.ecommerce / 100) * 2345678);
+      const totalCompetitorRevenue = Math.round((revenueByChannel.competitor.physical / 100) * 2789123) +
+                                     Math.round((revenueByChannel.competitor.ecommerce / 100) * 2789123);
+
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Merchant Stacked Bar */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-3">{t('dashboard.merchant')}</h4>
+            <div className="w-full h-12 bg-gray-100 rounded-lg overflow-hidden mb-3 relative group">
+              <div className="flex h-full">
+                <div
+                  className="h-full transition-all duration-300 relative"
+                  style={{
+                    width: `${revenueByChannel.merchant.physical}%`,
+                    backgroundColor: channelColors['Physical Store']
+                  }}
+                  title={`Physical Store: ${revenueByChannel.merchant.physical}% (${formatCurrency(Math.round((revenueByChannel.merchant.physical / 100) * 2345678))})`}
+                ></div>
+                <div
+                  className="h-full transition-all duration-300 relative"
+                  style={{
+                    width: `${revenueByChannel.merchant.ecommerce}%`,
+                    backgroundColor: channelColors['E-commerce']
+                  }}
+                  title={`E-commerce: ${revenueByChannel.merchant.ecommerce}% (${formatCurrency(Math.round((revenueByChannel.merchant.ecommerce / 100) * 2345678))})`}
+                ></div>
+              </div>
+
+              {/* Hover tooltip */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                  Total: {formatCurrency(totalMerchantRevenue)}
+                </div>
+              </div>
+            </div>
+            {/* Legend for Merchant */}
+            <div className="flex justify-center space-x-6">
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-sm mr-2"
+                  style={{ backgroundColor: channelColors['Physical Store'] }}
+                ></div>
+                <span className="text-sm text-gray-700">
+                  Physical Store ({revenueByChannel.merchant.physical}% - {formatCurrency(Math.round((revenueByChannel.merchant.physical / 100) * 2345678))})
+                </span>
+              </div>
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-sm mr-2"
+                  style={{ backgroundColor: channelColors['E-commerce'] }}
+                ></div>
+                <span className="text-sm text-gray-700">
+                  E-commerce ({revenueByChannel.merchant.ecommerce}% - {formatCurrency(Math.round((revenueByChannel.merchant.ecommerce / 100) * 2345678))})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Competition Stacked Bar */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-3">{t('dashboard.competition')}</h4>
+            <div className="w-full h-12 bg-gray-100 rounded-lg overflow-hidden mb-3">
+              <div className="flex h-full">
+                <div
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${revenueByChannel.competitor.physical}%`,
+                    backgroundColor: channelColors['Physical Store']
+                  }}
+                ></div>
+                <div
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${revenueByChannel.competitor.ecommerce}%`,
+                    backgroundColor: channelColors['E-commerce']
+                  }}
+                ></div>
+              </div>
+            </div>
+            {/* Legend for Competition */}
+            <div className="flex justify-center space-x-6">
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-sm mr-2"
+                  style={{ backgroundColor: channelColors['Physical Store'] }}
+                ></div>
+                <span className="text-sm text-gray-700">
+                  Physical Store ({revenueByChannel.competitor.physical}%)
+                </span>
+              </div>
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-sm mr-2"
+                  style={{ backgroundColor: channelColors['E-commerce'] }}
+                ></div>
+                <span className="text-sm text-gray-700">
+                  E-commerce ({revenueByChannel.competitor.ecommerce}%)
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -199,20 +328,8 @@ const RevenueByChannelChart = ({ filters }) => {
       );
     }
 
-    return (
-      <BarChart
-        data={channelData}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="channel" />
-        <YAxis tickFormatter={formatCurrency} />
-        <Tooltip content={<CustomTooltip />} />
-        <Legend />
-        <Bar dataKey="merchant" fill="#007B85" name={t('dashboard.merchant')} />
-        <Bar dataKey="competitor" fill="#73AA3C" name={t('dashboard.competition')} />
-      </BarChart>
-    );
+    // Default case - should not reach here, but return null as fallback
+    return null;
   };
 
   return (
@@ -221,10 +338,15 @@ const RevenueByChannelChart = ({ filters }) => {
         {/* Chart Type Selector - Upper Right */}
         <div className="min-w-32">
           <Select
-            value={{ value: chartType, label: t(`chartOptions.${chartType}`) }}
+            value={{
+              value: chartType,
+              label: chartType === 'stackedBar' ? 'Stacked Bar' :
+                     chartType === 'pie' ? 'Pie Charts' :
+                     t(`chartOptions.${chartType}`)
+            }}
             onChange={(option) => setChartType(option.value)}
             options={[
-              { value: 'bars', label: t('chartOptions.bars') },
+              { value: 'stackedBar', label: 'Stacked Bar' },
               { value: 'pie', label: 'Pie Charts' },
               { value: 'table', label: t('chartOptions.table') }
             ]}
@@ -235,7 +357,7 @@ const RevenueByChannelChart = ({ filters }) => {
       </div>
 
       <div className={chartType === 'table' ? 'max-h-64 overflow-y-auto' : 'h-64'}>
-        {chartType === 'table' || chartType === 'pie' ? (
+        {chartType === 'table' || chartType === 'pie' || chartType === 'stackedBar' ? (
           renderChart()
         ) : (
           <ResponsiveContainer width="100%" height="100%">
