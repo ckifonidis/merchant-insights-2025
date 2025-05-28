@@ -57,6 +57,9 @@
     "transactions": "Συναλλαγές",
     "revenue": "Έσοδα",
     "vsLastYear": "σε σχέση με πέρυσι",
+    "vsLastWeek": "σε σχέση με προηγούμενη εβδομάδα",
+    "vsLastMonth": "σε σχέση με προηγούμενο μήνα",
+    "vsLastQuarter": "σε σχέση με προηγούμενο τρίμηνο",
     "vsCompetition": "σε σχέση με ανταγωνισμό",
     "changeFromLastYear": "Μεταβολή από πέρυσι"
   },

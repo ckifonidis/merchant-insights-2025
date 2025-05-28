@@ -16,21 +16,81 @@ const RevenueTrendChart = ({ filters }) => {
     filters?.dateRange?.end
   );
 
-  // Process data based on timeline selection using the new helper
-  const processedData = processTimelineData(
+  // Process data with extended range to get previous period for calculations
+  const getExtendedDateRange = () => {
+    if (!filters?.dateRange?.start || !filters?.dateRange?.end) {
+      return { extendedStart: null, extendedEnd: null };
+    }
+
+    const start = new Date(filters.dateRange.start);
+    const end = new Date(filters.dateRange.end);
+    let extendedStart;
+
+    // Calculate how much to extend the start date based on timeline
+    switch (timeline) {
+      case 'weekly':
+        // Go back 1 week to get previous week's data
+        extendedStart = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'monthly':
+        // Go back 1 month to get previous month's data
+        extendedStart = new Date(start.getFullYear(), start.getMonth() - 1, start.getDate());
+        break;
+      case 'quarterly':
+        // Go back 3 months to get previous quarter's data
+        extendedStart = new Date(start.getFullYear(), start.getMonth() - 3, start.getDate());
+        break;
+      default:
+        extendedStart = start;
+    }
+
+    return { extendedStart, extendedEnd: end };
+  };
+
+  const { extendedStart, extendedEnd } = getExtendedDateRange();
+
+  // Process data with extended range to include previous period
+  const extendedProcessedData = processTimelineData(
+    rawData,
+    timeline,
+    extendedStart,
+    extendedEnd
+  );
+
+  // Process data for the actual display range
+  const displayProcessedData = processTimelineData(
     rawData,
     timeline,
     filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
     filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
   );
 
-  const chartData = processedData.map(item => ({
-    date: item.displayDate, // Use the formatted display date
-    merchant: Math.round(item.merchantRevenue),
-    competitor: Math.round(item.competitorRevenue),
-    merchantChange: ((Math.random() - 0.5) * 20).toFixed(1),
-    competitorChange: ((Math.random() - 0.5) * 15).toFixed(1)
-  }));
+  // Calculate period-over-period changes using extended data
+  const chartData = displayProcessedData.map((item, displayIndex) => {
+    let merchantChange = 0;
+    let competitorChange = 0;
+
+    // Find the corresponding item in extended data
+    const extendedIndex = extendedProcessedData.findIndex(extItem => extItem.date === item.date);
+
+    if (extendedIndex > 0) {
+      const previousItem = extendedProcessedData[extendedIndex - 1];
+      merchantChange = previousItem.merchantRevenue > 0
+        ? ((item.merchantRevenue - previousItem.merchantRevenue) / previousItem.merchantRevenue * 100)
+        : 0;
+      competitorChange = previousItem.competitorRevenue > 0
+        ? ((item.competitorRevenue - previousItem.competitorRevenue) / previousItem.competitorRevenue * 100)
+        : 0;
+    }
+
+    return {
+      date: item.displayDate, // Use the formatted display date
+      merchant: Math.round(item.merchantRevenue),
+      competitor: Math.round(item.competitorRevenue),
+      merchantChange: merchantChange.toFixed(1),
+      competitorChange: competitorChange.toFixed(1)
+    };
+  });
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('el-GR', {
@@ -39,6 +99,20 @@ const RevenueTrendChart = ({ filters }) => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  // Get the appropriate comparison text based on timeline
+  const getComparisonText = () => {
+    switch (timeline) {
+      case 'weekly':
+        return t('dashboard.vsLastWeek');
+      case 'monthly':
+        return t('dashboard.vsLastMonth');
+      case 'quarterly':
+        return t('dashboard.vsLastQuarter');
+      default:
+        return t('dashboard.vsLastYear');
+    }
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -51,7 +125,7 @@ const RevenueTrendChart = ({ filters }) => {
             const label = entry.dataKey === 'merchant' ? t('dashboard.merchant') : t('dashboard.competition');
             return (
               <p key={index} className="text-sm text-black mt-1">
-                {label}: {formatCurrency(entry.value)} ({change > 0 ? '+' : ''}{change}% {t('dashboard.vsLastYear')})
+                {label}: {formatCurrency(entry.value)} ({change > 0 ? '+' : ''}{change}% {getComparisonText()})
               </p>
             );
           })}
