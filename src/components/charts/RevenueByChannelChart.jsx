@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { revenueByChannel } from '../../data/mockData';
+import { useResponsive } from '../../hooks/useResponsive';
 
 const RevenueByChannelChart = ({ filters }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('stackedBar');
+  const { isMobile, isTablet } = useResponsive();
 
   // Transform channel data for visualization
   const channelData = [
@@ -110,55 +112,66 @@ const RevenueByChannelChart = ({ filters }) => {
     return null;
   };
 
+  // Calculate responsive pie chart radius
+  const getPieRadius = () => {
+    if (isMobile) return 50;
+    if (isTablet) return 65;
+    return 80;
+  };
+
   const renderChart = () => {
     if (chartType === 'pie') {
       return (
         <div className="flex flex-col h-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+          <div className={`grid gap-4 flex-grow ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
             {/* Merchant Pie Chart */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center min-h-0">
               <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.merchant')}</h4>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={merchantPieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={60}
-                    dataKey="value"
-                    label={(entry) => `${entry.percentage}%`}
-                    labelLine={false}
-                  >
-                    {merchantPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className={`w-full ${isMobile ? 'h-48' : 'h-full'} min-h-0`}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={merchantPieData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={getPieRadius()}
+                      dataKey="value"
+                      label={(entry) => `${entry.percentage}%`}
+                      labelLine={false}
+                    >
+                      {merchantPieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Competitor Pie Chart */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center min-h-0">
               <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.competition')}</h4>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={competitorPieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={60}
-                    dataKey="value"
-                    label={(entry) => `${entry.percentage}%`}
-                    labelLine={false}
-                  >
-                    {competitorPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className={`w-full ${isMobile ? 'h-48' : 'h-full'} min-h-0`}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={competitorPieData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={getPieRadius()}
+                      dataKey="value"
+                      label={(entry) => `${entry.percentage}%`}
+                      labelLine={false}
+                    >
+                      {competitorPieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
 
@@ -333,7 +346,7 @@ const RevenueByChannelChart = ({ filters }) => {
   };
 
   return (
-    <div className="h-80">
+    <div className={`${isMobile ? 'h-auto' : 'h-80'}`}>
       <div className="flex justify-end mb-4">
         {/* Chart Type Selector - Upper Right */}
         <div className="min-w-32">
@@ -356,7 +369,11 @@ const RevenueByChannelChart = ({ filters }) => {
         </div>
       </div>
 
-      <div className={chartType === 'table' ? 'max-h-64 overflow-y-auto' : 'h-64'}>
+      <div className={
+        chartType === 'table' ? 'max-h-64 overflow-y-auto' :
+        isMobile && chartType === 'pie' ? 'h-auto min-h-96' :
+        'h-64'
+      }>
         {chartType === 'table' || chartType === 'pie' || chartType === 'stackedBar' ? (
           renderChart()
         ) : (
