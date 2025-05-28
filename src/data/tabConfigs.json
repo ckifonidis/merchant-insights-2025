@@ -4,23 +4,6 @@
     "subtitle": "dashboard.subtitle",
     "metrics": [
       {
-        "id": "totalTransactions",
-        "name": "dashboard.totalTransactions",
-        "supportsCompetition": true,
-        "icon": "shopping-bag",
-        "color": "blue",
-        "merchant": {
-          "value": 45678,
-          "valueDiff": 8.2,
-          "valueDiffType": "percentage"
-        },
-        "competitor": {
-          "value": 52341,
-          "valueDiff": 4.5,
-          "valueDiffType": "percentage"
-        }
-      },
-      {
         "id": "totalRevenue",
         "name": "dashboard.totalRevenue",
         "supportsCompetition": true,
@@ -35,6 +18,23 @@
         "competitor": {
           "value": 2789123.45,
           "valueDiff": 5.8,
+          "valueDiffType": "percentage"
+        }
+      },
+      {
+        "id": "totalTransactions",
+        "name": "dashboard.totalTransactions",
+        "supportsCompetition": true,
+        "icon": "shopping-bag",
+        "color": "blue",
+        "merchant": {
+          "value": 45678,
+          "valueDiff": 8.2,
+          "valueDiffType": "percentage"
+        },
+        "competitor": {
+          "value": 52341,
+          "valueDiff": 4.5,
           "valueDiffType": "percentage"
         }
       },

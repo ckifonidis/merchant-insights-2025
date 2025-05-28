@@ -3,36 +3,35 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { generateTimeSeriesData } from '../../data/mockData';
+import { processTimelineData } from '../../utils/timelineHelpers';
 
 const RevenueChangeChart = ({ filters }) => {
   const { t } = useTranslation();
   const [timeline, setTimeline] = useState('weekly');
 
-  // Generate mock data for percentage change
-  const rawData = generateTimeSeriesData();
+  // Generate mock data for percentage change filtered by date range
+  const rawData = generateTimeSeriesData(
+    filters?.dateRange?.start,
+    filters?.dateRange?.end
+  );
 
-  const processDataByTimeline = (data, timelineType) => {
-    switch (timelineType) {
-      case 'weekly':
-        return data.filter((_, index) => index % 7 === 0).slice(0, 20);
-      case 'monthly':
-        return data.filter((_, index) => index % 30 === 0).slice(0, 12);
-      case 'quarterly':
-        return data.filter((_, index) => index % 90 === 0).slice(0, 8);
-      default:
-        return data.slice(-30);
-    }
-  };
+  // Process data based on timeline selection using the new helper
+  const processedData = processTimelineData(
+    rawData,
+    timeline,
+    filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
+    filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+  );
 
   // Generate percentage change data (merchant only)
-  const chartData = processDataByTimeline(rawData, timeline).map((item, index) => {
+  const chartData = processedData.map((item, index) => {
     // Simulate percentage change from last year
     const baseChange = Math.sin(index * 0.3) * 15; // Seasonal pattern
     const randomVariation = (Math.random() - 0.5) * 10;
     const percentageChange = baseChange + randomVariation;
 
     return {
-      date: item.date,
+      date: item.displayDate, // Use the formatted display date
       change: parseFloat(percentageChange.toFixed(1)),
       revenue: Math.round(item.merchantRevenue)
     };
@@ -112,7 +111,7 @@ const RevenueChangeChart = ({ filters }) => {
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="#666" strokeDasharray="2 2" />
             <Line
-              type="monotone"
+              type="linear"
               dataKey="change"
               stroke="#007B85"
               strokeWidth={3}

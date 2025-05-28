@@ -30,8 +30,8 @@
   },
   "genders": {
     "all": "Όλα",
-    "male": "Άνδρας",
-    "female": "Γυναίκα"
+    "male": "Άνδρες",
+    "female": "Γυναίκες"
   },
   "ageGroups": {
     "all": "Όλα",
@@ -66,13 +66,14 @@
     "totalRevenue": "Συνολικά Έσοδα",
     "avgDailyRevenue": "Μέσα Ημερήσια Έσοδα",
     "avgTransaction": "Μέσο Ποσό ανά Συναλλαγή",
-    "goForMoreRevenue": "Συνολικά Έσοδα από Go For More",
-    "goForMoreRewarded": "Συνολικό Ποσό Ανταμοιβών από Go For More",
-    "goForMoreRedeemed": "Συνολικό Ποσό Εξαργύρωσης από Go For More",
+    "goForMoreRevenue": "Συνολικά Έσοδα",
+    "goForMoreRewarded": "Συνολικό Ποσό Ανταμοιβών",
+    "goForMoreRedeemed": "Συνολικό Ποσό Εξαργύρωσης",
     "revenueTrend": "Τάση Εσόδων",
     "revenueChange": "Μεταβολή Εσόδων % από Πέρυσι",
     "byShoppingInterests": "Έσοδα ανά Ενδιαφέροντα Αγορών",
-    "byChannel": "Έσοδα ανά Κανάλι"
+    "byChannel": "Έσοδα ανά Κανάλι",
+    "goForMore": "Go For More"
   },
   "demographics": {
     "title": "Αναλυτικά Πελατών",

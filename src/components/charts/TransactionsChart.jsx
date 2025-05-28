@@ -3,32 +3,29 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { generateTimeSeriesData } from '../../data/mockData';
+import { processTimelineData } from '../../utils/timelineHelpers';
 
 const TransactionsChart = ({ filters }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('bars'); // bars, line, table
   const [timeline, setTimeline] = useState('daily'); // daily, weekly, monthly, yearly
 
-  // Generate mock data - in future this will be filtered based on filters prop
-  const rawData = generateTimeSeriesData();
+  // Generate mock data filtered by date range
+  const rawData = generateTimeSeriesData(
+    filters?.dateRange?.start,
+    filters?.dateRange?.end
+  );
 
-  // Process data based on timeline selection
-  const processDataByTimeline = (data, timelineType) => {
-    // For now, return sample data. In future, this will aggregate based on timeline
-    switch (timelineType) {
-      case 'weekly':
-        return data.filter((_, index) => index % 7 === 0).slice(0, 20);
-      case 'monthly':
-        return data.filter((_, index) => index % 30 === 0).slice(0, 12);
-      case 'yearly':
-        return data.filter((_, index) => index % 365 === 0).slice(0, 2);
-      default: // daily
-        return data.slice(-30); // Last 30 days
-    }
-  };
+  // Process data based on timeline selection using the new helper
+  const processedData = processTimelineData(
+    rawData,
+    timeline,
+    filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
+    filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+  );
 
-  const chartData = processDataByTimeline(rawData, timeline).map(item => ({
-    date: item.date,
+  const chartData = processedData.map(item => ({
+    date: item.displayDate, // Use the formatted display date
     merchant: item.merchantTransactions,
     competitor: item.competitorTransactions,
     // Calculate percentage change from last year (mock calculation)
@@ -49,18 +46,16 @@ const TransactionsChart = ({ filters }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900">{label}</p>
-          {payload.map((entry, index) => (
-            <div key={index} className="flex items-center mt-1">
-              <div
-                className="w-3 h-3 rounded-full mr-2"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-sm">
-                {formatTooltip(entry.value, entry.dataKey, entry)}
-              </span>
-            </div>
-          ))}
+          <p className="font-medium text-black">{label}</p>
+          {payload.map((entry, index) => {
+            const change = entry.dataKey === 'merchant' ? entry.payload.merchantChange : entry.payload.competitorChange;
+            const label = entry.dataKey === 'merchant' ? t('dashboard.merchant') : t('dashboard.competition');
+            return (
+              <p key={index} className="text-sm text-black mt-1">
+                {label}: {entry.value} ({change > 0 ? '+' : ''}{change}% {t('dashboard.vsLastYear')})
+              </p>
+            );
+          })}
         </div>
       );
     }
@@ -82,14 +77,14 @@ const TransactionsChart = ({ filters }) => {
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Line
-            type="monotone"
+            type="linear"
             dataKey="merchant"
             stroke="#007B85"
             strokeWidth={2}
             name={t('dashboard.merchant')}
           />
           <Line
-            type="monotone"
+            type="linear"
             dataKey="competitor"
             stroke="#73AA3C"
             strokeWidth={2}
@@ -161,7 +156,7 @@ const TransactionsChart = ({ filters }) => {
       {/* Chart Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
         <h3 className="text-lg font-semibold text-gray-900">
-          {t('dashboard.transactions')} {t('dashboard.vsLastYear')}
+          {t('dashboard.transactions')}
         </h3>
 
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">

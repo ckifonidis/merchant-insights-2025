@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import KeyMetrics from '../dashboard/KeyMetrics';
+import RevenueMetrics from './RevenueMetrics';
 import RevenueTrendChart from '../charts/RevenueTrendChart.jsx';
 import RevenueChangeChart from '../charts/RevenueChangeChart.jsx';
 import RevenueByInterestsChart from '../charts/RevenueByInterestsChart.jsx';
@@ -22,7 +22,7 @@ const Revenue = ({ filters }) => {
       </div>
 
       {/* Revenue Metrics */}
-      <KeyMetrics filters={filters} tabId="revenue" />
+      <RevenueMetrics filters={filters} />
 
       {/* Revenue Charts - Stacked vertically on mobile */}
       <div className="space-y-6">

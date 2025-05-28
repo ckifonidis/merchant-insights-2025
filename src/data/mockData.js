@@ -70,13 +70,22 @@ const generateRandomData = (baseValue, trend = 0, variance = 0.2) => {
   return baseValue * (1 + trend + (Math.random() - 0.5) * variance);
 };
 
-// Generate time series data
-export const generateTimeSeriesData = () => {
+// Generate time series data with optional date range filtering
+export const generateTimeSeriesData = (startDate = null, endDate = null) => {
   const dates = generateDateRange();
+  let filteredDates = dates;
+
+  // Filter dates based on provided date range
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    filteredDates = dates.filter(date => date >= start && date <= end);
+  }
+
   const data = [];
 
-  dates.forEach((date, index) => {
-    const dayOfYear = index;
+  filteredDates.forEach((date, index) => {
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
     const seasonalFactor = 1 + 0.3 * Math.sin((dayOfYear / 365) * 2 * Math.PI);
 
     data.push({

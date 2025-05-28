@@ -26,15 +26,35 @@ const RevenueByChannelChart = ({ filters }) => {
     }
   ];
 
-  // Data for pie charts
+  // Data for pie charts - using actual revenue values
   const merchantPieData = [
-    { name: 'Physical Store', value: revenueByChannel.merchant.physical, color: '#007B85' },
-    { name: 'E-commerce', value: revenueByChannel.merchant.ecommerce, color: '#4A90A4' }
+    {
+      name: 'Physical Store',
+      value: revenueByChannel.merchant.physical,
+      percentage: Math.round((revenueByChannel.merchant.physical / (revenueByChannel.merchant.physical + revenueByChannel.merchant.ecommerce)) * 100),
+      color: '#007B85'
+    },
+    {
+      name: 'E-commerce',
+      value: revenueByChannel.merchant.ecommerce,
+      percentage: Math.round((revenueByChannel.merchant.ecommerce / (revenueByChannel.merchant.physical + revenueByChannel.merchant.ecommerce)) * 100),
+      color: '#4A90A4'
+    }
   ];
 
   const competitorPieData = [
-    { name: 'Physical Store', value: revenueByChannel.competitor.physical, color: '#73AA3C' },
-    { name: 'E-commerce', value: revenueByChannel.competitor.ecommerce, color: '#8BC34A' }
+    {
+      name: 'Physical Store',
+      value: revenueByChannel.competitor.physical,
+      percentage: Math.round((revenueByChannel.competitor.physical / (revenueByChannel.competitor.physical + revenueByChannel.competitor.ecommerce)) * 100),
+      color: '#73AA3C'
+    },
+    {
+      name: 'E-commerce',
+      value: revenueByChannel.competitor.ecommerce,
+      percentage: Math.round((revenueByChannel.competitor.ecommerce / (revenueByChannel.competitor.physical + revenueByChannel.competitor.ecommerce)) * 100),
+      color: '#8BC34A'
+    }
   ];
 
   const formatCurrency = (value) => {
@@ -77,9 +97,10 @@ const RevenueByChannelChart = ({ filters }) => {
       const data = payload[0];
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <span className="text-sm">
-            {data.name}: {data.value}%
-          </span>
+          <p className="font-medium text-black">{data.name}</p>
+          <p className="text-sm text-black">
+            {data.percentage}%
+          </p>
         </div>
       );
     }
@@ -101,7 +122,7 @@ const RevenueByChannelChart = ({ filters }) => {
                   cy="50%"
                   outerRadius={60}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}%`}
+                  label={(entry) => `${entry.name}: ${entry.percentage}%`}
                   labelLine={false}
                 >
                   {merchantPieData.map((entry, index) => (
@@ -124,7 +145,7 @@ const RevenueByChannelChart = ({ filters }) => {
                   cy="50%"
                   outerRadius={60}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}%`}
+                  label={(entry) => `${entry.name}: ${entry.percentage}%`}
                   labelLine={false}
                 >
                   {competitorPieData.map((entry, index) => (
@@ -196,23 +217,20 @@ const RevenueByChannelChart = ({ filters }) => {
 
   return (
     <div className="h-80">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
-        {/* Chart Controls */}
-        <div className="flex items-center space-x-4">
-          {/* View Type Selector */}
-          <div className="min-w-32">
-            <Select
-              value={{ value: chartType, label: t(`chartOptions.${chartType}`) }}
-              onChange={(option) => setChartType(option.value)}
-              options={[
-                { value: 'bars', label: t('chartOptions.bars') },
-                { value: 'pie', label: 'Pie Charts' },
-                { value: 'table', label: t('chartOptions.table') }
-              ]}
-              className="text-sm"
-              isSearchable={false}
-            />
-          </div>
+      <div className="flex justify-end mb-4">
+        {/* Chart Type Selector - Upper Right */}
+        <div className="min-w-32">
+          <Select
+            value={{ value: chartType, label: t(`chartOptions.${chartType}`) }}
+            onChange={(option) => setChartType(option.value)}
+            options={[
+              { value: 'bars', label: t('chartOptions.bars') },
+              { value: 'pie', label: 'Pie Charts' },
+              { value: 'table', label: t('chartOptions.table') }
+            ]}
+            className="text-sm"
+            isSearchable={false}
+          />
         </div>
       </div>
 

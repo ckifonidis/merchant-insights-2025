@@ -13,7 +13,7 @@ const RevenueByInterestsChart = ({ filters }) => {
     .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor))
     .slice(0, 6)
     .map(item => ({
-      interest: item.interest.length > 20 ? item.interest.substring(0, 20) + '...' : item.interest,
+      interest: item.interest.length > 15 ? item.interest.substring(0, 15) + '...' : item.interest,
       fullInterest: item.interest,
       merchant: item.merchant,
       competitor: item.competitor
@@ -99,8 +99,9 @@ const RevenueByInterestsChart = ({ filters }) => {
           dataKey="interest"
           angle={-45}
           textAnchor="end"
-          height={80}
-          fontSize={12}
+          height={100}
+          fontSize={11}
+          interval={0}
         />
         <YAxis tickFormatter={formatCurrency} />
         <Tooltip content={<CustomTooltip />} />
@@ -113,22 +114,19 @@ const RevenueByInterestsChart = ({ filters }) => {
 
   return (
     <div className="h-80">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
-        {/* Chart Controls */}
-        <div className="flex items-center space-x-4">
-          {/* View Type Selector */}
-          <div className="min-w-32">
-            <Select
-              value={{ value: chartType, label: t(`chartOptions.${chartType}`) }}
-              onChange={(option) => setChartType(option.value)}
-              options={[
-                { value: 'bars', label: t('chartOptions.bars') },
-                { value: 'table', label: t('chartOptions.table') }
-              ]}
-              className="text-sm"
-              isSearchable={false}
-            />
-          </div>
+      <div className="flex justify-end mb-4">
+        {/* Chart Type Selector - Upper Right */}
+        <div className="min-w-32">
+          <Select
+            value={{ value: chartType, label: t(`chartOptions.${chartType}`) }}
+            onChange={(option) => setChartType(option.value)}
+            options={[
+              { value: 'bars', label: t('chartOptions.bars') },
+              { value: 'table', label: t('chartOptions.table') }
+            ]}
+            className="text-sm"
+            isSearchable={false}
+          />
         </div>
       </div>
 

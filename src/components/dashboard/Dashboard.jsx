@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import DashboardHeader from './DashboardHeader';
-import KeyMetrics from './KeyMetrics';
+import DashboardMetrics from './DashboardMetrics';
 import TransactionsChart from '../charts/TransactionsChart';
 import RevenueChart from '../charts/RevenueChart';
 import CustomersChart from '../charts/CustomersChart';
@@ -16,16 +16,16 @@ const Dashboard = ({ filters }) => {
       {/* Dashboard Heading */}
       <DashboardHeader />
 
-      {/* Key Metrics */}
-      <KeyMetrics filters={filters} />
+      {/* Dashboard Metrics */}
+      <DashboardMetrics filters={filters} />
 
       {/* Dashboard Charts - Stacked vertically on mobile */}
       <div className="space-y-6">
-        {/* Transactions Chart */}
-        <TransactionsChart filters={filters} />
-
         {/* Revenue Chart */}
         <RevenueChart filters={filters} />
+
+        {/* Transactions Chart */}
+        <TransactionsChart filters={filters} />
 
         {/* Customers Chart */}
         <CustomersChart filters={filters} />

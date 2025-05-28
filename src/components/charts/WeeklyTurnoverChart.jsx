@@ -72,7 +72,7 @@ const WeeklyTurnoverChart = ({ filters }) => {
 
             {/* Positive area (green) */}
             <Area
-              type="monotone"
+              type="linear"
               dataKey="positiveArea"
               fill="#10B981"
               fillOpacity={0.3}
@@ -81,7 +81,7 @@ const WeeklyTurnoverChart = ({ filters }) => {
 
             {/* Negative area (red) */}
             <Area
-              type="monotone"
+              type="linear"
               dataKey="negativeArea"
               fill="#EF4444"
               fillOpacity={0.3}
@@ -90,7 +90,7 @@ const WeeklyTurnoverChart = ({ filters }) => {
 
             {/* Main line */}
             <Line
-              type="monotone"
+              type="linear"
               dataKey="percentageChange"
               stroke={color}
               strokeWidth={2}
