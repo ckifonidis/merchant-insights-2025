@@ -22,9 +22,9 @@ const Competition = ({ filters }) => {
       {/* Competition Metrics */}
       <CompetitionMetrics filters={filters} />
 
-      {/* Competition Charts - Stacked vertically on mobile */}
+      {/* Competition Charts - Use grid layout like other tabs */}
       <div className="space-y-6">
-        {/* Weekly Turnover Chart */}
+        {/* Weekly Turnover Chart - Full width container */}
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {t('competition.weeklyTurnover')}
@@ -32,7 +32,7 @@ const Competition = ({ filters }) => {
           <WeeklyTurnoverChart filters={filters} />
         </div>
 
-        {/* Monthly Turnover Heatmap */}
+        {/* Monthly Turnover Heatmap - Full width container */}
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {t('competition.monthlyTurnover')}

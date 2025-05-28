@@ -29,25 +29,6 @@ const Dashboard = ({ filters }) => {
 
         {/* Customers Chart */}
         <CustomersChart filters={filters} />
-
-        {/* Additional Charts in Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Monthly Revenue Heatmap */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t('dashboard.revenue')} {t('chartOptions.monthly')} Calendar
-            </h3>
-            <MonthlyTurnoverHeatmap filters={filters} />
-          </div>
-
-          {/* Geographic Performance */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t('dashboard.revenue')} by Location
-            </h3>
-            <GeographicPerformance filters={filters} />
-          </div>
-        </div>
       </div>
 
       {/* Campaign Button */}

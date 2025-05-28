@@ -86,7 +86,7 @@ const MonthlyTurnoverHeatmap = ({ filters }) => {
     }
 
     return (
-      <div className="flex-1">
+      <div className="w-full min-w-0">
         <div className="text-sm font-medium text-gray-500 mb-2 text-center">{title}</div>
         <div className="text-xs font-medium text-gray-400 mb-3 text-center">{monthName}</div>
         <div className="flex flex-col items-center">
@@ -142,8 +142,11 @@ const MonthlyTurnoverHeatmap = ({ filters }) => {
         </button>
       </div>
 
-      <div className="flex justify-center">
-        <CalendarHeatmap title={t('dashboard.merchant')} dataType="merchant" />
+      <div className="w-full overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CalendarHeatmap title={t('dashboard.merchant')} dataType="merchant" />
+          <CalendarHeatmap title={t('dashboard.competition')} dataType="competition" />
+        </div>
       </div>
 
       <div className="flex justify-center items-center space-x-6 text-xs text-gray-500 mt-6">
