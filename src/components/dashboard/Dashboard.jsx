@@ -1,11 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import DashboardHeader from './DashboardHeader';
-import DashboardMetrics from './DashboardMetrics';
-import TransactionsChart from '../charts/TransactionsChart';
-import RevenueChart from '../charts/RevenueChart';
-import CustomersChart from '../charts/CustomersChart';
-import MonthlyTurnoverHeatmap from '../charts/MonthlyTurnoverHeatmap';
-import GeographicPerformance from '../charts/GeographicPerformance';
+import { getTabConfig, getFilteredMetrics, getIcon, getColorClass } from '../../utils/configHelpers.jsx';
+import { UniversalMetricCard, TimeSeriesChart } from '../ui';
+import { METRIC_VARIANTS } from '../../utils/constants';
 import CampaignButton from '../ui/CampaignButton';
 
 const Dashboard = ({ filters }) => {
@@ -13,22 +9,71 @@ const Dashboard = ({ filters }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      {/* Dashboard Heading */}
-      <DashboardHeader />
+      {/* Dashboard Header - Inlined */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('dashboard.title')}</h2>
+        <p className="text-gray-600">{t('dashboard.subtitle')}</p>
+      </div>
 
-      {/* Dashboard Metrics */}
-      <DashboardMetrics filters={filters} />
+      {/* Dashboard Metrics - Inlined */}
+      <div className="space-y-4 mb-8">
+        {(() => {
+          const tabConfig = getTabConfig('dashboard');
+          if (!tabConfig) return null;
+          
+          const filteredMetrics = getFilteredMetrics(tabConfig.metrics);
+          
+          return filteredMetrics.map((metric) => {
+            const iconElement = (
+              <div className={getColorClass(metric.color)}>
+                {getIcon(metric.icon, "w-5 h-5")}
+              </div>
+            );
 
-      {/* Dashboard Charts - Stacked vertically on mobile */}
+            return (
+              <UniversalMetricCard
+                key={metric.id}
+                variant={METRIC_VARIANTS.detailed}
+                title={t(metric.name)}
+                icon={iconElement}
+                merchantData={{
+                  value: metric.merchant.value,
+                  change: metric.merchant.valueDiff,
+                  valueType: metric.valueType
+                }}
+                competitorData={metric.supportsCompetition ? {
+                  value: metric.competitor.value,
+                  change: metric.competitor.valueDiff,
+                  valueType: metric.valueType
+                } : {}}
+              />
+            );
+          });
+        })()}
+      </div>
+
+      {/* Dashboard Charts - Using unified TimeSeriesChart */}
       <div className="space-y-6">
-        {/* Revenue Chart */}
-        <RevenueChart filters={filters} />
+        <TimeSeriesChart
+          filters={filters}
+          dataType="revenue"
+          title={t('dashboard.revenue')}
+          showComparison={true}
+        />
 
-        {/* Transactions Chart */}
-        <TransactionsChart filters={filters} />
+        <TimeSeriesChart
+          filters={filters}
+          dataType="transactions"
+          title={t('dashboard.transactions')}
+          showComparison={true}
+        />
 
-        {/* Customers Chart */}
-        <CustomersChart filters={filters} />
+        <TimeSeriesChart
+          filters={filters}
+          dataType="customers"
+          title={t('dashboard.customers')}
+          showComparison={false}
+        />
       </div>
 
       {/* Campaign Button */}

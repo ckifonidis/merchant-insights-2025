@@ -1,21 +1,25 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { weeklyTurnoverData } from '../../data/mockData.js';
 
-const WeeklyTurnoverChart = ({ filters }) => {
+const UniversalTimelineChart = ({ 
+  data, 
+  title,
+  yAxisLabel = 'Performance (%)',
+  dateFormat = { day: '2-digit', month: '2-digit', year: 'numeric' },
+  showReferenceLine = true,
+  merchantColor = '#007B85',
+  competitorColor = '#73AA3C',
+  filters 
+}) => {
   const { t } = useTranslation();
 
   // Custom tooltip with black font
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-      const data = payload[0];
-      const value = data.value;
-      const formattedDate = new Date(label).toLocaleDateString('el-GR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
+      const dataPoint = payload[0];
+      const value = dataPoint.value;
+      const formattedDate = new Date(label).toLocaleDateString('el-GR', dateFormat);
 
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
@@ -29,21 +33,18 @@ const WeeklyTurnoverChart = ({ filters }) => {
     return null;
   };
 
-  // Prepare merchant data
-  const merchantData = weeklyTurnoverData.merchant.map((item) => ({
-    week: item.week,
-    percentageChange: item.percentageChange,
-    positiveArea: item.percentageChange > 0 ? item.percentageChange : 0,
-    negativeArea: item.percentageChange < 0 ? item.percentageChange : 0
-  }));
+  // Prepare data for charts
+  const prepareChartData = (dataArray) => {
+    return dataArray.map((item) => ({
+      week: item.week,
+      percentageChange: item.percentageChange,
+      positiveArea: item.percentageChange > 0 ? item.percentageChange : 0,
+      negativeArea: item.percentageChange < 0 ? item.percentageChange : 0
+    }));
+  };
 
-  // Prepare competition data
-  const competitionData = weeklyTurnoverData.competition.map((item) => ({
-    week: item.week,
-    percentageChange: item.percentageChange,
-    positiveArea: item.percentageChange > 0 ? item.percentageChange : 0,
-    negativeArea: item.percentageChange < 0 ? item.percentageChange : 0
-  }));
+  const merchantData = data?.merchant ? prepareChartData(data.merchant) : [];
+  const competitionData = data?.competition ? prepareChartData(data.competition) : [];
 
   // Single chart component
   const SingleChart = ({ data, title, color }) => (
@@ -68,7 +69,7 @@ const WeeklyTurnoverChart = ({ filters }) => {
             <Tooltip content={<CustomTooltip />} />
 
             {/* Reference line at 0% */}
-            <ReferenceLine y={0} stroke="#666" strokeDasharray="5 5" strokeWidth={1} />
+            {showReferenceLine && <ReferenceLine y={0} stroke="#666" strokeDasharray="5 5" strokeWidth={1} />}
 
             {/* Positive area (green) */}
             <Area
@@ -109,16 +110,16 @@ const WeeklyTurnoverChart = ({ filters }) => {
         <SingleChart
           data={merchantData}
           title={t('dashboard.merchant')}
-          color="#007B85"
+          color={merchantColor}
         />
         <SingleChart
           data={competitionData}
           title={t('dashboard.competition')}
-          color="#73AA3C"
+          color={competitorColor}
         />
       </div>
     </div>
   );
 };
 
-export default WeeklyTurnoverChart;
+export default UniversalTimelineChart;

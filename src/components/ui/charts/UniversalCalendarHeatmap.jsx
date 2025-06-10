@@ -1,28 +1,33 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const MonthlyTurnoverHeatmap = ({ filters }) => {
+const UniversalCalendarHeatmap = ({ 
+  data,
+  title,
+  initialMonth = new Date(2024, 4, 1), // May 2024 default
+  valueLabel = 'Revenue',
+  formatTooltip = (value) => value?.toLocaleString(),
+  filters 
+}) => {
   const { t } = useTranslation();
-  const [currentMonth, setCurrentMonth] = useState(new Date(2024, 4, 1)); // May 2024
+  const [currentMonth, setCurrentMonth] = useState(initialMonth);
 
-  // Mock data for demonstration - in real app this would come from API
-  const generateMockData = () => {
-    const data = {};
+  // Use provided data or generate mock data for demonstration
+  const heatmapData = data || (() => {
+    const mockData = {};
     const startDate = new Date(2024, 0, 1); // January 1, 2024
     const endDate = new Date(2024, 11, 31); // December 31, 2024
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dateKey = d.toISOString().split('T')[0];
       // Generate random revenue values
-      data[dateKey] = {
+      mockData[dateKey] = {
         merchant: Math.random() * 10000 + 1000,
         competition: Math.random() * 12000 + 1200
       };
     }
-    return data;
-  };
-
-  const mockData = generateMockData();
+    return mockData;
+  })();
 
   // Get color class based on revenue value
   const getColorClass = (value, median) => {
@@ -43,8 +48,8 @@ const MonthlyTurnoverHeatmap = ({ filters }) => {
   };
 
   // Get all revenue values for median calculation
-  const allMerchantValues = Object.values(mockData).map(d => d.merchant);
-  const allCompetitionValues = Object.values(mockData).map(d => d.competition);
+  const allMerchantValues = Object.values(heatmapData).map(d => d.merchant);
+  const allCompetitionValues = Object.values(heatmapData).map(d => d.competition);
   const merchantMedian = calculateMedian([...allMerchantValues]);
   const competitionMedian = calculateMedian([...allCompetitionValues]);
 
@@ -74,7 +79,7 @@ const MonthlyTurnoverHeatmap = ({ filters }) => {
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const dateKey = date.toISOString().split('T')[0];
-      const dayData = mockData[dateKey];
+      const dayData = heatmapData[dateKey];
       const value = dayData ? dayData[dataType] : null;
       const colorClass = getColorClass(value, median);
 
@@ -175,4 +180,4 @@ const MonthlyTurnoverHeatmap = ({ filters }) => {
   );
 };
 
-export default MonthlyTurnoverHeatmap;
+export default UniversalCalendarHeatmap;
