@@ -7,12 +7,14 @@ import Dashboard from './components/dashboard/Dashboard';
 import Revenue from './components/revenue/Revenue';
 import Demographics from './components/demographics/Demographics';
 import Competition from './components/competition/Competition';
+import FirstPage from './components/FirstPage';
 import { useFilters } from './hooks/useFilters';
 import { useResponsive } from './hooks/useResponsive';
 import './i18n';
 import './styles/dashboard.css';
 
 function App() {
+  const [showMainApp, setShowMainApp] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { filters, updateFilters, resetFilters } = useFilters();
@@ -31,6 +33,10 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const handleInterestClick = () => {
+    setShowMainApp(true);
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -45,6 +51,11 @@ function App() {
         return <Dashboard filters={filters} />;
     }
   };
+
+  // Show FirstPage if user hasn't shown interest yet
+  if (!showMainApp) {
+    return <FirstPage onInterestClick={handleInterestClick} />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
