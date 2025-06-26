@@ -1,0 +1,612 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "converted_customers_by_activity",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "13811",
+                                "value2": "frequent"
+                            },
+                            {
+                                "value1": "9286",
+                                "value2": "less_frequent"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_age",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "1016",
+                                "value2": "18-24"
+                            },
+                            {
+                                "value1": "6101",
+                                "value2": "25-40"
+                            },
+                            {
+                                "value1": "9167",
+                                "value2": "41-56"
+                            },
+                            {
+                                "value1": "5807",
+                                "value2": "57-75"
+                            },
+                            {
+                                "value1": "837",
+                                "value2": "76-96"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_gender",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "6292",
+                                "value2": "f"
+                            },
+                            {
+                                "value1": "16643",
+                                "value2": "m"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_interest",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "860",
+                                "value2": ""
+                            },
+                            {
+                                "value1": "0",
+                                "value2": "other_category"
+                            },
+                            {
+                                "value1": "10270",
+                                "value2": "SHOPINT1"
+                            },
+                            {
+                                "value1": "2468",
+                                "value2": "SHOPINT10"
+                            },
+                            {
+                                "value1": "765",
+                                "value2": "SHOPINT11"
+                            },
+                            {
+                                "value1": "6189",
+                                "value2": "SHOPINT12"
+                            },
+                            {
+                                "value1": "7178",
+                                "value2": "SHOPINT13"
+                            },
+                            {
+                                "value1": "2779",
+                                "value2": "SHOPINT14"
+                            },
+                            {
+                                "value1": "1518",
+                                "value2": "SHOPINT15"
+                            },
+                            {
+                                "value1": "272",
+                                "value2": "SHOPINT2"
+                            },
+                            {
+                                "value1": "3443",
+                                "value2": "SHOPINT3"
+                            },
+                            {
+                                "value1": "2035",
+                                "value2": "SHOPINT4"
+                            },
+                            {
+                                "value1": "552",
+                                "value2": "SHOPINT5"
+                            },
+                            {
+                                "value1": "604",
+                                "value2": "SHOPINT6"
+                            },
+                            {
+                                "value1": "969",
+                                "value2": "SHOPINT7"
+                            },
+                            {
+                                "value1": "2059",
+                                "value2": "SHOPINT8"
+                            },
+                            {
+                                "value1": "2473",
+                                "value2": "SHOPINT9"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "customers_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "9267",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "14272",
+                                "value2": "2025-01-02"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "redeemed_points",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "redeemed_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "rewarded_points",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "rewarded_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "revenue_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "revenue",
+                        "seriesPoints": [
+                            {
+                                "value1": "300318.93",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "608902.87",
+                                "value2": "2025-01-02"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "transactions_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "10002.0",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "15244.0",
+                                "value2": "2025-01-02"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "total_transactions",
+                "percentageValue": false,
+                "scalarValue": "25246.0",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "36.014489424067179",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "1585.0",
+                                "value2": "ΘΕΣΣΑΛΙΑ"
+                            },
+                            {
+                                "value1": "1374.0",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "1256.0",
+                                "value2": "ΠΕΛΟΠΟΝΝΗΣΟΣ"
+                            },
+                            {
+                                "value1": "1775.0",
+                                "value2": "ΔΥΤΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "482.0",
+                                "value2": "ΒΟΡΕΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "715.0",
+                                "value2": "ΔΥΤΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "10655.0",
+                                "value2": "ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "674.0",
+                                "value2": "ΗΠΕΙΡΟΣ"
+                            },
+                            {
+                                "value1": "802.0",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ΚΑΙ ΘΡΑΚΗ"
+                            },
+                            {
+                                "value1": "395.0",
+                                "value2": "ΝΗΣΙΑ ΙΟΝΙΟΥ"
+                            },
+                            {
+                                "value1": "3473.0",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "1143.0",
+                                "value2": "ΚΡΗΤΗ"
+                            },
+                            {
+                                "value1": "610.0",
+                                "value2": "ΝΟΤΙΟ ΑΙΓΑΙΟ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_age",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "1552",
+                                "value2": "18-24"
+                            },
+                            {
+                                "value1": "9654",
+                                "value2": "25-40"
+                            },
+                            {
+                                "value1": "15239",
+                                "value2": "41-56"
+                            },
+                            {
+                                "value1": "10801",
+                                "value2": "57-75"
+                            },
+                            {
+                                "value1": "1720",
+                                "value2": "76-96"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "converted_customers_by_gender",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "10934",
+                                "value2": "f"
+                            },
+                            {
+                                "value1": "28045",
+                                "value2": "m"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "converted_customers_by_interest",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "0",
+                                "value2": ""
+                            },
+                            {
+                                "value1": "1797",
+                                "value2": "other_category"
+                            },
+                            {
+                                "value1": "18406",
+                                "value2": "SHOPINT1"
+                            },
+                            {
+                                "value1": "4093",
+                                "value2": "SHOPINT10"
+                            },
+                            {
+                                "value1": "1109",
+                                "value2": "SHOPINT11"
+                            },
+                            {
+                                "value1": "11474",
+                                "value2": "SHOPINT12"
+                            },
+                            {
+                                "value1": "11100",
+                                "value2": "SHOPINT13"
+                            },
+                            {
+                                "value1": "4793",
+                                "value2": "SHOPINT14"
+                            },
+                            {
+                                "value1": "2150",
+                                "value2": "SHOPINT15"
+                            },
+                            {
+                                "value1": "436",
+                                "value2": "SHOPINT2"
+                            },
+                            {
+                                "value1": "5169",
+                                "value2": "SHOPINT3"
+                            },
+                            {
+                                "value1": "3267",
+                                "value2": "SHOPINT4"
+                            },
+                            {
+                                "value1": "973",
+                                "value2": "SHOPINT5"
+                            },
+                            {
+                                "value1": "944",
+                                "value2": "SHOPINT6"
+                            },
+                            {
+                                "value1": "1494",
+                                "value2": "SHOPINT7"
+                            },
+                            {
+                                "value1": "3549",
+                                "value2": "SHOPINT8"
+                            },
+                            {
+                                "value1": "3574",
+                                "value2": "SHOPINT9"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "revenue_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "revenue",
+                        "seriesPoints": [
+                            {
+                                "value1": "43948.822",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "120279.796",
+                                "value2": "2025-01-02"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "transactions_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "1420.6",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "2844.8",
+                                "value2": "2025-01-02"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "total_transactions",
+                "percentageValue": false,
+                "scalarValue": "4265.4",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "38.502512777230740",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "customers_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "12946",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "26922",
+                                "value2": "2025-01-02"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "105.8",
+                                "value2": "ΔΥΤΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "114.2",
+                                "value2": "ΝΗΣΙΑ ΙΟΝΙΟΥ"
+                            },
+                            {
+                                "value1": "1412.2",
+                                "value2": "ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "251.2",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "247.5",
+                                "value2": "ΚΡΗΤΗ"
+                            },
+                            {
+                                "value1": "573.1",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "168.4",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ΚΑΙ ΘΡΑΚΗ"
+                            },
+                            {
+                                "value1": "164.6",
+                                "value2": "ΗΠΕΙΡΟΣ"
+                            },
+                            {
+                                "value1": "268.7",
+                                "value2": "ΠΕΛΟΠΟΝΝΗΣΟΣ"
+                            },
+                            {
+                                "value1": "278.0",
+                                "value2": "ΘΕΣΣΑΛΙΑ"
+                            },
+                            {
+                                "value1": "381.7",
+                                "value2": "ΔΥΤΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "143.8",
+                                "value2": "ΝΟΤΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "106.4",
+                                "value2": "ΒΟΡΕΙΟ ΑΙΓΑΙΟ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}
