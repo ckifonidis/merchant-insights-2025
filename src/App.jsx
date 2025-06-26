@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Provider } from 'react-redux';
+import { store } from './store/index.js';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import TabNavigation from './components/layout/TabNavigation';
@@ -8,12 +10,13 @@ import Revenue from './components/revenue/Revenue';
 import Demographics from './components/demographics/Demographics';
 import Competition from './components/competition/Competition';
 import FirstPage from './components/FirstPage';
+import ReduxDebugger from './components/debug/ReduxDebugger.jsx';
 import { useFilters } from './hooks/useFilters';
 import { useResponsive } from './hooks/useResponsive';
 import './i18n';
 import './styles/dashboard.css';
 
-function App() {
+function AppContent() {
   const [showMainApp, setShowMainApp] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -130,7 +133,19 @@ function App() {
       </div>
 
       <Footer />
+      
+      {/* Redux Debugger - Remove in production */}
+      {process.env.NODE_ENV === 'development' && <ReduxDebugger />}
     </div>
+  );
+}
+
+// Wrap the app with Redux Provider
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
   );
 }
 

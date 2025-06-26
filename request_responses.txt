@@ -1,0 +1,180 @@
+revenue per day request
+
+Endpoint {{ProxyUrl}}/analytics/query
+
+Request 
+{
+    "header": {
+        "ID": "34AFD930-D65B-FC15-8AC4-44F8184E7A87",
+        "application": "76A9FF99-64F9-4F72-9629-305CBE047902"
+    },
+    "payload": {
+        "userID": "BANK\\E82629",
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-15",
+        "providerId": "56f9cf99-3727-4f2f-bf1c-58dc532ebaf5",
+        "metricIDs": [
+            "revenue_per_day"
+        ],
+        "filterValues": [
+        ],
+        "merchantId": "52ba3854-a5d4-47bd-9d1a-b789ae139803"
+    }
+}
+
+Response
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "revenue_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "revenue",
+                        "seriesPoints": [
+                            {
+                                "value1": "3568.52",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "3497.07",
+                                "value2": "2025-01-02"
+                            },
+                            {
+                                "value1": "141982.35",
+                                "value2": "2025-01-03"
+                            },
+                            {
+                                "value1": "152165.05",
+                                "value2": "2025-01-04"
+                            },
+                            {
+                                "value1": "4313.68",
+                                "value2": "2025-01-05"
+                            },
+                            {
+                                "value1": "3953.63",
+                                "value2": "2025-01-06"
+                            },
+                            {
+                                "value1": "103606.32",
+                                "value2": "2025-01-07"
+                            },
+                            {
+                                "value1": "65659.41",
+                                "value2": "2025-01-08"
+                            },
+                            {
+                                "value1": "89832.93",
+                                "value2": "2025-01-09"
+                            },
+                            {
+                                "value1": "125818.38",
+                                "value2": "2025-01-10"
+                            },
+                            {
+                                "value1": "186890.13",
+                                "value2": "2025-01-11"
+                            },
+                            {
+                                "value1": "6283.36",
+                                "value2": "2025-01-12"
+                            },
+                            {
+                                "value1": "111938.84",
+                                "value2": "2025-01-13"
+                            },
+                            {
+                                "value1": "110816.25",
+                                "value2": "2025-01-14"
+                            },
+                            {
+                                "value1": "123181.35",
+                                "value2": "2025-01-15"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ATTICA"
+            },
+			{
+                "metricID": "revenue_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "revenue",
+                        "seriesPoints": [
+                            {
+                                "value1": "708.903",
+                                "value2": "2025-01-01"
+                            },
+                            {
+                                "value1": "1404.009",
+                                "value2": "2025-01-02"
+                            },
+                            {
+                                "value1": "39023.618",
+                                "value2": "2025-01-03"
+                            },
+                            {
+                                "value1": "35566.447",
+                                "value2": "2025-01-04"
+                            },
+                            {
+                                "value1": "926.517",
+                                "value2": "2025-01-05"
+                            },
+                            {
+                                "value1": "1241.777",
+                                "value2": "2025-01-06"
+                            },
+                            {
+                                "value1": "30302.318",
+                                "value2": "2025-01-07"
+                            },
+                            {
+                                "value1": "20330.266",
+                                "value2": "2025-01-08"
+                            },
+                            {
+                                "value1": "27681.654",
+                                "value2": "2025-01-09"
+                            },
+                            {
+                                "value1": "35387.672999999995",
+                                "value2": "2025-01-10"
+                            },
+                            {
+                                "value1": "42957.043",
+                                "value2": "2025-01-11"
+                            },
+                            {
+                                "value1": "1414.9180000000001",
+                                "value2": "2025-01-12"
+                            },
+                            {
+                                "value1": "22550.55",
+                                "value2": "2025-01-13"
+                            },
+                            {
+                                "value1": "24436.128",
+                                "value2": "2025-01-14"
+                            },
+                            {
+                                "value1": "31121.682",
+                                "value2": "2025-01-15"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+            ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}

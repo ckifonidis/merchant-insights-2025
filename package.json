@@ -4,18 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run mock-server\" \"vite\"",
+    "dev:app-only": "vite",
+    "dev:api-only": "cd mock-server && npm run dev",
+    "mock-server": "cd mock-server && npm run dev",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup:mock-server": "cd mock-server && npm install",
+    "test:mock-server": "cd mock-server && npm test"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
     "date-fns": "^4.1.0",
     "i18next": "^23.15.0",
     "react": "^19.1.0",
     "react-datepicker": "^7.3.0",
     "react-dom": "^19.1.0",
     "react-i18next": "^15.0.0",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^6.26.0",
     "react-select": "^5.8.0",
     "recharts": "^2.12.0"
@@ -26,6 +33,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
