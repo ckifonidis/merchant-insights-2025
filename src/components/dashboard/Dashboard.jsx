@@ -9,6 +9,8 @@ const Dashboard = ({ filters }) => {
   const { t } = useTranslation();
   const { data, loading, error, refresh } = useDashboardData();
 
+
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -89,6 +91,7 @@ const Dashboard = ({ filters }) => {
           dataType="revenue"
           title={t('dashboard.revenue')}
           showComparison={true}
+          apiData={data.revenueTimeSeries}
         />
 
         <TimeSeriesChart
@@ -96,6 +99,7 @@ const Dashboard = ({ filters }) => {
           dataType="transactions"
           title={t('dashboard.transactions')}
           showComparison={true}
+          apiData={data.transactionsTimeSeries}
         />
 
         <TimeSeriesChart
@@ -103,6 +107,7 @@ const Dashboard = ({ filters }) => {
           dataType="customers"
           title={t('dashboard.customers')}
           showComparison={false}
+          apiData={data.customersTimeSeries}
         />
       </div>
 

@@ -12,6 +12,68 @@ import { formatCurrency } from '../../../utils/formatters';
 import { COLORS, CHART_CONFIG } from '../../../utils/constants';
 
 /**
+ * Transform API data to chart format
+ * The apiData comes from dashboard transformation and has structure:
+ * { merchant: [{date, value, formattedDate}], competitor: [{date, value, formattedDate}] }
+ */
+const transformApiDataToChartFormat = (apiData, dataType) => {
+  if (!apiData || (!apiData.merchant && !apiData.competitor)) {
+    console.warn('⚠️ No API data available for chart:', dataType);
+    return [];
+  }
+
+  // Get merchant and competitor data arrays
+  const merchantData = apiData.merchant || [];
+  const competitorData = apiData.competitor || [];
+
+
+
+  // Create a map of dates to values
+  const dataMap = new Map();
+
+  // Get the correct property names for this data type
+  const keys = getDataKey(dataType);
+
+  // Process merchant data
+  merchantData.forEach(item => {
+    dataMap.set(item.date, {
+      date: item.date,
+      displayDate: item.formattedDate || item.date,
+      [keys.merchant]: item.value
+    });
+  });
+
+  // Process competitor data
+  competitorData.forEach(item => {
+    const existing = dataMap.get(item.date) || {
+      date: item.date,
+      displayDate: item.formattedDate || item.date
+    };
+    existing[keys.competitor] = item.value;
+    dataMap.set(item.date, existing);
+  });
+
+  // Convert map to array and sort by date
+  return Array.from(dataMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+};
+
+/**
+ * Get data keys based on chart type
+ */
+const getDataKey = (dataType) => {
+  switch (dataType) {
+    case 'revenue':
+      return { merchant: 'merchantRevenue', competitor: 'competitorRevenue' };
+    case 'transactions':
+      return { merchant: 'merchantTransactions', competitor: 'competitorTransactions' };
+    case 'customers':
+      return { merchant: 'merchantCustomers', competitor: 'competitorCustomers' };
+    default:
+      return { merchant: 'merchantRevenue', competitor: 'competitorRevenue' };
+  }
+};
+
+/**
  * Universal TimeSeriesChart component that handles revenue, transactions, and customers
  * Consolidates RevenueChart, TransactionsChart, and CustomersChart
  */
@@ -22,25 +84,36 @@ const TimeSeriesChart = ({
   showComparison = true, // Whether to show merchant vs competition
   valueFormatter = null, // Custom formatter function
   unit = '', // Unit to display (e.g., '€', 'transactions')
-  className = ''
+  className = '',
+  apiData = null // API data from Dashboard component
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('bars');
   const [timeline, setTimeline] = useState('daily');
 
-  // Generate mock data filtered by date range
-  const rawData = generateTimeSeriesData(
+  // Use API data if available, otherwise fall back to mock data
+  const rawData = apiData || generateTimeSeriesData(
     filters?.dateRange?.start,
     filters?.dateRange?.end
   );
 
+
+
   // Process data based on timeline selection
-  const processedData = processTimelineData(
-    rawData,
-    timeline,
-    filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
-    filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
-  );
+  let processedData;
+
+  if (apiData) {
+    // Transform API data to chart format
+    processedData = transformApiDataToChartFormat(apiData, dataType);
+  } else {
+    // Use existing mock data processing
+    processedData = processTimelineData(
+      rawData,
+      timeline,
+      filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
+      filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+    );
+  }
 
   // Data mapping based on type
   const getDataMapping = () => {
