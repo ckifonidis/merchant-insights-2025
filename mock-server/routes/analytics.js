@@ -29,34 +29,21 @@ router.post('/QUERY', (req, res) => {
       );
     }
 
-    // Check if request needs both merchant and competition data
-    const needsCompetitionComparison = hasCompetitionFilter(filterValues || []);
-    
-    console.log(`🔍 Processing ${metricIDs.length} metrics, competition comparison: ${needsCompetitionComparison}`);
+    // Always generate both merchant and competition data (like production API)
+    console.log(`🔍 Processing ${metricIDs.length} metrics, always including both merchant and competition data`);
 
     // Generate metrics data
     let allMetrics = [];
     
     metricIDs.forEach(metricID => {
-      if (needsCompetitionComparison) {
-        // Generate both merchant and competition data
-        const bothDatasets = generateResponseWithBothMerchantAndCompetition(metricID, {
-          filterValues,
-          startDate,
-          endDate,
-          merchantId
-        });
-        allMetrics.push(...bothDatasets);
-      } else {
-        // Generate only merchant data
-        const metric = generateMetricResponse(metricID, {
-          filterValues,
-          startDate,
-          endDate,
-          merchantId
-        });
-        allMetrics.push(metric);
-      }
+      // Always generate both merchant and competition data
+      const bothDatasets = generateResponseWithBothMerchantAndCompetition(metricID, {
+        filterValues,
+        startDate,
+        endDate,
+        merchantId
+      });
+      allMetrics.push(...bothDatasets);
     });
 
     console.log(`✅ Generated ${allMetrics.length} metric responses`);

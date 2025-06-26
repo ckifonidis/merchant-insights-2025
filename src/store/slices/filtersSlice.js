@@ -32,7 +32,7 @@ const initialState = {
   // Global filter values
   filterValues: [],
   
-  // Competition comparison toggle
+  // Competition comparison toggle (always true for now - data_origin filter not implemented)
   showCompetition: true,
   
   // Data refresh settings
