@@ -66,6 +66,36 @@ class AnalyticsService {
   }
 
   /**
+   * Build analytics request in proper format
+   */
+  buildAnalyticsRequest({
+    userID = 'BANK\\test',
+    startDate = '2025-01-01',
+    endDate = '2025-01-31',
+    merchantId = 'test-merchant',
+    metricIDs = [],
+    filterValues = [],
+    metricParameters = {}
+  }) {
+    return {
+      header: {
+        ID: `analytics-${Date.now()}`,
+        application: 'merchant-insights-ui'
+      },
+      payload: {
+        userID,
+        startDate,
+        endDate,
+        providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+        metricIDs,
+        filterValues,
+        metricParameters,
+        merchantId
+      }
+    };
+  }
+
+  /**
    * Main analytics query method
    * Routes to either mock server or real API based on configuration
    */
@@ -510,23 +540,29 @@ export const analyticsService = new AnalyticsService();
 
 // Export helper functions for building requests
 export const buildAnalyticsRequest = ({
-  userID,
-  startDate,
-  endDate,
-  merchantId,
-  metricIDs = Object.values(METRIC_IDS),
+  userID = 'BANK\\test',
+  startDate = '2025-01-01',
+  endDate = '2025-01-31',
+  merchantId = 'test-merchant',
+  metricIDs = [],
   filterValues = [],
   metricParameters = {}
 }) => {
   return {
-    userID,
-    startDate,
-    endDate,
-    providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
-    metricIDs,
-    filterValues,
-    metricParameters,
-    merchantId
+    header: {
+      ID: `analytics-${Date.now()}`,
+      application: 'merchant-insights-ui'
+    },
+    payload: {
+      userID,
+      startDate,
+      endDate,
+      providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+      metricIDs,
+      filterValues,
+      metricParameters,
+      merchantId
+    }
   };
 };
 

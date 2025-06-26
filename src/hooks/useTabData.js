@@ -70,69 +70,70 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
   };
 };
 
+// Static metric arrays to prevent infinite loops
+const DASHBOARD_METRIC_IDS = [
+  'total_revenue',
+  'total_transactions', 
+  'avg_ticket_per_user',
+  'revenue_per_day',
+  'transactions_per_day',
+  'customers_per_day'
+];
+
 /**
  * Hook for Dashboard tab data
  */
 export const useDashboardData = (options = {}) => {
-  const metricIDs = [
-    'total_revenue',
-    'total_transactions', 
-    'avg_ticket_per_user',
-    'revenue_per_day',
-    'transactions_per_day',
-    'customers_per_day'
-  ];
-
-  return useTabData('dashboard', metricIDs, options);
+  return useTabData('dashboard', DASHBOARD_METRIC_IDS, options);
 };
+
+const REVENUE_METRIC_IDS = [
+  'total_revenue',
+  'rewarded_amount',
+  'redeemed_amount', 
+  'revenue_per_day'
+  // TODO: Add revenue breakdown metrics when available
+];
+
+const DEMOGRAPHICS_METRIC_IDS = [
+  'converted_customers_by_age',
+  'converted_customers_by_gender',
+  'converted_customers_by_interest'
+  // TODO: Add customer count metrics when available
+];
+
+const COMPETITION_METRIC_IDS = [
+  'total_revenue',
+  'transactions_per_day',
+  'revenue_per_day'
+  // TODO: Add competition-specific metrics
+];
 
 /**
  * Hook for Revenue tab data
  */
 export const useRevenueData = (options = {}) => {
-  const metricIDs = [
-    'total_revenue',
-    'rewarded_amount',
-    'redeemed_amount', 
-    'revenue_per_day'
-    // TODO: Add revenue breakdown metrics when available
-  ];
-
-  return useTabData('revenue', metricIDs, options);
+  return useTabData('revenue', REVENUE_METRIC_IDS, options);
 };
 
 /**
  * Hook for Demographics tab data
  */
 export const useDemographicsData = (options = {}) => {
-  const metricIDs = [
-    'converted_customers_by_age',
-    'converted_customers_by_gender',
-    'converted_customers_by_interest'
-    // TODO: Add customer count metrics when available
-  ];
-
-  return useTabData('demographics', metricIDs, options);
+  return useTabData('demographics', DEMOGRAPHICS_METRIC_IDS, options);
 };
 
 /**
  * Hook for Competition tab data
  */
 export const useCompetitionData = (options = {}) => {
-  const metricIDs = [
-    'total_revenue',
-    'transactions_per_day',
-    'revenue_per_day'
-    // TODO: Add competition-specific metrics
-  ];
-
   // Competition tab always needs competition comparison
   const competitionOptions = {
     ...options,
     dependencies: [...(options.dependencies || []), 'competition']
   };
 
-  return useTabData('competition', metricIDs, competitionOptions);
+  return useTabData('competition', COMPETITION_METRIC_IDS, competitionOptions);
 };
 
 /**

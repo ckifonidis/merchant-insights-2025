@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { 
   ANALYTICS_PROVIDER_IDS,
   FILTER_VALUES 
@@ -223,14 +223,24 @@ export const selectAutoRefresh = (state) => state.filters.autoRefresh;
 export const selectSelectedTab = (state) => state.filters.selectedTab;
 export const selectAllFilters = (state) => state.filters;
 
-// Computed selectors
-export const selectApiRequestParams = (state) => ({
-  userID: state.filters.userID,
-  startDate: state.filters.dateRange.startDate,
-  endDate: state.filters.dateRange.endDate,
-  providerId: state.filters.providerId,
-  filterValues: state.filters.filterValues,
-  merchantId: state.filters.merchantId
-});
+// Computed selectors - MEMOIZED to prevent infinite loops
+export const selectApiRequestParams = createSelector(
+  [
+    (state) => state.filters.userID,
+    (state) => state.filters.dateRange.startDate,
+    (state) => state.filters.dateRange.endDate,
+    (state) => state.filters.providerId,
+    (state) => state.filters.filterValues,
+    (state) => state.filters.merchantId
+  ],
+  (userID, startDate, endDate, providerId, filterValues, merchantId) => ({
+    userID,
+    startDate,
+    endDate,
+    providerId,
+    filterValues,
+    merchantId
+  })
+);
 
 export default filtersSlice.reducer;

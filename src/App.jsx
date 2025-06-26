@@ -10,7 +10,6 @@ import Revenue from './components/revenue/Revenue';
 import Demographics from './components/demographics/Demographics';
 import Competition from './components/competition/Competition';
 import FirstPage from './components/FirstPage';
-import ReduxDebugger from './components/debug/ReduxDebugger.jsx';
 import { useFilters } from './hooks/useFilters';
 import { useResponsive } from './hooks/useResponsive';
 import './i18n';
@@ -133,9 +132,6 @@ function AppContent() {
       </div>
 
       <Footer />
-      
-      {/* Redux Debugger - Remove in production */}
-      {process.env.NODE_ENV === 'development' && <ReduxDebugger />}
     </div>
   );
 }

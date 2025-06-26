@@ -54,6 +54,55 @@
 - **RevenueByChannel Responsiveness** - Pie chart layout problems on mobile/tablet
 - **Filter Integration** - Charts don't respond to sidebar filter changes
 
+## 🚨 INFINITE LOOP PREVENTION
+
+### **Critical Issue Resolved: Redux + useEffect Infinite Loop**
+
+**Symptoms:** Console flooded with repeated API calls, app becomes unresponsive
+
+**Root Causes:**
+1. **Unmemoized selectors returning objects**
+2. **Arrays/objects created inside hooks**  
+3. **Unstable references in useCallback dependencies**
+
+### **Fixed Patterns:**
+
+**❌ WRONG - Causes Infinite Loop:**
+```javascript
+// Selector creates new object every render
+export const selectApiParams = (state) => ({
+  userID: state.filters.userID,  // ← NEW OBJECT EVERY TIME!
+  // ...
+});
+
+// Array created inside hook
+export const useDashboardData = () => {
+  const metricIDs = ['total_revenue', ...];  // ← NEW ARRAY EVERY RENDER!
+  return useTabData('dashboard', metricIDs);
+};
+```
+
+**✅ CORRECT - Stable References:**
+```javascript
+// Memoized selector
+export const selectApiParams = createSelector(
+  [(state) => state.filters.userID, ...],
+  (userID, ...) => ({ userID, ... })
+);
+
+// Constant outside component
+const DASHBOARD_METRIC_IDS = ['total_revenue', ...];
+export const useDashboardData = () => {
+  return useTabData('dashboard', DASHBOARD_METRIC_IDS);
+};
+```
+
+### **Prevention Rules:**
+1. **Always use `createSelector` for object-returning selectors**
+2. **Define arrays/objects as constants outside components**  
+3. **Keep useCallback dependencies stable**
+4. **Monitor console for repeated API calls during development**
+
 ## KEY ARCHITECTURE PATTERNS
 
 ### File Structure
@@ -155,6 +204,9 @@ const ChartComponent = ({ filters }) => {
 - Support multiple chart types (bars, line, table, pie)
 - Use existing mock data from `src/data/mockData.js`
 - Use Greek locale currency formatting
+- **Use `createSelector` for Redux selectors that return objects**
+- **Define arrays/objects as constants outside components**
+- **Memoize complex dependencies in useCallback/useEffect**
 
 ### ❌ DON'T:
 - Omit file extensions - causes Vite resolution errors
@@ -162,6 +214,9 @@ const ChartComponent = ({ filters }) => {
 - Hardcode metric data in components
 - Create charts without mobile responsiveness
 - Hardcode data values in components
+- **Create arrays/objects inside useCallback dependencies** - causes infinite loops
+- **Use unmemoized selectors that return objects** - causes infinite rerenders
+- **Define metric arrays inside hook functions** - creates new references every render
 
 ## MOCK DATA AVAILABLE
 - `customerMetrics` - Demographics metrics
