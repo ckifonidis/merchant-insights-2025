@@ -197,7 +197,11 @@ function generateDemographicPoints(category, isCompetition = false) {
       break;
       
     case 'gender':
-      const genders = ['Male', 'Female', 'Other'];
+      const genders = [
+        { code: 'm', label: 'Male', percentage: 0.45 },
+        { code: 'f', label: 'Female', percentage: 0.52 },
+        { code: 'other', label: 'Other', percentage: 0.03 }
+      ];
       const totalCustomers = Math.floor((Math.random() * 20000 + 10000) * competitionMultiplier);
       let remaining = totalCustomers;
       
@@ -206,14 +210,13 @@ function generateDemographicPoints(category, isCompetition = false) {
         if (index === genders.length - 1) {
           value = remaining; // Last item gets remaining count
         } else {
-          const percentage = gender === 'Male' ? 0.45 : gender === 'Female' ? 0.52 : 0.03;
-          value = Math.floor(totalCustomers * percentage);
+          value = Math.floor(totalCustomers * gender.percentage);
           remaining -= value;
         }
         
         points.push({
           value1: value.toString(),
-          value2: gender
+          value2: gender.code // Use 'm', 'f', 'other' to match API format
         });
       });
       break;

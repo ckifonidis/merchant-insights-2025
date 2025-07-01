@@ -7,11 +7,19 @@
 - **One API call per tab** with all required MetricIDs
 - **Tab-level loading states** and error handling
 
-### **Data Flow**
+### **Data Flow (✅ IMPLEMENTED)**
 ```
-Tab Component → Service Layer → Global State → Component Props
-     ↓              ↓              ↓              ↓
- Request Data → Transform Data → Store Data → Display Data
+FilterSidebar → Redux Store → useTabData Hook → Analytics Service → Mock Server → Charts
+     ↓              ↓              ↓                    ↓               ↓          ↓
+  Apply Filters → Store State → Pass Filters → Transform Filters → Filter Data → Display
+```
+
+**Filter Integration Flow:**
+```
+UI Filters → Filter Mapping Service → API Filters → Mock Server → Filtered Data → Charts
+     ↓                ↓                      ↓             ↓              ↓           ↓
+{gender:'female'} → [{filterId:'gender',   → Mock Data   → Only Female  → Updated
+                    value:'["f"]'}]        Generation     Data Returned   Display
 ```
 
 ### **Transformation Strategy: Option C (Service Layer)**
@@ -43,7 +51,18 @@ Transform data in service layer before storing in global state:
   filters: {
     dateRange: { startDate: '2025-01-01', endDate: '2025-01-31' },
     merchantId: 'uuid',
-    otherFilters: { ... }
+    uiFilters: {
+      gender: 'all',
+      ageGroups: [],
+      shoppingInterests: [],
+      customerLocation: [],
+      channel: 'all',
+      goForMore: null
+    },
+    filterValues: [
+      { providerId: 'uuid', filterId: 'gender', value: '["f"]' }
+    ],
+    filtersChanged: false
   }
 }
 ```
@@ -129,11 +148,69 @@ export const useTabData = (tabName, metricIDs) => {
    - Transform to: `{ comparison: {...}, trends: {...} }`
    - Components: Competition cards, Timeline, Heatmap
 
-### Phase 3: Global Features
-1. **Global filter management** (date range, merchant selection)
-2. **Period-over-period calculations** (separate API calls)
-3. **Loading states** and error boundaries
-4. **Performance optimization** (memoization, selectors)
+### Phase 3: Global Features ✅ COMPLETED
+1. **✅ Global filter management** (date range, merchant selection, demographic filters)
+2. **Period-over-period calculations** (separate API calls) - Pending
+3. **✅ Loading states** and error boundaries
+4. **✅ Performance optimization** (memoized selectors, active tab refresh only)
+
+## ✅ FILTER INTEGRATION ARCHITECTURE
+
+### **Core Components**
+
+#### **1. Filter Mapping Service** (`src/services/filterMappingService.js`)
+```javascript
+// Bidirectional UI ↔ API filter conversion
+class FilterMappingService {
+  mapUIFiltersToAPI(uiFilters) {
+    // Convert {gender: 'female'} → [{filterId: 'gender', value: '["f"]'}]
+  }
+  mapAPIFiltersToUI(filterValues) {
+    // Convert API format back to UI format for persistence
+  }
+  validateDatasetSize(data) {
+    // Check if filtered data meets minimum requirements
+  }
+}
+```
+
+#### **2. Enhanced Redux State** (`src/store/slices/filtersSlice.js`)
+```javascript
+// Dual filter state management
+{
+  uiFilters: {           // User-friendly format
+    gender: 'female',
+    ageGroups: ['millennials'],
+    shoppingInterests: ['SHOPINT1']
+  },
+  filterValues: [        // API-compatible format
+    { providerId: 'uuid', filterId: 'gender', value: '["f"]' }
+  ],
+  filtersChanged: true,  // Triggers refresh
+  selectedTab: 'dashboard'
+}
+```
+
+#### **3. Smart Data Refresh** (`src/hooks/useTabData.js`)
+```javascript
+// Only refresh active tab when filters change
+useEffect(() => {
+  if (filtersChanged && selectedTab === tabName) {
+    fetchData();
+    dispatch(markFiltersApplied());
+  }
+}, [filtersChanged, selectedTab, tabName]);
+```
+
+#### **4. Filter-Aware Mock Server** (`mock-server/utils/filterAwareDataGenerator.js`)
+```javascript
+// Applies filters to generated data
+function generateFilterAwareMetric(metricID, options) {
+  const baseData = generateMetricResponse(metricID, options);
+  const filteredData = applyFiltersToData(metricID, baseData, parsedFilters);
+  return validateDatasetSize(filteredData) ? filteredData : insufficientDataResponse;
+}
+```
 
 ## Transformation Examples
 

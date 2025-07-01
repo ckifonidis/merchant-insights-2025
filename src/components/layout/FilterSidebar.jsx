@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
 import { subDays, startOfYear } from 'date-fns';
 import { shoppingInterests, greekLocations, stores, merchantInfo } from '../../data/mockData';
+import { 
+  selectUIFilters, 
+  updateUIFilters, 
+  applyFilters, 
+  resetFilters 
+} from '../../store/slices/filtersSlice.js';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) => {
+const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const uiFilters = useSelector(selectUIFilters);
 
-  // Default date range: latest month to yesterday
-  const defaultEndDate = subDays(new Date(), 1);
-  const defaultStartDate = subDays(defaultEndDate, 30);
-
-  const [startDate, setStartDate] = useState(filters.dateRange?.start || defaultStartDate);
-  const [endDate, setEndDate] = useState(filters.dateRange?.end || defaultEndDate);
+  // Local state for date pickers (using controlled dates from Redux)
+  const [startDate, setStartDate] = useState(uiFilters.dateRange?.start || subDays(new Date(), 31));
+  const [endDate, setEndDate] = useState(uiFilters.dateRange?.end || subDays(new Date(), 1));
 
   // Options for dropdowns
   const channelOptions = [
@@ -73,30 +79,48 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
     });
   });
 
+  const handleFilterChange = (filterKey, value) => {
+    const updatedFilters = { ...uiFilters, [filterKey]: value };
+    dispatch(updateUIFilters(updatedFilters));
+  };
+
+  const handleDateChange = (dateKey, date) => {
+    if (dateKey === 'start') {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
+    
+    const updatedFilters = {
+      ...uiFilters,
+      dateRange: {
+        start: dateKey === 'start' ? date : startDate,
+        end: dateKey === 'end' ? date : endDate
+      }
+    };
+    dispatch(updateUIFilters(updatedFilters));
+  };
+
   const handleApplyFilters = () => {
-    const newFilters = {
-      ...filters,
+    // Update with final date range
+    const finalFilters = {
+      ...uiFilters,
       dateRange: { start: startDate, end: endDate }
     };
-    onFiltersChange(newFilters);
+    dispatch(updateUIFilters(finalFilters));
+    dispatch(applyFilters());
+    
     if (isMobile) {
       onClose();
     }
   };
 
   const handleResetFilters = () => {
+    dispatch(resetFilters());
+    const defaultEndDate = subDays(new Date(), 1);
+    const defaultStartDate = subDays(defaultEndDate, 30);
     setStartDate(defaultStartDate);
     setEndDate(defaultEndDate);
-    onFiltersChange({
-      dateRange: { start: defaultStartDate, end: defaultEndDate },
-      channel: 'all',
-      gender: 'all',
-      ageGroups: [],
-      customerLocation: [],
-      goForMore: null,
-      shoppingInterests: [],
-      stores: []
-    });
   };
 
   const sidebarClasses = `
@@ -138,7 +162,7 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
           <div className="space-y-2">
             <DatePicker
               selected={startDate}
-              onChange={setStartDate}
+              onChange={(date) => handleDateChange('start', date)}
               selectsStart
               startDate={startDate}
               endDate={endDate}
@@ -149,7 +173,7 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
             />
             <DatePicker
               selected={endDate}
-              onChange={setEndDate}
+              onChange={(date) => handleDateChange('end', date)}
               selectsEnd
               startDate={startDate}
               endDate={endDate}
@@ -168,8 +192,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
           </label>
           <Select
             options={channelOptions}
-            value={channelOptions.find(option => option.value === filters.channel)}
-            onChange={(option) => onFiltersChange({ ...filters, channel: option.value })}
+            value={channelOptions.find(option => option.value === uiFilters.channel)}
+            onChange={(option) => handleFilterChange('channel', option.value)}
             className="text-sm"
             styles={{
               container: (provided) => ({
@@ -195,8 +219,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
             </label>
             <Select
               options={genderOptions}
-              value={genderOptions.find(option => option.value === filters.gender)}
-              onChange={(option) => onFiltersChange({ ...filters, gender: option.value })}
+              value={genderOptions.find(option => option.value === uiFilters.gender)}
+              onChange={(option) => handleFilterChange('gender', option.value)}
               className="text-sm"
               styles={{
                 container: (provided) => ({
@@ -219,11 +243,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
             <Select
               isMulti
               options={ageGroupOptions}
-              value={ageGroupOptions.filter(option => filters.ageGroups?.includes(option.value))}
-              onChange={(options) => onFiltersChange({
-                ...filters,
-                ageGroups: options ? options.map(opt => opt.value) : []
-              })}
+              value={ageGroupOptions.filter(option => uiFilters.ageGroups?.includes(option.value))}
+              onChange={(options) => handleFilterChange('ageGroups', options ? options.map(opt => opt.value) : [])}
               className="text-sm"
             />
           </div>
@@ -236,11 +257,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
             <Select
               isMulti
               options={locationOptions}
-              value={locationOptions.filter(option => filters.customerLocation?.includes(option.value))}
-              onChange={(options) => onFiltersChange({
-                ...filters,
-                customerLocation: options ? options.map(opt => opt.value) : []
-              })}
+              value={locationOptions.filter(option => uiFilters.customerLocation?.includes(option.value))}
+              onChange={(options) => handleFilterChange('customerLocation', options ? options.map(opt => opt.value) : [])}
               className="text-sm"
             />
           </div>
@@ -254,8 +272,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
             </label>
             <Select
               options={goForMoreOptions}
-              value={goForMoreOptions.find(option => option.value === filters.goForMore)}
-              onChange={(option) => onFiltersChange({ ...filters, goForMore: option?.value })}
+              value={goForMoreOptions.find(option => option.value === uiFilters.goForMore)}
+              onChange={(option) => handleFilterChange('goForMore', option?.value)}
               isClearable
               className="text-sm"
             />
@@ -270,11 +288,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
           <Select
             isMulti
             options={shoppingInterestOptions}
-            value={shoppingInterestOptions.filter(option => filters.shoppingInterests?.includes(option.value))}
-            onChange={(options) => onFiltersChange({
-              ...filters,
-              shoppingInterests: options ? options.map(opt => opt.value) : []
-            })}
+            value={shoppingInterestOptions.filter(option => uiFilters.shoppingInterests?.includes(option.value))}
+            onChange={(options) => handleFilterChange('shoppingInterests', options ? options.map(opt => opt.value) : [])}
             className="text-sm"
           />
         </div>
@@ -287,11 +302,8 @@ const FilterSidebar = ({ isOpen, onClose, filters, onFiltersChange, isMobile }) 
           <Select
             isMulti
             options={storeOptions}
-            value={storeOptions.filter(option => filters.stores?.includes(option.value))}
-            onChange={(options) => onFiltersChange({
-              ...filters,
-              stores: options ? options.map(opt => opt.value) : []
-            })}
+            value={storeOptions.filter(option => uiFilters.stores?.includes(option.value))}
+            onChange={(options) => handleFilterChange('stores', options ? options.map(opt => opt.value) : [])}
             className="text-sm"
           />
         </div>

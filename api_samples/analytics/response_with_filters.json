@@ -1,0 +1,168 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "converted_customers_by_activity",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "3792",
+                                "value2": "frequent"
+                            },
+                            {
+                                "value1": "4741",
+                                "value2": "less_frequent"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_age",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "668",
+                                "value2": "18-24"
+                            },
+                            {
+                                "value1": "7617",
+                                "value2": "41-56"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_gender",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "8285",
+                                "value2": "f"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "total_transactions",
+                "percentageValue": false,
+                "scalarValue": "14502.0",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "37.967908564335954",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "14502.0",
+                                "value2": "ΑΤΤΙΚΗ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_age",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "827",
+                                "value2": "18-24"
+                            },
+                            {
+                                "value1": "11730",
+                                "value2": "41-56"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "converted_customers_by_gender",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "12557",
+                                "value2": "f"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "total_transactions",
+                "percentageValue": false,
+                "scalarValue": "2124.8",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "41.169140625000000",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "2124.8",
+                                "value2": "ΑΤΤΙΚΗ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}

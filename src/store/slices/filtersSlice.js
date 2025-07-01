@@ -3,46 +3,107 @@ import {
   ANALYTICS_PROVIDER_IDS,
   FILTER_VALUES 
 } from '../../data/apiSchema.js';
+import { filterMappingService } from '../../services/filterMappingService.js';
+import { subDays } from 'date-fns';
 
 // Get default date range (last 30 days)
 const getDefaultDateRange = () => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 30);
+  const endDate = subDays(new Date(), 1); // Yesterday
+  const startDate = subDays(endDate, 30); // 30 days before yesterday
   
   return {
     startDate: startDate.toISOString().split('T')[0], // YYYY-MM-DD format
-    endDate: endDate.toISOString().split('T')[0]
+    endDate: endDate.toISOString().split('T')[0],
+    start: startDate, // For UI components that expect Date objects
+    end: endDate
   };
 };
 
-const initialState = {
-  // Global date range
-  dateRange: getDefaultDateRange(),
-  
-  // Merchant selection
-  merchantId: "52ba3854-a5d4-47bd-9d1a-b789ae139803", // Default merchant
-  
-  // Provider selection
-  providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
-  
-  // User context
-  userID: "BANK\\E82629", // TODO: Get from auth context
-  
-  // Global filter values
-  filterValues: [],
-  
-  // Competition comparison toggle (always true for now - data_origin filter not implemented)
-  showCompetition: true,
-  
-  // Data refresh settings
-  autoRefresh: false,
-  refreshInterval: 300000, // 5 minutes in milliseconds
-  
-  // UI state
-  isDatePickerOpen: false,
-  selectedTab: 'dashboard'
+// Load persisted filters from localStorage
+const loadPersistedFilters = () => {
+  try {
+    const stored = localStorage.getItem('merchant-insights-filters');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Ensure dates are valid
+      if (parsed.dateRange) {
+        parsed.dateRange.start = new Date(parsed.dateRange.start);
+        parsed.dateRange.end = new Date(parsed.dateRange.end);
+      }
+      return parsed;
+    }
+  } catch (error) {
+    console.warn('Failed to load persisted filters:', error);
+  }
+  return null;
 };
+
+// Save filters to localStorage
+const persistFilters = (uiFilters) => {
+  try {
+    localStorage.setItem('merchant-insights-filters', JSON.stringify(uiFilters));
+  } catch (error) {
+    console.warn('Failed to persist filters:', error);
+  }
+};
+
+// Initialize state with persisted filters
+const getInitialState = () => {
+  const defaultDateRange = getDefaultDateRange();
+  const persistedFilters = loadPersistedFilters();
+  
+  const uiFilters = persistedFilters || {
+    dateRange: defaultDateRange,
+    channel: 'all',
+    gender: 'all', 
+    ageGroups: [],
+    customerLocation: [],
+    goForMore: null,
+    shoppingInterests: [],
+    stores: []
+  };
+
+  return {
+    // Global date range (API format)
+    dateRange: {
+      startDate: uiFilters.dateRange.start?.toISOString?.()?.split('T')[0] || defaultDateRange.startDate,
+      endDate: uiFilters.dateRange.end?.toISOString?.()?.split('T')[0] || defaultDateRange.endDate,
+      start: uiFilters.dateRange.start || defaultDateRange.start,
+      end: uiFilters.dateRange.end || defaultDateRange.end
+    },
+    
+    // UI Filters (for FilterSidebar)
+    uiFilters,
+    
+    // Merchant selection
+    merchantId: "52ba3854-a5d4-47bd-9d1a-b789ae139803", // Default merchant
+    
+    // Provider selection
+    providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+    
+    // User context
+    userID: "BANK\\E82629", // TODO: Get from auth context
+    
+    // Global filter values (API format)
+    filterValues: [],
+    
+    // Competition comparison toggle
+    showCompetition: true,
+    
+    // Data refresh settings
+    autoRefresh: false,
+    refreshInterval: 300000, // 5 minutes in milliseconds
+    
+    // UI state
+    isDatePickerOpen: false,
+    selectedTab: 'dashboard',
+    
+    // Track if filters have changed and need refresh
+    filtersChanged: false
+  };
+};
+
+const initialState = getInitialState();
 
 const filtersSlice = createSlice({
   name: 'filters',
@@ -181,12 +242,71 @@ const filtersSlice = createSlice({
       });
     },
     
+    // UI Filters management
+    updateUIFilters: (state, action) => {
+      const newUIFilters = { ...state.uiFilters, ...action.payload };
+      state.uiFilters = newUIFilters;
+      
+      // Update dateRange for API compatibility
+      if (newUIFilters.dateRange) {
+        state.dateRange = {
+          startDate: newUIFilters.dateRange.start?.toISOString?.()?.split('T')[0] || state.dateRange.startDate,
+          endDate: newUIFilters.dateRange.end?.toISOString?.()?.split('T')[0] || state.dateRange.endDate,
+          start: newUIFilters.dateRange.start || state.dateRange.start,
+          end: newUIFilters.dateRange.end || state.dateRange.end
+        };
+      }
+      
+      // Convert UI filters to API format
+      state.filterValues = filterMappingService.mapUIFiltersToAPI(newUIFilters);
+      
+      // Mark filters as changed for refresh
+      state.filtersChanged = true;
+      
+      // Persist to localStorage
+      persistFilters(newUIFilters);
+      
+      console.log('🔍 UI Filters updated:', newUIFilters);
+      console.log('📊 API Filters updated:', state.filterValues);
+    },
+    
+    applyFilters: (state) => {
+      // This action is called when "Apply Filters" is clicked
+      // Convert current UI filters to API format
+      state.filterValues = filterMappingService.mapUIFiltersToAPI(state.uiFilters);
+      state.filtersChanged = true;
+      persistFilters(state.uiFilters);
+      console.log('✅ Filters applied and persisted');
+    },
+    
+    markFiltersApplied: (state) => {
+      // Called after data refresh to clear the changed flag
+      state.filtersChanged = false;
+    },
+    
     // Reset to defaults
     resetFilters: (state) => {
-      return {
-        ...initialState,
-        dateRange: getDefaultDateRange()
+      const defaultState = getInitialState();
+      const defaultUIFilters = {
+        dateRange: defaultState.dateRange,
+        channel: 'all',
+        gender: 'all',
+        ageGroups: [],
+        customerLocation: [],
+        goForMore: null,
+        shoppingInterests: [],
+        stores: []
       };
+      
+      state.uiFilters = defaultUIFilters;
+      state.dateRange = defaultState.dateRange;
+      state.filterValues = [];
+      state.filtersChanged = true;
+      
+      // Clear persistence
+      localStorage.removeItem('merchant-insights-filters');
+      
+      console.log('🔄 Filters reset to defaults');
     }
   }
 });
@@ -209,6 +329,9 @@ export const {
   setDatePickerOpen,
   setSelectedTab,
   updateFilters,
+  updateUIFilters,
+  applyFilters,
+  markFiltersApplied,
   resetFilters
 } = filtersSlice.actions;
 
@@ -222,6 +345,8 @@ export const selectShowCompetition = (state) => state.filters.showCompetition;
 export const selectAutoRefresh = (state) => state.filters.autoRefresh;
 export const selectSelectedTab = (state) => state.filters.selectedTab;
 export const selectAllFilters = (state) => state.filters;
+export const selectUIFilters = (state) => state.filters.uiFilters;
+export const selectFiltersChanged = (state) => state.filters.filtersChanged;
 
 // Computed selectors - MEMOIZED to prevent infinite loops
 export const selectApiRequestParams = createSelector(

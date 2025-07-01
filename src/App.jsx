@@ -10,8 +10,9 @@ import Revenue from './components/revenue/Revenue';
 import Demographics from './components/demographics/Demographics';
 import Competition from './components/competition/Competition';
 import FirstPage from './components/FirstPage';
-import { useFilters } from './hooks/useFilters';
 import { useResponsive } from './hooks/useResponsive';
+import { selectUIFilters, setSelectedTab } from './store/slices/filtersSlice.js';
+import { useSelector, useDispatch } from 'react-redux';
 import './i18n';
 import './styles/dashboard.css';
 
@@ -19,8 +20,15 @@ function AppContent() {
   const [showMainApp, setShowMainApp] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { filters, updateFilters, resetFilters } = useFilters();
+  const filters = useSelector(selectUIFilters);
   const { isMobile } = useResponsive();
+  const dispatch = useDispatch();
+
+  // Update Redux with active tab
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    dispatch(setSelectedTab(newTab));
+  };
 
   // Close sidebar on mobile by default
   React.useEffect(() => {
@@ -62,15 +70,13 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
       <div className="flex flex-1">
         {/* Filter Sidebar */}
         <FilterSidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          filters={filters}
-          onFiltersChange={updateFilters}
           isMobile={isMobile}
         />
 

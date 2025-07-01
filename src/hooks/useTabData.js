@@ -1,7 +1,12 @@
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTabData, selectTabData, selectTabLoading, selectTabError } from '../store/slices/analyticsSlice.js';
-import { selectApiRequestParams } from '../store/slices/filtersSlice.js';
+import { 
+  selectApiRequestParams, 
+  selectFiltersChanged, 
+  selectSelectedTab, 
+  markFiltersApplied 
+} from '../store/slices/filtersSlice.js';
 
 /**
  * Generic hook for fetching tab data
@@ -15,6 +20,8 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
   const loading = useSelector(state => selectTabLoading(state, tabName));
   const error = useSelector(state => selectTabError(state, tabName));
   const filters = useSelector(selectApiRequestParams);
+  const filtersChanged = useSelector(selectFiltersChanged);
+  const selectedTab = useSelector(selectSelectedTab);
   
   // Options
   const { 
@@ -42,6 +49,15 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Filter change detection - only refresh active tab
+  useEffect(() => {
+    if (filtersChanged && (selectedTab === tabName || selectedTab === 'dashboard')) {
+      console.log(`🔄 Filters changed, refreshing ${tabName} data...`);
+      fetchData();
+      dispatch(markFiltersApplied()); // Mark filters as applied
+    }
+  }, [filtersChanged, selectedTab, tabName, fetchData, dispatch]);
 
   // Auto-refresh logic
   useEffect(() => {

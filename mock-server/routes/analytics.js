@@ -5,6 +5,10 @@ const {
   generateResponseWithBothMerchantAndCompetition,
   hasCompetitionFilter 
 } = require('../utils/dataGenerator');
+const { 
+  generateFilterAwareMetric,
+  parseFilterValues 
+} = require('../utils/filterAwareDataGenerator');
 const { buildSuccessResponse, buildErrorResponse } = require('../utils/responseBuilder');
 
 // POST /ANALYTICS/QUERY
@@ -30,20 +34,35 @@ router.post('/QUERY', (req, res) => {
     }
 
     // Always generate both merchant and competition data (like production API)
-    console.log(`🔍 Processing ${metricIDs.length} metrics, always including both merchant and competition data`);
+    console.log(`🔍 Processing ${metricIDs.length} metrics with ${filterValues?.length || 0} filters`);
+    
+    if (filterValues && filterValues.length > 0) {
+      console.log(`🎯 Active filters:`, filterValues.map(f => `${f.filterId}=${f.value}`));
+    }
 
-    // Generate metrics data
+    // Generate metrics data with filter awareness
     let allMetrics = [];
     
     metricIDs.forEach(metricID => {
-      // Always generate both merchant and competition data
-      const bothDatasets = generateResponseWithBothMerchantAndCompetition(metricID, {
+      // Generate merchant data with filters
+      const merchantData = generateFilterAwareMetric(metricID, {
         filterValues,
         startDate,
         endDate,
-        merchantId
+        merchantId: 'ATTICA',
+        isCompetition: false
       });
-      allMetrics.push(...bothDatasets);
+      
+      // Generate competition data with same filters
+      const competitionData = generateFilterAwareMetric(metricID, {
+        filterValues,
+        startDate,
+        endDate,
+        merchantId: 'competition',
+        isCompetition: true
+      });
+      
+      allMetrics.push(merchantData, competitionData);
     });
 
     console.log(`✅ Generated ${allMetrics.length} metric responses`);

@@ -51,6 +51,9 @@ export const transformDashboardData = (apiResponse) => {
     }
   });
 
+  // Calculate avgTransaction from revenue and transactions if needed
+  transformedData.avgTransaction = calculateAvgTransaction(transformedData);
+
   console.log('✅ Dashboard data transformed:', transformedData);
   return transformedData;
 };
@@ -166,6 +169,61 @@ export const calculatePeriodChange = (currentValue, previousValue) => {
   
   const change = ((currentValue - previousValue) / previousValue) * 100;
   return Math.round(change * 10) / 10; // Round to 1 decimal place
+};
+
+// Calculate avgTransaction from revenue and transactions
+const calculateAvgTransaction = (transformedData) => {
+  const { totalRevenue, totalTransactions, avgTransaction } = transformedData;
+  
+  // If we already have avgTransaction data from API and it's valid, use it
+  if (avgTransaction?.merchant?.value > 0) {
+    return avgTransaction;
+  }
+  
+  // Calculate avgTransaction from revenue and transactions
+  const result = {
+    merchant: null,
+    competitor: null
+  };
+  
+  // Calculate for merchant
+  if (totalRevenue?.merchant && totalTransactions?.merchant) {
+    const revenue = totalRevenue.merchant.value || 0;
+    const transactions = totalTransactions.merchant.value || 0;
+    
+    result.merchant = {
+      value: transactions > 0 ? revenue / transactions : 0,
+      change: null,
+      valueType: 'currency'
+    };
+    
+    console.log(`📊 Calculated merchant avgTransaction: ${result.merchant.value} (${revenue}/${transactions})`);
+  }
+  
+  // Calculate for competitor
+  if (totalRevenue?.competitor && totalTransactions?.competitor) {
+    const revenue = totalRevenue.competitor.value || 0;
+    const transactions = totalTransactions.competitor.value || 0;
+    
+    result.competitor = {
+      value: transactions > 0 ? revenue / transactions : 0,
+      change: null,
+      valueType: 'currency'
+    };
+    
+    console.log(`📊 Calculated competitor avgTransaction: ${result.competitor.value} (${revenue}/${transactions})`);
+  }
+  
+  // Ensure we always have merchant data structure
+  if (!result.merchant) {
+    result.merchant = {
+      value: 0,
+      change: null,
+      valueType: 'currency'
+    };
+  }
+  
+  return result;
 };
 
 // Validate dashboard data structure
