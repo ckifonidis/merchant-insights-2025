@@ -345,6 +345,7 @@ FilterSidebar → Redux Store → useTabData Hook → Analytics Service → API/
 - **archive/** - Historical planning documents and implemented fixes
 
 ### Other Reference Files:
+- **METRICS_API_INTEGRATION.md** - Complete API integration analysis by tab
 - **mock_server_setup.md** - Redirect to mock-server documentation
 - **migration_plan.md** - Future migration considerations  
 - **request_responses.txt** - API testing data
