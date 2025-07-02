@@ -109,12 +109,20 @@ mock-server/
 
 ## 🔧 Development
 
-### **Key Files**
-- `CLAUDE.md` - Comprehensive project documentation
-- `ARCHITECTURE.md` - Technical implementation details
-- `API_PLANNING.md` - API integration specifications
+### **Documentation Structure**
+- **`CLAUDE.md`** - 📋 **Main project guide** with comprehensive documentation
+  - Project overview and implementation status
+  - Complete metric mapping with API integration status
+  - Competition tab technical specifications  
+  - Original UI requirements reference
+  - Architecture patterns and guidelines
+- **`mock-server/CLAUDE.md`** - Mock server setup and documentation
+- **`archive/`** - Historical documentation (planning docs, implemented fixes)
+
+### **Key Technical Files**
 - `src/store/slices/filtersSlice.js` - Filter state management
 - `src/services/filterMappingService.js` - Filter transformations
+- `src/hooks/useTabData.js` - Data fetching hooks
 - `mock-server/utils/filterAwareDataGenerator.js` - Mock data with filters
 
 ### **Next Steps**

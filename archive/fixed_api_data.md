@@ -17,7 +17,7 @@ The TimeSeriesChart components were hardcoded to use mock data from `generateTim
 5. ❌ **Component Layer**: TimeSeriesChart components were ignoring API data
 
 ### API Response Structure
-The mock server returns data in this format:
+The development server returns data in this format:
 ```json
 {
   "payload": {
@@ -174,7 +174,7 @@ This matches the existing mock data structure, ensuring seamless integration.
 ## Verification Process
 
 ### API Call Monitoring
-Mock server logs confirmed successful API calls:
+Development server logs confirmed successful API calls:
 ```
 🔍 2025-06-26T13:02:59.334Z - POST /ANALYTICS/QUERY from http://127.0.0.1:5174
 📊 Analytics query received: {
@@ -212,4 +212,7 @@ Mock server logs confirmed successful API calls:
 ✅ **Backward compatibility** maintained with mock data fallback  
 ✅ **No breaking changes** to existing functionality  
 
-The Dashboard tab now correctly shows the values returned by the ANALYTICS/QUERY API call instead of mock data, while maintaining full compatibility with the existing codebase architecture.
+The Dashboard tab now correctly shows the values returned by the ANALYTICS/QUERY API call instead of hardcoded data, while maintaining full compatibility with the existing codebase architecture.
+
+## Development Server
+For complete mock server documentation including setup, architecture, and testing procedures, see **[mock-server/CLAUDE.md](./mock-server/CLAUDE.md)**.

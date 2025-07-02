@@ -9,17 +9,17 @@
 
 ### **Data Flow (✅ IMPLEMENTED)**
 ```
-FilterSidebar → Redux Store → useTabData Hook → Analytics Service → Mock Server → Charts
-     ↓              ↓              ↓                    ↓               ↓          ↓
+FilterSidebar → Redux Store → useTabData Hook → Analytics Service → API/Dev Server → Charts
+     ↓              ↓              ↓                    ↓                  ↓            ↓
   Apply Filters → Store State → Pass Filters → Transform Filters → Filter Data → Display
 ```
 
 **Filter Integration Flow:**
 ```
-UI Filters → Filter Mapping Service → API Filters → Mock Server → Filtered Data → Charts
-     ↓                ↓                      ↓             ↓              ↓           ↓
-{gender:'female'} → [{filterId:'gender',   → Mock Data   → Only Female  → Updated
-                    value:'["f"]'}]        Generation     Data Returned   Display
+UI Filters → Filter Mapping Service → API Filters → Dev Server → Filtered Data → Charts
+     ↓                ↓                      ↓             ↓             ↓           ↓
+{gender:'female'} → [{filterId:'gender',   → Data        → Only Female → Updated
+                    value:'["f"]'}]        Generation     Data Returned  Display
 ```
 
 ### **Transformation Strategy: Option C (Service Layer)**
