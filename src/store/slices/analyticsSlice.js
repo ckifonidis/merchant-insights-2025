@@ -97,11 +97,14 @@ const analyticsSlice = createSlice({
       // Fetch tab data - fulfilled
       .addCase(fetchTabData.fulfilled, (state, action) => {
         const { tabName, data } = action.payload;
+        console.log(`🗃️ Redux store - Storing ${tabName} data:`, data);
+        console.log(`🗃️ Redux store - Data type: ${typeof data}, keys:`, Object.keys(data || {}));
         if (state[tabName]) {
           state[tabName].loading = false;
           state[tabName].data = data;
           state[tabName].error = null;
           state[tabName].lastUpdated = new Date().toISOString();
+          console.log(`🗃️ Redux store - ${tabName} state updated:`, state[tabName].data);
         }
       })
       

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTabData, selectTabData, selectTabLoading, selectTabError } from '../store/slices/analyticsSlice.js';
 import { 
@@ -31,37 +31,60 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
     customFilters = null
   } = options;
   
-  // Use custom filters if provided, otherwise use Redux filters
-  const effectiveFilters = customFilters || filters;
+  // Dependencies are now stable, no debug logging needed
 
-  // Fetch data function
-  const fetchData = useCallback(() => {
+  // Centralized fetch logic for manual refresh
+  const performFetch = useCallback(() => {
     if (!metricIDs || metricIDs.length === 0) {
       console.warn(`⚠️ No metricIDs provided for ${tabName} tab`);
       return;
     }
 
     console.log(`🔄 Fetching ${tabName} data...`);
+    const effectiveFilters = customFilters || filters;
     dispatch(fetchTabData({ 
       tabName, 
       metricIDs, 
       filters: effectiveFilters 
     }));
-  }, [dispatch, tabName, metricIDs, effectiveFilters, ...dependencies]);
+  }, [dispatch, tabName, metricIDs, filters, customFilters, ...dependencies]);
 
   // Initial fetch and dependency-based refetch
+  // Use stable dependencies instead of fetchData to prevent Strict Mode duplicates
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!metricIDs || metricIDs.length === 0) {
+      console.warn(`⚠️ No metricIDs provided for ${tabName} tab`);
+      return;
+    }
+
+    console.log(`🔄 Fetching ${tabName} data...`);
+    const effectiveFilters = customFilters || filters;
+    dispatch(fetchTabData({ 
+      tabName, 
+      metricIDs, 
+      filters: effectiveFilters 
+    }));
+  }, [dispatch, tabName, metricIDs, filters, customFilters, ...dependencies]);
 
   // Filter change detection - only refresh active tab
   useEffect(() => {
     if (filtersChanged && (selectedTab === tabName || selectedTab === 'dashboard')) {
       console.log(`🔄 Filters changed, refreshing ${tabName} data...`);
-      fetchData();
+      
+      if (!metricIDs || metricIDs.length === 0) {
+        console.warn(`⚠️ No metricIDs provided for ${tabName} tab`);
+        return;
+      }
+
+      const effectiveFilters = customFilters || filters;
+      dispatch(fetchTabData({ 
+        tabName, 
+        metricIDs, 
+        filters: effectiveFilters 
+      }));
       dispatch(markFiltersApplied()); // Mark filters as applied
     }
-  }, [filtersChanged, selectedTab, tabName, fetchData, dispatch]);
+  }, [filtersChanged, selectedTab, tabName, dispatch, metricIDs, filters, customFilters, ...dependencies]);
 
   // Auto-refresh logic
   useEffect(() => {
@@ -69,17 +92,28 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
 
     const interval = setInterval(() => {
       console.log(`🔄 Auto-refreshing ${tabName} data...`);
-      fetchData();
+      
+      if (!metricIDs || metricIDs.length === 0) {
+        console.warn(`⚠️ No metricIDs provided for ${tabName} tab`);
+        return;
+      }
+
+      const effectiveFilters = customFilters || filters;
+      dispatch(fetchTabData({ 
+        tabName, 
+        metricIDs, 
+        filters: effectiveFilters 
+      }));
     }, refreshInterval);
 
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval, fetchData]);
+  }, [autoRefresh, refreshInterval, dispatch, tabName, metricIDs, filters, customFilters, ...dependencies]);
 
   // Manual refresh function
   const refresh = useCallback(() => {
     console.log(`🔄 Manually refreshing ${tabName} data...`);
-    fetchData();
-  }, [fetchData]);
+    performFetch();
+  }, [performFetch]);
 
   return {
     data: tabData?.data || {},
@@ -107,14 +141,15 @@ export const useDashboardData = (options = {}) => {
   return useTabData('dashboard', DASHBOARD_METRIC_IDS, options);
 };
 
-const REVENUE_METRIC_IDS = [
+// Static array with Object.freeze to ensure immutability
+const REVENUE_METRIC_IDS = Object.freeze([
   'total_revenue',
   'rewarded_amount',
   'redeemed_amount', 
   'revenue_per_day',
   'converted_customers_by_interest', // Shopping interests breakdown
   'revenue_by_channel' // Channel breakdown metric
-];
+]);
 
 const DEMOGRAPHICS_METRIC_IDS = [
   'converted_customers_by_age',
@@ -134,27 +169,8 @@ const COMPETITION_METRIC_IDS = [
  * Hook for Revenue tab data
  */
 export const useRevenueData = (options = {}) => {
-  const baseFilters = useSelector(selectApiRequestParams);
-  
-  // Add revenue-specific filters for breakdown data
-  const revenueFilters = useMemo(() => ({
-    ...baseFilters,
-    filterValues: [
-      ...(baseFilters.filterValues || []),
-      {
-        providerId: baseFilters.providerId,
-        filterId: 'interest_type',
-        value: 'revenue'
-      }
-    ]
-  }), [baseFilters]);
-  
-  const revenueOptions = {
-    ...options,
-    customFilters: revenueFilters
-  };
-  
-  return useTabData('revenue', REVENUE_METRIC_IDS, revenueOptions);
+  // Use base filters directly - no need for revenue-specific filters yet
+  return useTabData('revenue', REVENUE_METRIC_IDS, options);
 };
 
 /**

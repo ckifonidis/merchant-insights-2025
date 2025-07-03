@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useResponsive } from '../../../hooks/useResponsive';
 
 const UniversalBreakdownChart = ({ 
@@ -24,21 +24,27 @@ const UniversalBreakdownChart = ({
     { value: 'table', label: t('chartOptions.table') }
   ];
 
-  // Process data for pie charts
-  const merchantPieData = data.map(item => ({
+  // Process data for pie charts with defensive programming
+  const merchantPieData = data.filter(item => {
+    const merchantValue = typeof item.merchant === 'number' && !isNaN(item.merchant) ? item.merchant : 0;
+    return merchantValue > 0; // Only include items with valid positive values
+  }).map(item => ({
     name: item.category,
-    value: item.merchant,
-    percentage: item.merchant,
-    absoluteValue: item.merchantAbsolute,
-    color: colors[item.category] || colors[item.key]
+    value: typeof item.merchant === 'number' && !isNaN(item.merchant) ? item.merchant : 0,
+    percentage: typeof item.merchant === 'number' && !isNaN(item.merchant) ? item.merchant : 0,
+    absoluteValue: typeof item.merchantAbsolute === 'number' && !isNaN(item.merchantAbsolute) ? item.merchantAbsolute : null,
+    color: colors[item.category] || colors[item.key] || '#999999'
   }));
 
-  const competitorPieData = data.map(item => ({
+  const competitorPieData = data.filter(item => {
+    const competitorValue = typeof item.competitor === 'number' && !isNaN(item.competitor) ? item.competitor : 0;
+    return competitorValue > 0; // Only include items with valid positive values
+  }).map(item => ({
     name: item.category,
-    value: item.competitor,
-    percentage: item.competitor,
-    absoluteValue: item.competitorAbsolute,
-    color: colors[item.category] || colors[item.key]
+    value: typeof item.competitor === 'number' && !isNaN(item.competitor) ? item.competitor : 0,
+    percentage: typeof item.competitor === 'number' && !isNaN(item.competitor) ? item.competitor : 0,
+    absoluteValue: typeof item.competitorAbsolute === 'number' && !isNaN(item.competitorAbsolute) ? item.competitorAbsolute : null,
+    color: colors[item.category] || colors[item.key] || '#999999'
   }));
 
   // Pie chart tooltip

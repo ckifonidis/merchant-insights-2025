@@ -31,19 +31,21 @@ const SHOPPING_INTEREST_LABELS = {
  */
 export const transformRevenueByInterests = (apiResponse) => {
   console.log('🔄 Transforming revenue by interests data:', apiResponse);
-  console.log('🔍 API Response structure:', {
-    hasPayload: !!apiResponse?.payload,
-    hasMetrics: !!apiResponse?.payload?.metrics,
-    metricsLength: apiResponse?.payload?.metrics?.length,
-    metrics: apiResponse?.payload?.metrics
-  });
   
-  if (!apiResponse?.payload?.metrics || apiResponse.payload.metrics.length === 0) {
-    console.warn('⚠️ No metrics data in revenue interests response');
+  // Handle both full API response and Redux store format
+  let metrics;
+  if (apiResponse?.payload?.metrics) {
+    // Full API response format
+    metrics = apiResponse.payload.metrics;
+    console.log('🔍 Using full API response format');
+  } else if (Array.isArray(apiResponse)) {
+    // Redux store format (array of metrics)
+    metrics = apiResponse;
+    console.log('🔍 Using Redux store format (array)');
+  } else {
+    console.warn('⚠️ No metrics data in revenue interests response', apiResponse);
     return [];
   }
-
-  const metrics = apiResponse.payload.metrics;
   
   // Find merchant and competition data
   const interestMetrics = metrics.filter(m => m.metricID === 'converted_customers_by_interest');
@@ -106,15 +108,23 @@ export const transformRevenueByInterests = (apiResponse) => {
 export const transformRevenueByChannel = (apiResponse) => {
   console.log('🔄 Transforming revenue by channel data:', apiResponse);
   
-  if (!apiResponse?.payload?.metrics || apiResponse.payload.metrics.length === 0) {
-    console.warn('⚠️ No metrics data in revenue channel response');
+  // Handle both full API response and Redux store format
+  let metrics;
+  if (apiResponse?.payload?.metrics) {
+    // Full API response format
+    metrics = apiResponse.payload.metrics;
+    console.log('🔍 Using full API response format');
+  } else if (Array.isArray(apiResponse)) {
+    // Redux store format (array of metrics)
+    metrics = apiResponse;
+    console.log('🔍 Using Redux store format (array)');
+  } else {
+    console.warn('⚠️ No metrics data in revenue channel response', apiResponse);
     return {
-      merchant: { physical: 0, ecommerce: 0 },
-      competitor: { physical: 0, ecommerce: 0 }
+      merchant: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 },
+      competitor: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 }
     };
   }
-
-  const metrics = apiResponse.payload.metrics;
   console.log('🔍 All metrics received:', metrics.map(m => ({ metricID: m.metricID, merchantId: m.merchantId })));
   
   // Find revenue_by_channel metrics specifically

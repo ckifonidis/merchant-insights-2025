@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff } from '../../utils/configHelpers.jsx';
 import { UniversalMetricCard, UniversalBarChart, UniversalBreakdownChart, TimeSeriesChart } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
@@ -12,22 +13,45 @@ const Revenue = ({ filters }) => {
   // Get revenue data from API
   const { data: revenueApiData, loading, error } = useRevenueData();
   
-  // Transform API data for revenue by interests and channel
-  const revenueByInterests = revenueApiData ? 
-    transformRevenueData(revenueApiData, 'interests') :
-    [];
+  // Create content-based memoization key
+  const metricsKey = useMemo(() => {
+    const metrics = revenueApiData?.payload?.metrics;
+    if (!metrics) return 'empty';
+    // Create a stable key based on actual content, not object references
+    return `${metrics.length}-${metrics.map(m => m.metricID).sort().join('-')}`;
+  }, [revenueApiData?.payload?.metrics]);
+  
+  const revenueByInterests = useMemo(() => {
+    console.log('🔄 Memoizing interests transformation (key-based)');
+    const metrics = revenueApiData?.payload?.metrics;
+    if (!metrics || metrics.length === 0) return [];
     
-  const revenueByChannelData = revenueApiData ? 
-    transformRevenueData(revenueApiData, 'channel') :
-    { merchant: { physical: 0, ecommerce: 0 }, competitor: { physical: 0, ecommerce: 0 } };
+    // Create stable data structure without timing properties
+    const stableApiData = { payload: { metrics } };
+    return transformRevenueData(stableApiData, 'interests');
+  }, [metricsKey]); // ✅ Stable key - only changes when actual content changes
+  
+  const revenueByChannelData = useMemo(() => {
+    console.log('🔄 Memoizing channel transformation (key-based)');
+    const metrics = revenueApiData?.payload?.metrics;
+    if (!metrics || metrics.length === 0) {
+      return { merchant: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 }, 
+               competitor: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 } };
+    }
+    
+    // Create stable data structure without timing properties
+    const stableApiData = { payload: { metrics } };
+    return transformRevenueData(stableApiData, 'channel');
+  }, [metricsKey]); // ✅ Stable key
   
   // Debug logging
   console.log('🔍 Revenue Debug Info:');
-  console.log('- revenueApiData:', revenueApiData);
+  console.log('- metricsKey:', metricsKey);
+  console.log('- metrics length:', revenueApiData?.payload?.metrics?.length);
   console.log('- loading:', loading);
   console.log('- error:', error);
-  console.log('- revenueByInterests:', revenueByInterests);
-  console.log('- revenueByChannelData:', revenueByChannelData);
+  console.log('- revenueByInterests length:', revenueByInterests?.length);
+  console.log('- revenueByChannelData keys:', Object.keys(revenueByChannelData || {}));
 
 
 

@@ -58,9 +58,11 @@ class AnalyticsService {
 
     // Call the API
     const rawResponse = await this.queryAnalytics(request);
+    console.log(`📥 Raw API response for ${tabName}:`, rawResponse);
 
     // Transform the response
     const transformedData = transformTabData(tabName, rawResponse);
+    console.log(`🔄 Transformed data for ${tabName}:`, transformedData);
 
     return transformedData;
   }
