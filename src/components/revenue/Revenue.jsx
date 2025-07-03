@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff } from '../../utils/configHelpers.jsx';
 import { UniversalMetricCard, UniversalBarChart, UniversalBreakdownChart, TimeSeriesChart } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
-import { revenueByChannel } from '../../data/mockData';
 import { useRevenueData } from '../../hooks/useTabData.js';
 import { transformRevenueData } from '../../services/transformations/revenueTransform.js';
 import CampaignButton from '../ui/CampaignButton';
@@ -13,10 +12,14 @@ const Revenue = ({ filters }) => {
   // Get revenue data from API
   const { data: revenueApiData, loading, error } = useRevenueData();
   
-  // Transform API data for revenue by interests
+  // Transform API data for revenue by interests and channel
   const revenueByInterests = revenueApiData ? 
     transformRevenueData(revenueApiData, 'interests') :
     [];
+    
+  const revenueByChannelData = revenueApiData ? 
+    transformRevenueData(revenueApiData, 'channel') :
+    { merchant: { physical: 0, ecommerce: 0 }, competitor: { physical: 0, ecommerce: 0 } };
   
   // Debug logging
   console.log('🔍 Revenue Debug Info:');
@@ -24,6 +27,7 @@ const Revenue = ({ filters }) => {
   console.log('- loading:', loading);
   console.log('- error:', error);
   console.log('- revenueByInterests:', revenueByInterests);
+  console.log('- revenueByChannelData:', revenueByChannelData);
 
 
 
@@ -178,30 +182,46 @@ const Revenue = ({ filters }) => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {t('revenue.byChannel')}
             </h3>
-            <UniversalBreakdownChart
-              data={[
-                {
-                  category: 'Physical Store',
-                  merchant: revenueByChannel.merchant.physical,
-                  competitor: revenueByChannel.competitor.physical
-                },
-                {
-                  category: 'E-commerce',
-                  merchant: revenueByChannel.merchant.ecommerce,
-                  competitor: revenueByChannel.competitor.ecommerce
-                }
-              ]}
-              colors={{
-                'Physical Store': '#007B85',
-                'E-commerce': '#7BB3C0'
-              }}
-              formatValue={(value) => new Intl.NumberFormat('el-GR', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(Math.round((value / 100) * 2345678))}
-            />
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-gray-500">Loading revenue data...</div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-red-500">Error loading data: {error}</div>
+              </div>
+            ) : (
+              <UniversalBreakdownChart
+                data={[
+                  {
+                    category: 'Physical Store',
+                    merchant: revenueByChannelData.merchant.physical,
+                    competitor: revenueByChannelData.competitor.physical,
+                    merchantAbsolute: revenueByChannelData.merchant.physicalAbsolute,
+                    competitorAbsolute: revenueByChannelData.competitor.physicalAbsolute
+                  },
+                  {
+                    category: 'E-commerce',
+                    merchant: revenueByChannelData.merchant.ecommerce,
+                    competitor: revenueByChannelData.competitor.ecommerce,
+                    merchantAbsolute: revenueByChannelData.merchant.ecommerceAbsolute,
+                    competitorAbsolute: revenueByChannelData.competitor.ecommerceAbsolute
+                  }
+                ]}
+                colors={{
+                  'Physical Store': '#007B85',
+                  'E-commerce': '#7BB3C0'
+                }}
+                formatValue={(value) => `${value.toFixed(1)}%`}
+                formatTooltipValue={(absoluteValue) => new Intl.NumberFormat('el-GR', {
+                  style: 'currency',
+                  currency: 'EUR',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(absoluteValue)}
+                showAbsoluteValues={true}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -10,7 +10,8 @@ const UniversalBreakdownChart = ({
   formatValue = (value) => `${value}%`,
   showAbsoluteValues = false,
   totalValue = null,
-  note = null 
+  note = null,
+  formatTooltipValue = null
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('stacked');
@@ -28,6 +29,7 @@ const UniversalBreakdownChart = ({
     name: item.category,
     value: item.merchant,
     percentage: item.merchant,
+    absoluteValue: item.merchantAbsolute,
     color: colors[item.category] || colors[item.key]
   }));
 
@@ -35,6 +37,7 @@ const UniversalBreakdownChart = ({
     name: item.category,
     value: item.competitor,
     percentage: item.competitor,
+    absoluteValue: item.competitorAbsolute,
     color: colors[item.category] || colors[item.key]
   }));
 
@@ -42,9 +45,18 @@ const UniversalBreakdownChart = ({
   const PieTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      console.log('🔍 Pie tooltip data:', { data, formatTooltipValue, absoluteValue: data.absoluteValue });
+      
+      let displayValue;
+      if (formatTooltipValue && data.absoluteValue !== undefined && data.absoluteValue !== null) {
+        displayValue = formatTooltipValue(data.absoluteValue);
+      } else {
+        displayValue = `${data.percentage.toFixed(1)}%`;
+      }
+      
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-black">{data.name}: {data.percentage}%</p>
+          <p className="font-medium text-black">{data.name}: {displayValue}</p>
         </div>
       );
     }
@@ -75,7 +87,7 @@ const UniversalBreakdownChart = ({
         fontSize="12"
         fontWeight="bold"
       >
-        {`${(percent * 100).toFixed(0)}%`}
+        {`${(percent * 100).toFixed(1)}%`}
       </text>
     );
   };
@@ -142,8 +154,10 @@ const UniversalBreakdownChart = ({
             <div className="flex h-full">
               {data.map((item, index) => {
                 const color = colors[item.category] || colors[item.key];
-                const absoluteValue = showAbsoluteValues && totalValue ? 
-                  Math.round(item.merchant * totalValue / 100) : null;
+                const absoluteValue = item.merchantAbsolute;
+                const formattedAbsolute = formatTooltipValue && absoluteValue ? 
+                  formatTooltipValue(absoluteValue) : 
+                  (absoluteValue ? absoluteValue.toLocaleString() : '');
                 
                 return (
                   <div
@@ -153,7 +167,7 @@ const UniversalBreakdownChart = ({
                       width: `${item.merchant}%`,
                       backgroundColor: color
                     }}
-                    title={`${item.category}: ${item.merchant}%${absoluteValue ? ` (${absoluteValue.toLocaleString()})` : ''}`}
+                    title={`${item.category}: ${item.merchant.toFixed(1)}%${formattedAbsolute ? ` (${formattedAbsolute})` : ''}`}
                   />
                 );
               })}
@@ -173,8 +187,10 @@ const UniversalBreakdownChart = ({
           <div className="flex justify-center space-x-6 flex-wrap">
             {data.map((item, index) => {
               const color = colors[item.category] || colors[item.key];
-              const absoluteValue = showAbsoluteValues && totalValue ? 
-                Math.round(item.merchant * totalValue / 100) : null;
+              const absoluteValue = item.merchantAbsolute;
+              const formattedAbsolute = formatTooltipValue && absoluteValue ? 
+                formatTooltipValue(absoluteValue) : 
+                (absoluteValue ? absoluteValue.toLocaleString() : '');
               
               return (
                 <div key={index} className="flex items-center">
@@ -183,7 +199,7 @@ const UniversalBreakdownChart = ({
                     style={{ backgroundColor: color }}
                   />
                   <span className="text-sm text-gray-700">
-                    {item.category} ({item.merchant}%{absoluteValue ? ` - ${absoluteValue.toLocaleString()}` : ''})
+                    {item.category} ({item.merchant.toFixed(1)}%{formattedAbsolute ? ` - ${formattedAbsolute}` : ''})
                   </span>
                 </div>
               );
@@ -198,6 +214,10 @@ const UniversalBreakdownChart = ({
             <div className="flex h-full">
               {data.map((item, index) => {
                 const color = colors[item.category] || colors[item.key];
+                const absoluteValue = item.competitorAbsolute;
+                const formattedAbsolute = formatTooltipValue && absoluteValue ? 
+                  formatTooltipValue(absoluteValue) : 
+                  (absoluteValue ? absoluteValue.toLocaleString() : '');
                 
                 return (
                   <div
@@ -207,6 +227,7 @@ const UniversalBreakdownChart = ({
                       width: `${item.competitor}%`,
                       backgroundColor: color
                     }}
+                    title={`${item.category}: ${item.competitor.toFixed(1)}%${formattedAbsolute ? ` (${formattedAbsolute})` : ''}`}
                   />
                 );
               })}
@@ -217,6 +238,10 @@ const UniversalBreakdownChart = ({
           <div className="flex justify-center space-x-6 flex-wrap">
             {data.map((item, index) => {
               const color = colors[item.category] || colors[item.key];
+              const absoluteValue = item.competitorAbsolute;
+              const formattedAbsolute = formatTooltipValue && absoluteValue ? 
+                formatTooltipValue(absoluteValue) : 
+                (absoluteValue ? absoluteValue.toLocaleString() : '');
               
               return (
                 <div key={index} className="flex items-center">
@@ -225,7 +250,7 @@ const UniversalBreakdownChart = ({
                     style={{ backgroundColor: color }}
                   />
                   <span className="text-sm text-gray-700">
-                    {item.category} ({item.competitor}%)
+                    {item.category} ({item.competitor.toFixed(1)}%{formattedAbsolute ? ` - ${formattedAbsolute}` : ''})
                   </span>
                 </div>
               );

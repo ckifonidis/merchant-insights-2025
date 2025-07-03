@@ -38,6 +38,9 @@ export const METRIC_IDS = {
   TRANSACTIONS_PER_DAY: 'transactions_per_day',
   CUSTOMERS_PER_DAY: 'customers_per_day',
   
+  // Revenue Breakdown Metrics
+  REVENUE_BY_CHANNEL: 'revenue_by_channel',
+  
   // Geographic Metrics
   TRANSACTIONS_BY_GEO: 'transactions_by_geo'
 };

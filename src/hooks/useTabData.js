@@ -112,7 +112,8 @@ const REVENUE_METRIC_IDS = [
   'rewarded_amount',
   'redeemed_amount', 
   'revenue_per_day',
-  'converted_customers_by_interest' // Add breakdown metric
+  'converted_customers_by_interest', // Shopping interests breakdown
+  'revenue_by_channel' // Channel breakdown metric
 ];
 
 const DEMOGRAPHICS_METRIC_IDS = [

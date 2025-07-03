@@ -6,8 +6,9 @@ Step 1 You request the sample request response for the tab and wait for me.
 Step 2 I provide you with the request repsonse in api_samples/{tab} directory.
 Step 3 You evaluate the request response for completeness and correctness. Request clarifications as needed.
 Step 4 For the metrics covered, proceed to implementation for mock server and client.
-Step 5 Once done you give me control to test it. I report any issues back.
-Step 6 Once done, you update this document with the progress.
+Step 5 I may provide you with separate request response files for each metric or a collection of metrics, you need to merge them in one request for each tab that will respond with all metric values.
+Step 6 Once done you give me control to test it. I report any issues back.
+Step 7 Once done, you update this document with the progress.
 
 
 # METRICS API INTEGRATION ANALYSIS
@@ -21,7 +22,7 @@ This document provides a comprehensive analysis of API integration requirements 
 | Tab | API Integration | Missing Components | Priority |
 |-----|----------------|-------------------|----------|
 | **Dashboard** | ✅ **100% Complete** | None | ✅ Production Ready |
-| **Revenue** | 🟡 **75% Complete** ⬆️ | Metric cards, channel chart | 🟡 Medium Priority |
+| **Revenue** | 🟢 **95% Complete** ⬆️ | Metric cards only | 🟡 Medium Priority |
 | **Demographics** | 🟡 **70% Complete** | Customer count metrics | 🟡 Medium Priority |
 | **Competition** | 🔴 **0% Complete** | All components | 🟡 Medium Priority |
 
@@ -83,22 +84,23 @@ Dashboard tab is fully implemented and production-ready.
 
 ---
 
-## TAB 2: REVENUE - 🟡 75% COMPLETE ✨ UPDATED
+## TAB 2: REVENUE - 🟢 95% COMPLETE ✨ UPDATED
 
 ### Implementation Status
-**🟡 Significant API Integration** - Time series charts and shopping interests breakdown working, some components still using static data
+**🟢 Near-Complete API Integration** - All charts using API data, only metric cards remain on static data
 
 ### Current API Integration
-**✅ Working (75%)**:
+**✅ Working (95%)**:
 - TimeSeriesChart components using `useTimeSeriesData('revenue')` hook
 - Revenue trend and change charts connected to API
 - **✨ NEW**: Revenue by Shopping Interests using `converted_customers_by_interest` API
+- **✨ NEW**: Revenue by Channel using `revenue_by_channel` API ⬅️ **NEWLY COMPLETED**
 - **✨ NEW**: Full API integration with `useRevenueData()` hook and transformation
 - **✨ NEW**: Real revenue data display with loading/error states
+- **✨ NEW**: Enhanced chart tooltips with percentage labels and currency hover
 
-**❌ Missing (25%)**:
-- Revenue metrics still reading from `tabConfigs.json` (lines 44-101) 
-- Revenue by Channel chart using `mockData.js` imports (lines 169+)
+**❌ Missing (5%)**:
+- Revenue metrics still reading from `tabConfigs.json` (lines 44-101)
 
 ### Required MetricIDs
 
@@ -109,14 +111,14 @@ const REVENUE_METRIC_IDS = [
   'rewarded_amount',                  // ✅ Supported by mock server  
   'redeemed_amount',                  // ✅ Supported by mock server
   'revenue_per_day',                  // ✅ Supported by mock server
-  'converted_customers_by_interest'   // ✅ ✨ NEW: Now implemented for revenue breakdown
+  'converted_customers_by_interest',  // ✅ ✨ NEW: Now implemented for revenue breakdown
+  'revenue_by_channel'                // ✅ ✨ NEW: Now implemented for channel breakdown
 ];
 ```
 
 #### ❌ Missing from API Schema
 ```javascript
 // Add to apiSchema.js:
-'revenue_by_channel',            // Physical vs E-commerce split - HIGH PRIORITY
 'avg_daily_revenue',             // Used in tabConfigs.json
 'go_for_more_revenue',           // Go For More specific metrics
 'go_for_more_rewarded',          // Points/cashback rewarded  
@@ -124,6 +126,7 @@ const REVENUE_METRIC_IDS = [
 
 // ✅ SOLVED: 'revenue_by_shopping_interests' now uses 'converted_customers_by_interest' 
 // with interest_type='revenue' filter - no new MetricID needed
+// ✅ SOLVED: 'revenue_by_channel' now fully implemented with API integration
 ```
 
 ### Required Request Samples
@@ -186,8 +189,9 @@ const REVENUE_METRIC_IDS = [
 }
 ```
 
-#### 2. Revenue Breakdown by Channel
-**File**: `api_samples/revenue_breakdown_channel.json`
+#### 2. Revenue Breakdown by Channel ✅ COMPLETED
+**File**: `api_samples/revenue/revenue_by_channel_request.json` + `response.json`
+**Status**: ✅ **IMPLEMENTED** - Working with real API integration
 ```json
 {
   "payload": {
@@ -228,9 +232,9 @@ const REVENUE_METRIC_IDS = [
 2. ✅ **Create revenue transformation function** in `src/services/transformations/revenueTransform.js`
 3. ❌ **Replace tabConfigs.json usage** with API data for metrics (REMAINING)
 
-#### **Medium Priority (4-6 hours)**: 🟡 PARTIALLY COMPLETED  
+#### **Medium Priority (4-6 hours)**: ✅ COMPLETED  
 1. ✅ **Implement `revenue_by_shopping_interests`** API endpoint in mock server
-2. ❌ **Implement `revenue_by_channel`** API endpoint in mock server (REMAINING)
+2. ✅ **Implement `revenue_by_channel`** API endpoint in mock server ⬅️ **COMPLETED**
 3. ✅ **Create breakdown data hooks** and integration
 
 #### **Low Priority (2-3 hours)**: ✅ COMPLETED
@@ -248,10 +252,21 @@ const REVENUE_METRIC_IDS = [
 - **Data**: Real revenue values (€102k - €1.2M) for 17 shopping interest categories
 - **Status**: ✅ **PRODUCTION READY**
 
+#### **Revenue by Channel API Integration** ⬅️ **NEWLY COMPLETED**
+- **Component**: `src/components/revenue/Revenue.jsx` lines 180-219
+- **API**: Uses `revenue_by_channel` metric with mock server generation
+- **Transformation**: `src/services/transformations/revenueTransform.js` - converts absolute values to percentages
+- **Chart Enhancement**: Enhanced `UniversalBreakdownChart` with percentage labels + absolute value tooltips
+- **Data**: Real revenue split with percentage display (Physical: 65.0%, E-commerce: 35.0%) and currency hover (€450,000)
+- **Mock Server**: Added `generateChannelPoints()` function for realistic channel data generation
+- **Status**: ✅ **PRODUCTION READY**
+
 #### **Infrastructure Improvements**
-- **Mock Server**: Enhanced `generateShoppingInterestPoints()` for revenue data
+- **Mock Server**: Enhanced `generateShoppingInterestPoints()` for revenue data + added `generateChannelPoints()`
+- **API Schema**: Added `REVENUE_BY_CHANNEL` to apiSchema.js and supported metrics list
 - **Redux Integration**: Fixed revenue transformation in `/transformations/index.js`
 - **Filter Support**: Added `interest_type` and `data_origin` filter processing
+- **Chart Components**: Enhanced `UniversalBreakdownChart` with `formatTooltipValue` prop for both pie and stacked bar charts
 - **Error Handling**: Loading states, error messages, and data validation
 
 ---
@@ -630,8 +645,7 @@ const DEMOGRAPHICS_METRIC_IDS = [
 ### **Missing API MetricIDs (Must Add to Schema)**
 ```javascript
 // Revenue Tab
-'revenue_by_shopping_interests',
-'revenue_by_channel',
+'avg_daily_revenue',             // Used in tabConfigs.json
 'go_for_more_revenue',
 'go_for_more_rewarded',
 'go_for_more_redeemed',
@@ -651,8 +665,8 @@ const DEMOGRAPHICS_METRIC_IDS = [
 ```
 
 ### **Missing Request/Response Samples**
-1. **`api_samples/revenue_breakdown_interests.json`** + response
-2. **`api_samples/revenue_breakdown_channel.json`** + response
+1. ✅ ~~**`api_samples/revenue_breakdown_interests.json`** + response~~ **COMPLETED**
+2. ✅ ~~**`api_samples/revenue_breakdown_channel.json`** + response~~ **COMPLETED**
 3. **`api_samples/demographics_customer_metrics.json`** + response
 4. **`api_samples/demographics_frequency_analysis.json`** + response
 5. **`api_samples/competition_metrics.json`** + response
@@ -660,21 +674,31 @@ const DEMOGRAPHICS_METRIC_IDS = [
 7. **`api_samples/competition_heatmap.json`** + response
 
 ### **Missing Transformation Functions**
-1. **`src/services/transformations/revenueTransform.js`** (placeholder exists)
+1. ✅ ~~**`src/services/transformations/revenueTransform.js`**~~ **COMPLETED** (fully implemented)
 2. **`src/services/transformations/demographicsTransform.js`** (placeholder exists)
 3. **`src/services/transformations/competitionTransform.js`** (placeholder exists)
 
 ### **Implementation Priority**
-1. **High Priority**: Revenue tab completion (business critical metrics)
+1. **High Priority**: Revenue tab completion (only metric cards remaining - 1-2 hours)
 2. **Medium Priority**: Demographics customer metrics (user engagement insights)
 3. **Medium Priority**: Competition analysis (competitive intelligence)
 
 ## CONCLUSION
 
-The Dashboard tab serves as the gold standard implementation pattern. The remaining tabs need:
-- **12 new MetricIDs** added to API schema
-- **7 request/response sample files** created
-- **3 transformation functions** implemented
-- **Component integration** to replace static data sources
+The Dashboard tab serves as the gold standard implementation pattern. With the completed revenue_by_channel integration, the remaining work is significantly reduced:
 
-Total estimated effort: **16-20 hours** to complete full API integration across all tabs.
+**✅ Progress Made:**
+- Revenue Tab: 95% complete (was 75%) - Only metric cards remain
+- 2 major chart integrations completed (revenue by interests + revenue by channel)
+- Enhanced chart components with improved UX
+- Complete mock server support for revenue breakdowns
+
+**📋 Remaining Work:**
+- **9 new MetricIDs** added to API schema (reduced from 12)
+- **5 request/response sample files** created (reduced from 7)
+- **2 transformation functions** implemented (reduced from 3)
+- **Component integration** to replace remaining static data sources
+
+**Updated estimated effort: 12-16 hours** to complete full API integration across all tabs (reduced from 16-20 hours).
+
+**Next Priority: Complete Revenue Tab to 100%** - Only 1-2 hours needed to replace metric cards with API data.

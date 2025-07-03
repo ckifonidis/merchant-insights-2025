@@ -130,6 +130,15 @@ function generateMetricResponse(metricID, options = {}) {
         }]
       };
       
+    case 'revenue_by_channel':
+      return {
+        ...baseMetric,
+        seriesValues: [{
+          seriesID: 'revenue',
+          seriesPoints: generateChannelPoints(isCompetition)
+        }]
+      };
+      
     default:
       console.warn(`Unknown metricID: ${metricID}, generating default scalar value`);
       return {
@@ -198,6 +207,27 @@ function generateShoppingInterestPoints(interestType = 'customers', isCompetitio
     points.push({
       value1: value,
       value2: interest.code
+    });
+  });
+  
+  return points;
+}
+
+function generateChannelPoints(isCompetition = false) {
+  const points = [];
+  const competitionMultiplier = isCompetition ? 1.2 : 1.0; // Competition typically has higher values
+  
+  // Based on the API sample, channels are 'physical' and 'ecommerce'
+  const channels = [
+    { code: 'physical', baseRevenue: Math.random() * 500000 + 200000 },
+    { code: 'ecommerce', baseRevenue: Math.random() * 800000 + 300000 }
+  ];
+  
+  channels.forEach(channel => {
+    const revenue = (channel.baseRevenue * competitionMultiplier).toFixed(2);
+    points.push({
+      value1: revenue,
+      value2: channel.code
     });
   });
   

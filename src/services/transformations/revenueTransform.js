@@ -115,45 +115,65 @@ export const transformRevenueByChannel = (apiResponse) => {
   }
 
   const metrics = apiResponse.payload.metrics;
+  console.log('🔍 All metrics received:', metrics.map(m => ({ metricID: m.metricID, merchantId: m.merchantId })));
+  
+  // Find revenue_by_channel metrics specifically
+  const channelMetrics = metrics.filter(m => m.metricID === 'revenue_by_channel');
+  console.log('🔍 Channel metrics found:', channelMetrics.length, channelMetrics);
   
   // Find merchant and competition data
-  const merchantData = metrics.find(m => m.merchantId !== 'competition');
-  const competitionData = metrics.find(m => m.merchantId === 'competition');
+  const merchantData = channelMetrics.find(m => m.merchantId !== 'competition');
+  const competitionData = channelMetrics.find(m => m.merchantId === 'competition');
+  
+  console.log('🔍 Merchant channel data:', merchantData);
+  console.log('🔍 Competition channel data:', competitionData);
   
   const result = {
-    merchant: { physical: 0, ecommerce: 0 },
-    competitor: { physical: 0, ecommerce: 0 }
+    merchant: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 },
+    competitor: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 }
   };
   
   // Process merchant data
   if (merchantData?.seriesValues?.[0]?.seriesPoints) {
-    merchantData.seriesValues[0].seriesPoints.forEach(point => {
+    const merchantPoints = merchantData.seriesValues[0].seriesPoints;
+    const merchantTotal = merchantPoints.reduce((sum, point) => sum + (parseFloat(point.value1) || 0), 0);
+    
+    merchantPoints.forEach(point => {
       const channel = point.value2;
-      const value = parseFloat(point.value1) || 0;
+      const absoluteValue = parseFloat(point.value1) || 0;
+      const percentage = merchantTotal > 0 ? (absoluteValue / merchantTotal) * 100 : 0;
       
       if (channel === 'physical') {
-        result.merchant.physical = value;
+        result.merchant.physical = percentage;
+        result.merchant.physicalAbsolute = absoluteValue;
       } else if (channel === 'ecommerce') {
-        result.merchant.ecommerce = value;
+        result.merchant.ecommerce = percentage;
+        result.merchant.ecommerceAbsolute = absoluteValue;
       }
     });
   }
   
   // Process competition data
   if (competitionData?.seriesValues?.[0]?.seriesPoints) {
-    competitionData.seriesValues[0].seriesPoints.forEach(point => {
+    const competitionPoints = competitionData.seriesValues[0].seriesPoints;
+    const competitionTotal = competitionPoints.reduce((sum, point) => sum + (parseFloat(point.value1) || 0), 0);
+    
+    competitionPoints.forEach(point => {
       const channel = point.value2;
-      const value = parseFloat(point.value1) || 0;
+      const absoluteValue = parseFloat(point.value1) || 0;
+      const percentage = competitionTotal > 0 ? (absoluteValue / competitionTotal) * 100 : 0;
       
       if (channel === 'physical') {
-        result.competitor.physical = value;
+        result.competitor.physical = percentage;
+        result.competitor.physicalAbsolute = absoluteValue;
       } else if (channel === 'ecommerce') {
-        result.competitor.ecommerce = value;
+        result.competitor.ecommerce = percentage;
+        result.competitor.ecommerceAbsolute = absoluteValue;
       }
     });
   }
   
-  console.log('✅ Transformed channel breakdown data');
+  console.log('✅ Transformed channel breakdown data:', result);
   return result;
 };
 

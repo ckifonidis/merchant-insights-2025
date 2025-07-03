@@ -98,7 +98,8 @@ router.get('/STATUS', (req, res) => {
       'customers_per_day',
       'converted_customers_by_age',
       'converted_customers_by_gender',
-      'converted_customers_by_interest'
+      'converted_customers_by_interest',
+      'revenue_by_channel'
     ],
     timestamp: new Date().toISOString()
   });
