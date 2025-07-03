@@ -1,12 +1,29 @@
 import { useTranslation } from 'react-i18next';
 import { getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff } from '../../utils/configHelpers.jsx';
-import { UniversalMetricCard, UniversalBreakdownChart, TimeSeriesChart } from '../ui';
+import { UniversalMetricCard, UniversalBarChart, UniversalBreakdownChart, TimeSeriesChart } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
-import { revenueByChannel, revenueByInterests } from '../../data/mockData';
+import { revenueByChannel } from '../../data/mockData';
+import { useRevenueData } from '../../hooks/useTabData.js';
+import { transformRevenueData } from '../../services/transformations/revenueTransform.js';
 import CampaignButton from '../ui/CampaignButton';
 
 const Revenue = ({ filters }) => {
   const { t } = useTranslation();
+  
+  // Get revenue data from API
+  const { data: revenueApiData, loading, error } = useRevenueData();
+  
+  // Transform API data for revenue by interests
+  const revenueByInterests = revenueApiData ? 
+    transformRevenueData(revenueApiData, 'interests') :
+    [];
+  
+  // Debug logging
+  console.log('🔍 Revenue Debug Info:');
+  console.log('- revenueApiData:', revenueApiData);
+  console.log('- loading:', loading);
+  console.log('- error:', error);
+  console.log('- revenueByInterests:', revenueByInterests);
 
 
 
@@ -127,32 +144,33 @@ const Revenue = ({ filters }) => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {t('revenue.byShoppingInterests')}
             </h3>
-            <UniversalBreakdownChart
-              data={revenueByInterests
-                .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor))
-                .slice(0, 6)
-                .map(item => ({
-                  category: item.interest.length > 15 ? item.interest.substring(0, 15) + '...' : item.interest,
-                  merchant: item.merchant,
-                  competitor: item.competitor
-                }))}
-              colors={{
-                'Electronics': '#007B85',
-                'Fashion': '#73AA3C',
-                'Home & Garden': '#FF6B6B',
-                'Sports': '#4ECDC4',
-                'Books': '#45B7D1',
-                'Travel': '#96CEB4',
-                'Food': '#FFEAA7',
-                'Health': '#DDA0DD'
-              }}
-              formatValue={(value) => new Intl.NumberFormat('el-GR', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(value)}
-            />
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-gray-500">Loading revenue data...</div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-red-500">Error loading data: {error}</div>
+              </div>
+            ) : revenueByInterests.length === 0 ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-gray-500">No data available</div>
+              </div>
+            ) : (
+              <UniversalBarChart
+                data={revenueByInterests
+                  .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor))
+                  .slice(0, 6)
+                  .map(item => ({
+                    category: item.interest.length > 15 ? item.interest.substring(0, 15) + '...' : item.interest,
+                    merchant: item.merchant,
+                    competitor: item.competitor
+                  }))}
+                merchantColor="#007B85"
+                competitorColor="#73AA3C"
+                yAxisLabel="€"
+              />
+            )}
           </div>
 
           {/* Revenue by Channel */}

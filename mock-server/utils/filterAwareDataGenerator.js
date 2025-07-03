@@ -49,6 +49,14 @@ function parseFilterValues(filterValues = []) {
         }
         break;
         
+      case 'interest_type':
+        parsed.interestType = filter.value; // revenue or customers
+        break;
+        
+      case 'data_origin':
+        parsed.dataOrigin = filter.value; // own_data, competition_comparison, etc.
+        break;
+        
       case 'age':
         try {
           const [min, max] = filter.value.split('|').map(Number);
@@ -292,7 +300,7 @@ function generateFilterAwareMetric(metricID, options = {}) {
   
   // Generate base data using existing generator
   const { generateMetricResponse } = require('./dataGenerator');
-  let data = generateMetricResponse(metricID, otherOptions);
+  let data = generateMetricResponse(metricID, { ...otherOptions, filterValues });
   
   // Apply filters to the data
   data = applyFiltersToData(metricID, data, parsedFilters);

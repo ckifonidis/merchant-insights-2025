@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTabData, selectTabData, selectTabLoading, selectTabError } from '../store/slices/analyticsSlice.js';
 import { 
@@ -27,8 +27,12 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
   const { 
     autoRefresh = false, 
     refreshInterval = 300000, // 5 minutes
-    dependencies = [] 
+    dependencies = [],
+    customFilters = null
   } = options;
+  
+  // Use custom filters if provided, otherwise use Redux filters
+  const effectiveFilters = customFilters || filters;
 
   // Fetch data function
   const fetchData = useCallback(() => {
@@ -41,9 +45,9 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
     dispatch(fetchTabData({ 
       tabName, 
       metricIDs, 
-      filters 
+      filters: effectiveFilters 
     }));
-  }, [dispatch, tabName, metricIDs, filters, ...dependencies]);
+  }, [dispatch, tabName, metricIDs, effectiveFilters, ...dependencies]);
 
   // Initial fetch and dependency-based refetch
   useEffect(() => {
@@ -107,8 +111,8 @@ const REVENUE_METRIC_IDS = [
   'total_revenue',
   'rewarded_amount',
   'redeemed_amount', 
-  'revenue_per_day'
-  // TODO: Add revenue breakdown metrics when available
+  'revenue_per_day',
+  'converted_customers_by_interest' // Add breakdown metric
 ];
 
 const DEMOGRAPHICS_METRIC_IDS = [
@@ -129,7 +133,27 @@ const COMPETITION_METRIC_IDS = [
  * Hook for Revenue tab data
  */
 export const useRevenueData = (options = {}) => {
-  return useTabData('revenue', REVENUE_METRIC_IDS, options);
+  const baseFilters = useSelector(selectApiRequestParams);
+  
+  // Add revenue-specific filters for breakdown data
+  const revenueFilters = useMemo(() => ({
+    ...baseFilters,
+    filterValues: [
+      ...(baseFilters.filterValues || []),
+      {
+        providerId: baseFilters.providerId,
+        filterId: 'interest_type',
+        value: 'revenue'
+      }
+    ]
+  }), [baseFilters]);
+  
+  const revenueOptions = {
+    ...options,
+    customFilters: revenueFilters
+  };
+  
+  return useTabData('revenue', REVENUE_METRIC_IDS, revenueOptions);
 };
 
 /**

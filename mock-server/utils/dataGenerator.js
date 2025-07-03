@@ -1,5 +1,24 @@
+// Parse filter values helper function
+function parseFilterValues(filterValues = []) {
+  const parsed = {};
+  filterValues.forEach(filter => {
+    switch (filter.filterId) {
+      case 'interest_type':
+        parsed.interestType = filter.value; // 'revenue' or 'customers'
+        break;
+      case 'data_origin':
+        parsed.dataOrigin = filter.value;
+        break;
+    }
+  });
+  return parsed;
+}
+
 function generateMetricResponse(metricID, options = {}) {
   const { startDate, endDate, merchantId, filterValues = [] } = options;
+  
+  // Parse filter values for special filters
+  const parsedFilters = parseFilterValues(filterValues);
   
   // Check if this is for competition data
   const isCompetition = hasCompetitionFilter(filterValues) || merchantId === 'competition';
@@ -106,8 +125,8 @@ function generateMetricResponse(metricID, options = {}) {
       return {
         ...baseMetric,
         seriesValues: [{
-          seriesID: 'interests',
-          seriesPoints: generateDemographicPoints('interests', isCompetition)
+          seriesID: 'customers', // API returns 'customers' seriesID even for revenue
+          seriesPoints: generateShoppingInterestPoints(parsedFilters.interestType, isCompetition)
         }]
       };
       
@@ -118,6 +137,71 @@ function generateMetricResponse(metricID, options = {}) {
         scalarValue: (Math.random() * 1000).toFixed(2)
       };
   }
+}
+
+function generateShoppingInterestPoints(interestType = 'customers', isCompetition = false) {
+  const points = [];
+  const competitionMultiplier = isCompetition ? 1.2 : 1.0; // Competition typically has higher values
+  
+  // Shopping interests based on the API sample data
+  const interests = [
+    { code: '', label: 'Unspecified' },
+    { code: 'other_category', label: 'Other Category' },
+    { code: 'SHOPINT1', label: 'Automotive & Fuel Products' },
+    { code: 'SHOPINT2', label: 'Electronics & Household Appliances' },
+    { code: 'SHOPINT3', label: 'Telecommunication' },
+    { code: 'SHOPINT4', label: 'Health & Medical Care' },
+    { code: 'SHOPINT5', label: 'Entertainment & Hobbies' },
+    { code: 'SHOPINT6', label: 'Education' },
+    { code: 'SHOPINT7', label: 'Toys' },
+    { code: 'SHOPINT8', label: 'Travel & Transportation' },
+    { code: 'SHOPINT9', label: 'Personal Care' },
+    { code: 'SHOPINT10', label: 'Pets' },
+    { code: 'SHOPINT11', label: 'Fashion, Cosmetics & Jewelry' },
+    { code: 'SHOPINT12', label: 'Tourism' },
+    { code: 'SHOPINT13', label: 'Home & Garden' },
+    { code: 'SHOPINT14', label: 'Restaurants, Bars, Fast Food & Coffee' },
+    { code: 'SHOPINT15', label: 'Food & Drinks' }
+  ];
+  
+  interests.forEach(interest => {
+    let value;
+    
+    if (interestType === 'revenue') {
+      // Generate revenue values (in euros)
+      if (interest.code === '') {
+        value = (Math.random() * 100000 + 50000 * competitionMultiplier).toFixed(2);
+      } else if (interest.code === 'other_category') {
+        value = isCompetition ? (Math.random() * 30000 + 10000).toFixed(3) : '0';
+      } else {
+        // Major interests get higher values
+        const baseRevenue = ['SHOPINT1', 'SHOPINT12', 'SHOPINT13'].includes(interest.code) 
+          ? Math.random() * 800000 + 400000 
+          : Math.random() * 300000 + 100000;
+        value = (baseRevenue * competitionMultiplier).toFixed(interest.code.includes('SHOPINT') ? Math.random() > 0.5 ? 2 : 3 : 2);
+      }
+    } else {
+      // Generate customer counts
+      if (interest.code === '') {
+        value = Math.floor((Math.random() * 3000 + 1000) * competitionMultiplier).toString();
+      } else if (interest.code === 'other_category') {
+        value = isCompetition ? Math.floor(Math.random() * 6000 + 2000).toString() : '0';
+      } else {
+        // Major interests get higher customer counts
+        const baseCustomers = ['SHOPINT1', 'SHOPINT12', 'SHOPINT13'].includes(interest.code) 
+          ? Math.random() * 25000 + 15000 
+          : Math.random() * 8000 + 2000;
+        value = Math.floor(baseCustomers * competitionMultiplier).toString();
+      }
+    }
+    
+    points.push({
+      value1: value,
+      value2: interest.code
+    });
+  });
+  
+  return points;
 }
 
 function generateScalarValue(type, isCompetition = false) {

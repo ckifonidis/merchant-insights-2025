@@ -9,9 +9,9 @@ import { transformDashboardData, validateDashboardData } from './dashboardTransf
 const transformations = {
   dashboard: transformDashboardData,
   revenue: (data) => {
-    // TODO: Implement revenue transformation
-    console.log('🔄 Revenue transformation not implemented yet');
-    return {};
+    // For now, return the raw API response so components can transform it themselves
+    console.log('🔄 Revenue transformation: passing through raw API data');
+    return data;
   },
   demographics: (data) => {
     // TODO: Implement demographics transformation

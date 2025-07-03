@@ -106,6 +106,24 @@ class FilterMappingService {
       });
     }
 
+    // Interest type mapping (revenue vs customers for breakdown charts)
+    if (uiFilters.interestType) {
+      filterValues.push({
+        providerId: this.providerId,
+        filterId: 'interest_type',
+        value: uiFilters.interestType // 'revenue' or 'customers'
+      });
+    }
+
+    // Data origin mapping (own_data vs competition_comparison)
+    if (uiFilters.dataOrigin) {
+      filterValues.push({
+        providerId: this.providerId,
+        filterId: 'data_origin',
+        value: uiFilters.dataOrigin
+      });
+    }
+
     return filterValues;
   }
 
@@ -119,7 +137,9 @@ class FilterMappingService {
       channel: 'all',
       shoppingInterests: [],
       customerLocation: [],
-      goForMore: null
+      goForMore: null,
+      interestType: null,
+      dataOrigin: null
     };
 
     filterValues.forEach(filter => {
@@ -188,6 +208,14 @@ class FilterMappingService {
           } catch (e) {
             console.warn('Failed to parse age range filter:', filter.value);
           }
+          break;
+
+        case 'interest_type':
+          uiFilters.interestType = filter.value;
+          break;
+
+        case 'data_origin':
+          uiFilters.dataOrigin = filter.value;
           break;
       }
     });
@@ -302,6 +330,14 @@ class FilterMappingService {
           } catch (e) {
             console.warn('Failed to parse location filter');
           }
+          break;
+
+        case 'interest_type':
+          parsed.interestType = filter.value; // revenue or customers
+          break;
+
+        case 'data_origin':
+          parsed.dataOrigin = filter.value;
           break;
       }
     });

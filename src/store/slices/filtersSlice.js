@@ -14,8 +14,8 @@ const getDefaultDateRange = () => {
   return {
     startDate: startDate.toISOString().split('T')[0], // YYYY-MM-DD format
     endDate: endDate.toISOString().split('T')[0],
-    start: startDate, // For UI components that expect Date objects
-    end: endDate
+    start: startDate.toISOString(), // Store as ISO string for Redux serialization
+    end: endDate.toISOString()
   };
 };
 
@@ -25,10 +25,15 @@ const loadPersistedFilters = () => {
     const stored = localStorage.getItem('merchant-insights-filters');
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Ensure dates are valid
+      // Ensure dates are valid - keep as ISO strings for Redux serialization
       if (parsed.dateRange) {
-        parsed.dateRange.start = new Date(parsed.dateRange.start);
-        parsed.dateRange.end = new Date(parsed.dateRange.end);
+        // Convert to ISO strings if they're Date objects
+        if (parsed.dateRange.start instanceof Date) {
+          parsed.dateRange.start = parsed.dateRange.start.toISOString();
+        }
+        if (parsed.dateRange.end instanceof Date) {
+          parsed.dateRange.end = parsed.dateRange.end.toISOString();
+        }
       }
       return parsed;
     }
@@ -252,8 +257,8 @@ const filtersSlice = createSlice({
         state.dateRange = {
           startDate: newUIFilters.dateRange.start?.toISOString?.()?.split('T')[0] || state.dateRange.startDate,
           endDate: newUIFilters.dateRange.end?.toISOString?.()?.split('T')[0] || state.dateRange.endDate,
-          start: newUIFilters.dateRange.start || state.dateRange.start,
-          end: newUIFilters.dateRange.end || state.dateRange.end
+          start: newUIFilters.dateRange.start?.toISOString?.() || state.dateRange.start,
+          end: newUIFilters.dateRange.end?.toISOString?.() || state.dateRange.end
         };
       }
       

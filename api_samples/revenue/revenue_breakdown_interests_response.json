@@ -1,0 +1,171 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "converted_customers_by_interest",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "73169.81",
+                                "value2": ""
+                            },
+                            {
+                                "value1": "0",
+                                "value2": "other_category"
+                            },
+                            {
+                                "value1": "1251847.39",
+                                "value2": "SHOPINT1"
+                            },
+                            {
+                                "value1": "210086.64",
+                                "value2": "SHOPINT10"
+                            },
+                            {
+                                "value1": "85748.67",
+                                "value2": "SHOPINT11"
+                            },
+                            {
+                                "value1": "503895.19",
+                                "value2": "SHOPINT12"
+                            },
+                            {
+                                "value1": "593244.47",
+                                "value2": "SHOPINT13"
+                            },
+                            {
+                                "value1": "265915.63",
+                                "value2": "SHOPINT14"
+                            },
+                            {
+                                "value1": "134011.49",
+                                "value2": "SHOPINT15"
+                            },
+                            {
+                                "value1": "25722.41",
+                                "value2": "SHOPINT2"
+                            },
+                            {
+                                "value1": "308572.85",
+                                "value2": "SHOPINT3"
+                            },
+                            {
+                                "value1": "201373.96",
+                                "value2": "SHOPINT4"
+                            },
+                            {
+                                "value1": "48913.96",
+                                "value2": "SHOPINT5"
+                            },
+                            {
+                                "value1": "56949.6",
+                                "value2": "SHOPINT6"
+                            },
+                            {
+                                "value1": "82589.36",
+                                "value2": "SHOPINT7"
+                            },
+                            {
+                                "value1": "211232.88",
+                                "value2": "SHOPINT8"
+                            },
+                            {
+                                "value1": "282135.65",
+                                "value2": "SHOPINT9"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "converted_customers_by_interest",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "0",
+                                "value2": ""
+                            },
+                            {
+                                "value1": "19383.228",
+                                "value2": "other_category"
+                            },
+                            {
+                                "value1": "309820.182",
+                                "value2": "SHOPINT1"
+                            },
+                            {
+                                "value1": "46205.505",
+                                "value2": "SHOPINT10"
+                            },
+                            {
+                                "value1": "15772.362",
+                                "value2": "SHOPINT11"
+                            },
+                            {
+                                "value1": "129625.04699999999",
+                                "value2": "SHOPINT12"
+                            },
+                            {
+                                "value1": "111974.10900000001",
+                                "value2": "SHOPINT13"
+                            },
+                            {
+                                "value1": "66473.394",
+                                "value2": "SHOPINT14"
+                            },
+                            {
+                                "value1": "23986.116",
+                                "value2": "SHOPINT15"
+                            },
+                            {
+                                "value1": "5061.284",
+                                "value2": "SHOPINT2"
+                            },
+                            {
+                                "value1": "61498.61899999999",
+                                "value2": "SHOPINT3"
+                            },
+                            {
+                                "value1": "44915.611",
+                                "value2": "SHOPINT4"
+                            },
+                            {
+                                "value1": "11828.689999999999",
+                                "value2": "SHOPINT5"
+                            },
+                            {
+                                "value1": "11462.603",
+                                "value2": "SHOPINT6"
+                            },
+                            {
+                                "value1": "15801.9",
+                                "value2": "SHOPINT7"
+                            },
+                            {
+                                "value1": "47908.159",
+                                "value2": "SHOPINT8"
+                            },
+                            {
+                                "value1": "49069.502",
+                                "value2": "SHOPINT9"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0
+}
