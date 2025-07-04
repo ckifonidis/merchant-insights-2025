@@ -14,7 +14,7 @@ const createRequestKey = ({ tabName, metricIDs, filters }) => {
 // Async thunk for fetching tab data with automatic deduplication
 export const fetchTabData = createAsyncThunk(
   'analytics/fetchTabData',
-  async ({ tabName, metricIDs, filters }, { rejectWithValue, getState }) => {
+  async ({ tabName, metricIDs, filters, options = {} }, { rejectWithValue, getState }) => {
     const requestKey = createRequestKey({ tabName, metricIDs, filters });
     
     // Check if identical request is already pending
@@ -41,9 +41,10 @@ export const fetchTabData = createAsyncThunk(
     
     try {
       console.log(`🔄 Fetching ${tabName} data with metrics:`, metricIDs);
+      console.log(`⚙️ Metric-specific options:`, options);
       
       // Create and cache the promise
-      const requestPromise = analyticsService.fetchTabData(tabName, metricIDs, filters)
+      const requestPromise = analyticsService.fetchTabData(tabName, metricIDs, filters, options)
         .then(transformedData => {
           console.log(`✅ ${tabName} data loaded successfully:`, transformedData);
           return { tabName, data: transformedData };

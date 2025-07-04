@@ -16,6 +16,11 @@ import {
   AGE_GROUPS
 } from '../data/apiSchema.js';
 import { transformTabData } from './transformations/index.js';
+import { 
+  getMultipleMetricFiltersForContext, 
+  convertMetricFiltersToAPI, 
+  validateMetricFilters 
+} from '../data/metricFilters.js';
 
 // Configuration for different environments
 const API_CONFIG = {
@@ -45,15 +50,20 @@ class AnalyticsService {
    * Fetch and transform data for a specific tab
    * This is the main method used by Redux thunks
    */
-  async fetchTabData(tabName, metricIDs, filters) {
+  async fetchTabData(tabName, metricIDs, filters, options = {}) {
     console.log(`🔄 AnalyticsService.fetchTabData called for ${tabName}`);
     console.log(`📊 MetricIDs: ${metricIDs.join(', ')}`);
     console.log(`🔍 Filters:`, filters);
+    console.log(`⚙️ Options:`, options);
 
-    // Build the analytics request
+    const { metricSpecificFilters = {}, autoInferContext = true } = options;
+
+    // Build the analytics request with metric-specific filters
     const request = this.buildAnalyticsRequest({
       metricIDs,
-      ...filters
+      ...filters,
+      metricSpecificFilters,
+      context: autoInferContext ? tabName : null
     });
 
     // Call the API
@@ -77,8 +87,16 @@ class AnalyticsService {
     merchantId = 'test-merchant',
     metricIDs = [],
     filterValues = [],
-    metricParameters = {}
+    metricParameters = {},
+    metricSpecificFilters = {},
+    context = null
   }) {
+    // Merge user filters with metric-specific filters
+    const combinedFilters = [
+      ...filterValues, // User filters from sidebar
+      ...this._buildMetricSpecificFilters(metricIDs, context, metricSpecificFilters)
+    ];
+
     return {
       header: {
         ID: `analytics-${Date.now()}`,
@@ -90,11 +108,61 @@ class AnalyticsService {
         endDate,
         providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
         metricIDs,
-        filterValues,
+        filterValues: combinedFilters,
         metricParameters,
         merchantId
       }
     };
+  }
+
+  /**
+   * Build metric-specific filters based on context and overrides
+   * @param {string[]} metricIDs - Array of metric identifiers
+   * @param {string|null} context - The context (usually tab name) for auto-inference
+   * @param {Object} overrides - Explicit metric-specific filter overrides
+   * @returns {Array} Array of filter objects in API format
+   */
+  _buildMetricSpecificFilters(metricIDs, context, overrides = {}) {
+    const metricFilters = [];
+
+    // Get auto-inferred filters based on context (tab name)
+    const contextFilters = context ? getMultipleMetricFiltersForContext(metricIDs, context) : {};
+    
+    // Merge context-inferred filters with explicit overrides
+    const finalMetricFilters = {};
+    metricIDs.forEach(metricID => {
+      const contextFilter = contextFilters[metricID] || {};
+      const overrideFilter = overrides[metricID] || {};
+      
+      if (Object.keys(contextFilter).length > 0 || Object.keys(overrideFilter).length > 0) {
+        finalMetricFilters[metricID] = { ...contextFilter, ...overrideFilter };
+      }
+    });
+
+    // Validate and convert to API format
+    Object.entries(finalMetricFilters).forEach(([metricID, filters]) => {
+      // Validate filters
+      const validation = validateMetricFilters(metricID, filters);
+      if (!validation.valid) {
+        console.warn(`Invalid metric filters for ${metricID}:`, validation.error);
+        return;
+      }
+
+      // Convert to API format
+      Object.entries(filters).forEach(([filterId, value]) => {
+        metricFilters.push({
+          providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+          filterId,
+          value: String(value)
+        });
+      });
+    });
+
+    if (metricFilters.length > 0) {
+      console.log(`🎯 Auto-generated metric-specific filters:`, metricFilters);
+    }
+
+    return metricFilters;
   }
 
   /**

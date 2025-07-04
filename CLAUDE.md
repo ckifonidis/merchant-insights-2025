@@ -64,11 +64,22 @@
 - ✅ **FIXED: Apply Filters button workflow** - Filters only apply when button is clicked
 - ✅ **FIXED: Immediate filter application issue** - UI updates don't trigger API calls until Apply
 
+**✅ Metric-Specific Filters (100% COMPLETE + PRODUCTION READY):**
+- ✅ Configuration system for metric-specific filters (`src/data/metricFilters.js`)
+- ✅ Automatic context inference (Revenue tab → revenue data, Demographics tab → customer data)
+- ✅ Enhanced analytics service with filter merging logic
+- ✅ Updated useTabData hook with metric-specific filter support
+- ✅ Redux integration with proper options passing
+- ✅ Mock server support for `interest_type` filter
+- ✅ **FIXED: Infinite loop prevention** - Stable object references and dependency arrays
+- ✅ Zero configuration required in components - fully automatic
+
 ## 🚨 INFINITE LOOP PREVENTION
 
-### **Critical Issue Resolved: Redux + useEffect Infinite Loop**
+### **Critical Issue Resolved: Redux + useEffect Infinite Loop (FIXED July 2025)**
 
-**Symptoms:** Console flooded with repeated API calls, app becomes unresponsive
+**Status:** ✅ **COMPLETELY RESOLVED** - App now loads properly with data display  
+**Previous Symptoms:** Console flooded with repeated API calls, app becomes unresponsive
 
 **Root Causes:**
 1. **Unmemoized selectors returning objects**
@@ -113,6 +124,13 @@ export const useDashboardData = () => {
 3. **Keep useCallback dependencies stable**
 4. **Monitor console for repeated API calls during development**
 
+### **✅ Applied Fixes (July 2025):**
+1. **Removed spread operator** `...dependencies` from useCallback dependency array in `useTabData.js:53`
+2. **Frozen all metric ID arrays** with `Object.freeze()` to prevent new references
+3. **Created stable DEFAULT_OPTIONS** object for hook parameters
+4. **Eliminated unstable dependencies** option that was causing new array creation
+5. **Result:** App loads properly, data displays correctly, no infinite loops
+
 ## KEY ARCHITECTURE PATTERNS
 
 ### File Structure
@@ -136,6 +154,7 @@ src/
 │   └── ui/                # Shared UI components
 ├── data/
 │   ├── tabConfigs.json    # 🔥 METRIC CONFIGURATIONS
+│   ├── metricFilters.js   # ✅ Metric-specific filters configuration
 │   └── mockData.js        # Sample data
 ├── locales/               # Translations (en.json, gr.json)
 ├── services/              # API service layer (CREATED)
@@ -391,6 +410,7 @@ Select Filters → Store UI → Click Apply → Convert to API → Skip Cache �
 
 ## KEY FILES TO REFERENCE
 - `src/data/tabConfigs.json` - Metric configurations
+- `src/data/metricFilters.js` - ✅ Metric-specific filters configuration system
 - `src/data/mockData.js` - All mock data
 - `src/locales/en.json` & `gr.json` - Translations
 - `src/utils/configHelpers.jsx` - Icons and utilities
@@ -398,8 +418,9 @@ Select Filters → Store UI → Click Apply → Convert to API → Skip Cache �
 - Revenue Tab components - Gold standard implementation examples
 - `src/store/slices/filtersSlice.js` - ✅ Complete filter state management with persistence
 - `src/services/filterMappingService.js` - ✅ Bidirectional filter transformations
+- `src/services/analyticsService.js` - ✅ Enhanced with metric-specific filter support
 - `src/components/layout/FilterSidebar.jsx` - ✅ Redux-connected filter UI
-- `src/hooks/useTabData.js` - ✅ Smart data refresh with filter integration
+- `src/hooks/useTabData.js` - ✅ Smart data refresh with filter integration + infinite loop fixes
 
 ## COMPREHENSIVE METRIC MAPPING & IMPLEMENTATION STATUS
 

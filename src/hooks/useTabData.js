@@ -12,7 +12,16 @@ import {
  * Generic hook for fetching tab data
  * Used by all tab-specific hooks
  */
-export const useTabData = (tabName, metricIDs, options = {}) => {
+// Default options constant to prevent new object creation
+const DEFAULT_OPTIONS = Object.freeze({
+  autoRefresh: false,
+  refreshInterval: 300000, // 5 minutes
+  customFilters: null,
+  metricSpecificFilters: {},
+  autoInferContext: true
+});
+
+export const useTabData = (tabName, metricIDs, options = DEFAULT_OPTIONS) => {
   const dispatch = useDispatch();
   
   // Get data from Redux store
@@ -23,12 +32,13 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
   const filtersChanged = useSelector(selectFiltersChanged);
   const selectedTab = useSelector(selectSelectedTab);
   
-  // Options
+  // Options (use defaults for undefined values)
   const { 
-    autoRefresh = false, 
-    refreshInterval = 300000, // 5 minutes
-    dependencies = [],
-    customFilters = null
+    autoRefresh = DEFAULT_OPTIONS.autoRefresh, 
+    refreshInterval = DEFAULT_OPTIONS.refreshInterval,
+    customFilters = DEFAULT_OPTIONS.customFilters,
+    metricSpecificFilters = DEFAULT_OPTIONS.metricSpecificFilters,
+    autoInferContext = DEFAULT_OPTIONS.autoInferContext
   } = options;
   
   // Unified fetch function - deduplication handled at Redux level
@@ -42,9 +52,13 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
     dispatch(fetchTabData({ 
       tabName, 
       metricIDs, 
-      filters: effectiveFilters 
+      filters: effectiveFilters,
+      options: {
+        metricSpecificFilters,
+        autoInferContext
+      }
     }));
-  }, [dispatch, tabName, metricIDs, filters, customFilters, ...dependencies]);
+  }, [dispatch, tabName, metricIDs, filters, customFilters, metricSpecificFilters, autoInferContext]);
 
   // Initial fetch - deduplication handled automatically
   useEffect(() => {
@@ -99,7 +113,7 @@ const DASHBOARD_METRIC_IDS = Object.freeze([
 /**
  * Hook for Dashboard tab data
  */
-export const useDashboardData = (options = {}) => {
+export const useDashboardData = (options = DEFAULT_OPTIONS) => {
   return useTabData('dashboard', DASHBOARD_METRIC_IDS, options);
 };
 
@@ -113,52 +127,46 @@ const REVENUE_METRIC_IDS = Object.freeze([
   'revenue_by_channel' // Channel breakdown metric
 ]);
 
-const DEMOGRAPHICS_METRIC_IDS = [
+const DEMOGRAPHICS_METRIC_IDS = Object.freeze([
   'converted_customers_by_age',
   'converted_customers_by_gender',
   'converted_customers_by_interest'
   // TODO: Add customer count metrics when available
-];
+]);
 
-const COMPETITION_METRIC_IDS = [
+const COMPETITION_METRIC_IDS = Object.freeze([
   'total_revenue',
   'transactions_per_day',
   'revenue_per_day'
   // TODO: Add competition-specific metrics
-];
+]);
 
 /**
  * Hook for Revenue tab data
  */
-export const useRevenueData = (options = {}) => {
+export const useRevenueData = (options = DEFAULT_OPTIONS) => {
   return useTabData('revenue', REVENUE_METRIC_IDS, options);
 };
 
 /**
  * Hook for Demographics tab data
  */
-export const useDemographicsData = (options = {}) => {
+export const useDemographicsData = (options = DEFAULT_OPTIONS) => {
   return useTabData('demographics', DEMOGRAPHICS_METRIC_IDS, options);
 };
 
 /**
  * Hook for Competition tab data
  */
-export const useCompetitionData = (options = {}) => {
-  // Competition tab always needs competition comparison
-  const competitionOptions = {
-    ...options,
-    dependencies: [...(options.dependencies || []), 'competition']
-  };
-
-  return useTabData('competition', COMPETITION_METRIC_IDS, competitionOptions);
+export const useCompetitionData = (options = DEFAULT_OPTIONS) => {
+  return useTabData('competition', COMPETITION_METRIC_IDS, options);
 };
 
 /**
  * Hook for specific time series data
  * Used by TimeSeriesChart components
  */
-export const useTimeSeriesData = (metricType, options = {}) => {
+export const useTimeSeriesData = (metricType, options = DEFAULT_OPTIONS) => {
   const metricMap = {
     'revenue': 'revenue_per_day',
     'transactions': 'transactions_per_day', 
