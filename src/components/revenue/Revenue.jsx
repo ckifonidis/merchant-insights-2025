@@ -13,45 +13,31 @@ const Revenue = ({ filters }) => {
   // Get revenue data from API
   const { data: revenueApiData, loading, error } = useRevenueData();
   
-  // Create content-based memoization key
-  const metricsKey = useMemo(() => {
-    const metrics = revenueApiData?.payload?.metrics;
-    if (!metrics) return 'empty';
-    // Create a stable key based on actual content, not object references
-    return `${metrics.length}-${metrics.map(m => m.metricID).sort().join('-')}`;
-  }, [revenueApiData?.payload?.metrics]);
-  
+  // Simple, clean transformations - let React Strict Mode do its thing
   const revenueByInterests = useMemo(() => {
-    console.log('🔄 Memoizing interests transformation (key-based)');
-    const metrics = revenueApiData?.payload?.metrics;
-    if (!metrics || metrics.length === 0) return [];
-    
-    // Create stable data structure without timing properties
-    const stableApiData = { payload: { metrics } };
-    return transformRevenueData(stableApiData, 'interests');
-  }, [metricsKey]); // ✅ Stable key - only changes when actual content changes
-  
+    if (!revenueApiData?.payload?.metrics) return [];
+    return transformRevenueData(revenueApiData, 'interests');
+  }, [revenueApiData]);
+
   const revenueByChannelData = useMemo(() => {
-    console.log('🔄 Memoizing channel transformation (key-based)');
-    const metrics = revenueApiData?.payload?.metrics;
-    if (!metrics || metrics.length === 0) {
-      return { merchant: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 }, 
-               competitor: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 } };
+    if (!revenueApiData?.payload?.metrics) {
+      return { 
+        merchant: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 }, 
+        competitor: { physical: 0, ecommerce: 0, physicalAbsolute: 0, ecommerceAbsolute: 0 } 
+      };
     }
-    
-    // Create stable data structure without timing properties
-    const stableApiData = { payload: { metrics } };
-    return transformRevenueData(stableApiData, 'channel');
-  }, [metricsKey]); // ✅ Stable key
+    return transformRevenueData(revenueApiData, 'channel');
+  }, [revenueApiData]);
   
-  // Debug logging
-  console.log('🔍 Revenue Debug Info:');
-  console.log('- metricsKey:', metricsKey);
-  console.log('- metrics length:', revenueApiData?.payload?.metrics?.length);
-  console.log('- loading:', loading);
-  console.log('- error:', error);
-  console.log('- revenueByInterests length:', revenueByInterests?.length);
-  console.log('- revenueByChannelData keys:', Object.keys(revenueByChannelData || {}));
+  // Clean development logging
+  if (import.meta.env.DEV) {
+    console.log('📊 Revenue data ready:', {
+      loading,
+      hasData: !!revenueApiData?.payload?.metrics,
+      interestsCount: revenueByInterests?.length,
+      channelData: !!revenueByChannelData
+    });
+  }
 
 
 

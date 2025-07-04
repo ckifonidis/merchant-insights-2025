@@ -1,18 +1,57 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { analyticsService } from '../../services/index.js';
 
-// Async thunk for fetching tab data
+// Request deduplication cache
+const pendingRequests = new Map();
+
+// Create request key for deduplication
+const createRequestKey = ({ tabName, metricIDs, filters }) => {
+  const filterKey = JSON.stringify(filters, Object.keys(filters).sort());
+  const metricsKey = metricIDs.slice().sort().join(',');
+  return `${tabName}:${metricsKey}:${filterKey}`;
+};
+
+// Async thunk for fetching tab data with automatic deduplication
 export const fetchTabData = createAsyncThunk(
   'analytics/fetchTabData',
-  async ({ tabName, metricIDs, filters }, { rejectWithValue }) => {
+  async ({ tabName, metricIDs, filters }, { rejectWithValue, getState }) => {
+    const requestKey = createRequestKey({ tabName, metricIDs, filters });
+    
+    // Check if identical request is already pending
+    if (pendingRequests.has(requestKey)) {
+      console.log(`🔄 Deduplicating ${tabName} request (already pending)`);
+      return await pendingRequests.get(requestKey);
+    }
+    
+    // Check if we already have fresh data in store (optional cache check)
+    const existingData = getState().analytics[tabName];
+    if (existingData?.data && existingData.lastUpdated) {
+      const timeSinceUpdate = Date.now() - new Date(existingData.lastUpdated).getTime();
+      if (timeSinceUpdate < 30000) { // 30 seconds cache
+        console.log(`🔄 Using cached ${tabName} data (${timeSinceUpdate}ms old)`);
+        return { tabName, data: existingData.data };
+      }
+    }
+    
     try {
       console.log(`🔄 Fetching ${tabName} data with metrics:`, metricIDs);
       
-      const transformedData = await analyticsService.fetchTabData(tabName, metricIDs, filters);
+      // Create and cache the promise
+      const requestPromise = analyticsService.fetchTabData(tabName, metricIDs, filters)
+        .then(transformedData => {
+          console.log(`✅ ${tabName} data loaded successfully:`, transformedData);
+          return { tabName, data: transformedData };
+        })
+        .finally(() => {
+          // Remove from pending requests when complete
+          pendingRequests.delete(requestKey);
+        });
       
-      console.log(`✅ ${tabName} data loaded successfully:`, transformedData);
-      return { tabName, data: transformedData };
+      pendingRequests.set(requestKey, requestPromise);
+      return await requestPromise;
+      
     } catch (error) {
+      pendingRequests.delete(requestKey);
       console.error(`❌ Failed to load ${tabName} data:`, error);
       return rejectWithValue({
         tabName,
