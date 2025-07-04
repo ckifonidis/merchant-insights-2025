@@ -1,0 +1,79 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "redeemed_points",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "redeemed_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "rewarded_points",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "rewarded_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "total_revenue",
+                "percentageValue": false,
+                "scalarValue": "25246.0",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "avg_daily_revenue",
+                "percentageValue": false,
+                "scalarValue": "70.014489424067179",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "36.014489424067179",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "total_revenue",
+                "percentageValue": false,
+                "scalarValue": "4265.4",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "avg_daily_revenue",
+                "percentageValue": false,
+                "scalarValue": "504",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "38.502512777230740",
+                "seriesValues": null,
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}

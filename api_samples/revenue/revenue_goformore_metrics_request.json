@@ -1,0 +1,27 @@
+{
+    "header": {
+        "ID": "{{$guid}}",
+        "application": "76A9FF99-64F9-4F72-9629-305CBE047902"
+    },
+    "payload": {
+        "userID": "XANDRH004400003",
+        "startDate": "2025-01-01",
+        "endDate": "2025-01-02",
+        "providerId": "56f9cf99-3727-4f2f-bf1c-58dc532ebaf5",
+        "metricIDs": [
+            "goformore_amount",
+            "rewarded_amount",
+            "redeemed_amount"
+        ],
+        "filterValues": [
+            {
+                "providerId": "56f9cf99-3727-4f2f-bf1c-58dc532ebaf5",
+                "filterId": "data_origin",
+                "value": "own_data"
+            }
+        ],
+        "metricParameters": {
+        },
+        "merchantId": null
+    }
+}

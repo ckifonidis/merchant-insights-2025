@@ -1,0 +1,30 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "goformore_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "redeemed_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "rewarded_amount",
+                "percentageValue": false,
+                "scalarValue": "null",
+                "seriesValues": null,
+                "merchantId": "SHELL MYRTEA"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}
