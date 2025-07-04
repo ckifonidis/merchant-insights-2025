@@ -11,12 +11,12 @@
 
 ### ✅ COMPLETED WORK
 1. **Core Infrastructure (100%)** - JSON configuration system, component architecture, internationalization
-2. **Dashboard Tab (100%)** - All Step 1-2 improvements applied, separate metric components
+2. **Dashboard Tab (100% + FILTER FIXES)** - All Step 1-2 improvements applied, separate metric components, **working filter integration**
 3. **Revenue Tab (100%)** - All Step 1-3 improvements applied, fixed chart layouts, Go For More metrics
 4. **Demographics Tab (100%)** - Complete with premium visualizations, 6 customer metrics, 4 advanced charts, Step 4 improvements completed
 5. **Competition Tab (100%)** - Custom metrics layout, interactive charts, dual calendar heatmaps
 6. **Mobile Experience (100%)** - Fixed filter sidebar, responsive tab navigation, metric card layouts
-7. **Filter Integration (100%)** - Complete Redux-based filter system with API integration, UI components, mock server support, end-to-end functionality
+7. **Filter Integration (100% + CRITICAL FIXES)** - Complete Redux-based filter system with API integration, **fixed cache bypass and Apply button workflow**
 
 ### 🎯 PENDING WORK (Priority Order)
 1. **Real Data Integration** (LOW - 8-12 hours) - Replace mock data with API calls
@@ -51,7 +51,7 @@
 **✅ RevenueByChannel Responsiveness (COMPLETED):**
 - ✅ Fixed pie chart layout problems on mobile/tablet
 
-**✅ Filter Integration (100% COMPLETE):**
+**✅ Filter Integration (100% COMPLETE + CRITICAL FIXES APPLIED):**
 - ✅ Redux state management with persistence
 - ✅ Filter UI components (FilterSidebar) connected to Redux
 - ✅ API integration with mock server
@@ -60,6 +60,9 @@
 - ✅ Chart components connected to Redux filter state
 - ✅ Active tab refresh optimization
 - ✅ End-to-end filter functionality verified
+- ✅ **FIXED: Cache bypass for filter changes** - Filters now properly trigger API calls
+- ✅ **FIXED: Apply Filters button workflow** - Filters only apply when button is clicked
+- ✅ **FIXED: Immediate filter application issue** - UI updates don't trigger API calls until Apply
 
 ## 🚨 INFINITE LOOP PREVENTION
 
@@ -259,7 +262,7 @@ npm run mock-server  # Starts only the mock server
 
 ## FILTER INTEGRATION ARCHITECTURE
 
-### ✅ COMPLETED FILTER SYSTEM (100% Complete)
+### ✅ COMPLETED FILTER SYSTEM (100% Complete + Critical Fixes Applied)
 
 #### **Core Architecture**
 - **Redux State Management**: Dual filter state (UI + API formats) with persistence
@@ -267,13 +270,20 @@ npm run mock-server  # Starts only the mock server
 - **8 Filter Types**: Date range, channel, gender, age groups, location, Go For More, interests, stores
 - **Responsive UI**: Mobile slide-over + desktop sidebar with React Select
 - **API Integration**: Filter-aware data processing with realistic filtering
+- **Proper Apply Button Workflow**: Filters only apply when "Apply Filters" button is clicked
+- **Cache Bypass Logic**: API cache is bypassed when filters change to ensure fresh filtered data
 
-#### **Data Flow (Currently Implemented)**
+#### **Data Flow (Fixed Implementation)**
 ```
-FilterSidebar → Redux Store → useTabData Hook → Analytics Service → API/Mock → Charts
-     ↓              ↓              ↓                    ↓              ↓         ↓
-  Apply Filters → Store State → Pass Filters → Transform Filters → Filter Data → Display
+FilterSidebar → UI State → Apply Button → API Conversion → Cache Bypass → Fresh API Call → Charts
+     ↓            ↓           ↓              ↓                ↓              ↓            ↓
+Select Filters → Store UI → Click Apply → Convert to API → Skip Cache → Filter Data → Display
 ```
+
+#### **Critical Fixes Applied (July 2025)**
+1. **Cache Bypass Issue Fixed**: Analytics slice now bypasses 30-second cache when `filtersChanged: true`
+2. **Apply Button Workflow Fixed**: `updateUIFilters` no longer triggers immediate API calls
+3. **Filter Application Timing**: API conversion only happens when "Apply Filters" is clicked
 
 #### **✅ COMPLETED IMPLEMENTATION**
 
@@ -319,7 +329,10 @@ FilterSidebar → Redux Store → useTabData Hook → Analytics Service → API/
 - **Channel:** Physical stores vs E-commerce
 - **Date Range:** Integrated with existing timeline functionality
 
-### ✅ **Filter Behavior (All Implemented)**
+### ✅ **Filter Behavior (All Implemented + Fixed)**
+- **Apply Button Workflow:** Filters only apply when "Apply Filters" button is clicked
+- **UI vs API State:** Filter selections update UI immediately, API calls only on Apply
+- **Cache Bypass:** Fresh API calls made when filters are applied (bypasses 30-second cache)
 - **Filter Precedence:** Combined (all filters applied together)
 - **Partial Data Handling:** Shows "insufficient data" placeholders when needed
 - **Competition Data:** Uses same filters as merchant data for comparison
@@ -327,7 +340,7 @@ FilterSidebar → Redux Store → useTabData Hook → Analytics Service → API/
 - **Persistence:** Filters saved across browser sessions
 - **Default Behavior:** No filters = all data (current behavior)
 
-### ✅ **Testing Verified**
+### ✅ **Testing Verified + Recent Fixes**
 - ✅ Filter mapping service works correctly
 - ✅ Redux state management functions properly
 - ✅ Mock server applies filters to generated data
@@ -335,6 +348,30 @@ FilterSidebar → Redux Store → useTabData Hook → Analytics Service → API/
 - ✅ Gender filter test: Only returns female data when filter applied
 - ✅ Both merchant and competition data respect the same filters
 - ✅ End-to-end filter functionality confirmed
+- ✅ **FIXED (July 2025): Apply Filters button workflow** - Verified filters only trigger API calls when button is clicked
+- ✅ **FIXED (July 2025): Cache bypass logic** - Verified fresh API calls with filter changes
+- ✅ **FIXED (July 2025): UI state separation** - Filter selections update UI without triggering API until Apply
+
+### 🚨 **CRITICAL BUG FIXES APPLIED (July 2025)**
+
+#### **Issue 1: Cache Bypass Problem**
+- **Problem:** 30-second cache in `analyticsSlice.js` was returning old data instead of making fresh API calls with new filters
+- **Root Cause:** Cache logic didn't check if filters had changed
+- **Fix Applied:** Added `hasFiltersChanged` check to cache logic in `fetchTabData` thunk
+- **File Modified:** `src/store/slices/analyticsSlice.js:27-42`
+- **Result:** Fresh API calls now made when filters are applied
+
+#### **Issue 2: Immediate Filter Application**  
+- **Problem:** Filters were applying immediately on selection instead of waiting for "Apply Filters" button
+- **Root Cause:** `updateUIFilters` action was setting `filtersChanged: true` and converting to API format immediately
+- **Fix Applied:** Removed immediate API conversion and `filtersChanged` flag from `updateUIFilters`
+- **File Modified:** `src/store/slices/filtersSlice.js:251-272`
+- **Result:** Filters now only apply when "Apply Filters" button is clicked
+
+#### **Current Working Behavior:**
+1. **Select filter values** → UI updates only, no API calls
+2. **Click "Apply Filters"** → Convert to API format, set `filtersChanged: true`, bypass cache, make fresh API call
+3. **Data refreshes** with filtered results
 
 ## DOCUMENTATION STRUCTURE
 
@@ -394,12 +431,12 @@ This section provides the definitive mapping of all chart components to their re
 #### **Dashboard Charts (Time Series)**
 | Chart | API MetricID | Component | Status | Data Source | Notes |
 |-------|--------------|-----------|---------|-------------|--------|
-| Revenue Chart | `revenue_per_day` | `TimeSeriesChart` | 🟡 | API + Mock Fallback | API requested but falls back to mock |
-| Transactions Chart | `transactions_per_day` | `TimeSeriesChart` | 🟡 | API + Mock Fallback | API requested but falls back to mock |
-| Customers Chart | `customers_per_day` | `TimeSeriesChart` | 🟡 | API + Mock Fallback | API requested but falls back to mock |
+| Revenue Chart | `revenue_per_day` | `TimeSeriesChart` | ✅ | API via Redux | **FIXED: Filter integration working** |
+| Transactions Chart | `transactions_per_day` | `TimeSeriesChart` | ✅ | API via Redux | **FIXED: Filter integration working** |
+| Customers Chart | `customers_per_day` | `TimeSeriesChart` | ✅ | API via Redux | **FIXED: Filter integration working** |
 
-**Issue:** Charts receive `apiData` prop but fallback to `generateTimeSeriesData()` when null
-**File:** `src/components/ui/charts/TimeSeriesChart.jsx:94-98`
+**FIXED (July 2025):** Cache bypass issue resolved - charts now receive fresh filtered data when Apply Filters is clicked
+**File:** `src/components/ui/charts/TimeSeriesChart.jsx:94-98` - Fallback logic remains for error handling
 
 ---
 

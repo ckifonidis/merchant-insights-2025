@@ -54,7 +54,6 @@ export const useTabData = (tabName, metricIDs, options = {}) => {
   // Filter change detection - only refresh active tab
   useEffect(() => {
     if (filtersChanged && (selectedTab === tabName || selectedTab === 'dashboard')) {
-      console.log(`🔄 Filters changed, refreshing ${tabName} data...`);
       performFetch();
       dispatch(markFiltersApplied()); // Mark filters as applied
     }

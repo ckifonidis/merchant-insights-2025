@@ -107,6 +107,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
       ...uiFilters,
       dateRange: { start: startDate, end: endDate }
     };
+    
     dispatch(updateUIFilters(finalFilters));
     dispatch(applyFilters());
     

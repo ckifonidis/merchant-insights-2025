@@ -262,17 +262,13 @@ const filtersSlice = createSlice({
         };
       }
       
-      // Convert UI filters to API format
-      state.filterValues = filterMappingService.mapUIFiltersToAPI(newUIFilters);
+      // DON'T convert to API format or trigger refresh here - only when Apply Filters is clicked
+      // DON'T set filtersChanged = true here - only in applyFilters action
       
-      // Mark filters as changed for refresh
-      state.filtersChanged = true;
-      
-      // Persist to localStorage
+      // Persist to localStorage for UI state
       persistFilters(newUIFilters);
       
-      console.log('🔍 UI Filters updated:', newUIFilters);
-      console.log('📊 API Filters updated:', state.filterValues);
+      // UI filters updated but not yet applied to API
     },
     
     applyFilters: (state) => {
@@ -281,7 +277,6 @@ const filtersSlice = createSlice({
       state.filterValues = filterMappingService.mapUIFiltersToAPI(state.uiFilters);
       state.filtersChanged = true;
       persistFilters(state.uiFilters);
-      console.log('✅ Filters applied and persisted');
     },
     
     markFiltersApplied: (state) => {

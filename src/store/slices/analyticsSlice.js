@@ -24,14 +24,20 @@ export const fetchTabData = createAsyncThunk(
     }
     
     // Check if we already have fresh data in store (optional cache check)
+    // IMPORTANT: Skip cache if filters have changed to ensure filtered data is fetched
+    const filtersState = getState().filters;
+    const hasFiltersChanged = filtersState.filtersChanged;
+    
     const existingData = getState().analytics[tabName];
-    if (existingData?.data && existingData.lastUpdated) {
+    if (existingData?.data && existingData.lastUpdated && !hasFiltersChanged) {
       const timeSinceUpdate = Date.now() - new Date(existingData.lastUpdated).getTime();
       if (timeSinceUpdate < 30000) { // 30 seconds cache
         console.log(`🔄 Using cached ${tabName} data (${timeSinceUpdate}ms old)`);
         return { tabName, data: existingData.data };
       }
     }
+    
+    // Skip cache when filters have changed to ensure fresh filtered data
     
     try {
       console.log(`🔄 Fetching ${tabName} data with metrics:`, metricIDs);
