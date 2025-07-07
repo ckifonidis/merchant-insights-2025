@@ -3,15 +3,29 @@ import { useMemo } from 'react';
 // Removed unused imports: getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff
 import { UniversalMetricCard, UniversalBarChart, UniversalBreakdownChart, TimeSeriesChart } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
-import { useRevenueData } from '../../hooks/useTabData.js';
+import { useRevenueDataWithYearComparison } from '../../hooks/useTabData.js';
 import { transformRevenueData } from '../../services/transformations/revenueTransform.js';
 import CampaignButton from '../ui/CampaignButton';
 
 const Revenue = ({ filters }) => {
   const { t } = useTranslation();
   
-  // Get revenue data from API
-  const { data: revenueApiData, loading, error } = useRevenueData();
+  // Get revenue data from API with year-over-year comparison
+  const { 
+    current: revenueApiData, 
+    previous: previousRevenueData, 
+    dateRanges, 
+    loading, 
+    error,
+    hasPreviousYearData 
+  } = useRevenueDataWithYearComparison();
+
+  console.log('🎯 Revenue year-over-year data:', { 
+    current: revenueApiData, 
+    previous: previousRevenueData, 
+    dateRanges,
+    hasPrevious: hasPreviousYearData() 
+  });
   
   // Simple, clean transformations - let React Strict Mode do its thing
   const revenueByInterests = useMemo(() => {

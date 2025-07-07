@@ -21,6 +21,7 @@ import {
   convertMetricFiltersToAPI, 
   validateMetricFilters 
 } from '../data/metricFilters.js';
+import { getPreviousYearDateRange } from '../utils/dateHelpers.js';
 
 // Configuration for different environments
 const API_CONFIG = {
@@ -75,6 +76,92 @@ class AnalyticsService {
     console.log(`🔄 Transformed data for ${tabName}:`, transformedData);
 
     return transformedData;
+  }
+
+  /**
+   * Fetch current year and previous year data simultaneously
+   * Used for year-over-year comparisons
+   */
+  async fetchTabDataWithYearComparison(tabName, metricIDs, filters, options = {}) {
+    console.log(`🔄 AnalyticsService.fetchTabDataWithYearComparison called for ${tabName}`);
+    console.log(`📊 MetricIDs: ${metricIDs.join(', ')}`);
+    console.log(`🔍 Filters:`, filters);
+
+    const { metricSpecificFilters = {}, autoInferContext = true } = options;
+
+    // Calculate previous year date range
+    const previousYearDates = getPreviousYearDateRange(filters.startDate, filters.endDate);
+    
+    if (!previousYearDates.startDate || !previousYearDates.endDate) {
+      console.warn('⚠️ Could not calculate previous year dates, fetching current year only');
+      const currentData = await this.fetchTabData(tabName, metricIDs, filters, options);
+      return {
+        current: currentData,
+        previous: null
+      };
+    }
+
+    // Build requests for both current and previous year
+    const currentRequest = this.buildAnalyticsRequest({
+      metricIDs,
+      ...filters,
+      metricSpecificFilters,
+      context: autoInferContext ? tabName : null
+    });
+
+    const previousRequest = this.buildAnalyticsRequest({
+      metricIDs,
+      ...filters,
+      startDate: previousYearDates.startDate,
+      endDate: previousYearDates.endDate,
+      metricSpecificFilters,
+      context: autoInferContext ? tabName : null
+    });
+
+    console.log(`📅 Current year request: ${filters.startDate} to ${filters.endDate}`);
+    console.log(`📅 Previous year request: ${previousYearDates.startDate} to ${previousYearDates.endDate}`);
+
+    try {
+      // Execute both API calls in parallel
+      const [currentResponse, previousResponse] = await Promise.all([
+        this.queryAnalytics(currentRequest),
+        this.queryAnalytics(previousRequest)
+      ]);
+
+      console.log(`📥 Current year API response for ${tabName}:`, currentResponse);
+      console.log(`📥 Previous year API response for ${tabName}:`, previousResponse);
+
+      // Transform both responses
+      const currentData = transformTabData(tabName, currentResponse);
+      const previousData = transformTabData(`${tabName}_previous`, previousResponse);
+
+      console.log(`🔄 Current year transformed data for ${tabName}:`, currentData);
+      console.log(`🔄 Previous year transformed data for ${tabName}:`, previousData);
+
+      return {
+        current: currentData,
+        previous: previousData,
+        dateRanges: {
+          current: { startDate: filters.startDate, endDate: filters.endDate },
+          previous: { startDate: previousYearDates.startDate, endDate: previousYearDates.endDate }
+        }
+      };
+
+    } catch (error) {
+      console.error(`❌ Failed to load year-over-year data for ${tabName}:`, error);
+      
+      // Fallback: try to get at least current year data
+      try {
+        const currentData = await this.fetchTabData(tabName, metricIDs, filters, options);
+        return {
+          current: currentData,
+          previous: null,
+          error: `Previous year data unavailable: ${error.message}`
+        };
+      } catch (fallbackError) {
+        throw new Error(`Both current and previous year data failed: ${fallbackError.message}`);
+      }
+    }
   }
 
   /**

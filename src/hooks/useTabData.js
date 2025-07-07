@@ -1,6 +1,15 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTabData, selectTabData, selectTabLoading, selectTabError } from '../store/slices/analyticsSlice.js';
+import { 
+  fetchTabData, 
+  fetchTabDataWithYearComparison,
+  selectTabData, 
+  selectTabLoading, 
+  selectTabError,
+  selectTabYearOverYearData,
+  selectTabYearOverYearLoading,
+  selectTabYearOverYearError
+} from '../store/slices/analyticsSlice.js';
 import { 
   selectApiRequestParams, 
   selectFiltersChanged, 
@@ -100,6 +109,104 @@ export const useTabData = (tabName, metricIDs, options = DEFAULT_OPTIONS) => {
   };
 };
 
+/**
+ * Enhanced hook for fetching tab data with year-over-year comparison
+ * Used for Dashboard, Revenue, and Competition tabs
+ */
+export const useTabDataWithYearComparison = (tabName, metricIDs, options = DEFAULT_OPTIONS) => {
+  const dispatch = useDispatch();
+  
+  // Create a memoized selector instance for this specific tabName to prevent unnecessary rerenders
+  const selectYearOverYearDataForTab = useMemo(
+    () => (state) => selectTabYearOverYearData(state, tabName),
+    [tabName]
+  );
+  
+  // Get year-over-year data from Redux store using the memoized selector
+  const yearOverYearData = useSelector(selectYearOverYearDataForTab);
+  const filters = useSelector(selectApiRequestParams);
+  const filtersChanged = useSelector(selectFiltersChanged);
+  const selectedTab = useSelector(selectSelectedTab);
+  
+  // Options (use defaults for undefined values)
+  const { 
+    autoRefresh = DEFAULT_OPTIONS.autoRefresh, 
+    refreshInterval = DEFAULT_OPTIONS.refreshInterval,
+    customFilters = DEFAULT_OPTIONS.customFilters,
+    metricSpecificFilters = DEFAULT_OPTIONS.metricSpecificFilters,
+    autoInferContext = DEFAULT_OPTIONS.autoInferContext
+  } = options;
+  
+  // Year-over-year fetch function
+  const performYearOverYearFetch = useCallback(() => {
+    if (!metricIDs || metricIDs.length === 0) {
+      console.warn(`⚠️ No metricIDs provided for ${tabName} year-over-year comparison`);
+      return;
+    }
+
+    const effectiveFilters = customFilters || filters;
+    console.log(`🔄 Fetching year-over-year data for ${tabName}:`, { metricIDs, filters: effectiveFilters });
+    
+    dispatch(fetchTabDataWithYearComparison({ 
+      tabName, 
+      metricIDs, 
+      filters: effectiveFilters,
+      options: {
+        metricSpecificFilters,
+        autoInferContext
+      }
+    }));
+  }, [dispatch, tabName, metricIDs, filters, customFilters, metricSpecificFilters, autoInferContext]);
+
+  // Initial fetch - deduplication handled automatically
+  useEffect(() => {
+    performYearOverYearFetch();
+  }, [performYearOverYearFetch]);
+
+  // Filter change detection - only refresh active tab
+  useEffect(() => {
+    if (filtersChanged && (selectedTab === tabName || selectedTab === 'dashboard')) {
+      performYearOverYearFetch();
+      dispatch(markFiltersApplied()); // Mark filters as applied
+    }
+  }, [filtersChanged, selectedTab, tabName, performYearOverYearFetch, dispatch]);
+
+  // Auto-refresh logic
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      console.log(`🔄 Auto-refreshing year-over-year ${tabName} data...`);
+      performYearOverYearFetch();
+    }, refreshInterval);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, refreshInterval, performYearOverYearFetch]);
+
+  // Manual refresh function
+  const refresh = useCallback(() => {
+    console.log(`🔄 Manually refreshing year-over-year ${tabName} data...`);
+    performYearOverYearFetch();
+  }, [performYearOverYearFetch]);
+
+  return {
+    current: yearOverYearData.current,
+    previous: yearOverYearData.previous,
+    dateRanges: yearOverYearData.dateRanges,
+    loading: yearOverYearData.loading,
+    error: yearOverYearData.error,
+    refresh,
+    
+    // For backward compatibility - current data as default
+    data: yearOverYearData.current,
+    
+    // Helper function to check if previous year data is available
+    hasPreviousYearData: () => {
+      return yearOverYearData.previous && Object.keys(yearOverYearData.previous).length > 0;
+    }
+  };
+};
+
 // Static metric arrays to prevent infinite loops
 const DASHBOARD_METRIC_IDS = Object.freeze([
   'total_revenue',
@@ -115,6 +222,13 @@ const DASHBOARD_METRIC_IDS = Object.freeze([
  */
 export const useDashboardData = (options = DEFAULT_OPTIONS) => {
   return useTabData('dashboard', DASHBOARD_METRIC_IDS, options);
+};
+
+/**
+ * Hook for Dashboard tab data with year-over-year comparison
+ */
+export const useDashboardDataWithYearComparison = (options = DEFAULT_OPTIONS) => {
+  return useTabDataWithYearComparison('dashboard', DASHBOARD_METRIC_IDS, options);
 };
 
 // Static array with Object.freeze to ensure immutability
@@ -152,6 +266,13 @@ export const useRevenueData = (options = DEFAULT_OPTIONS) => {
 };
 
 /**
+ * Hook for Revenue tab data with year-over-year comparison
+ */
+export const useRevenueDataWithYearComparison = (options = DEFAULT_OPTIONS) => {
+  return useTabDataWithYearComparison('revenue', REVENUE_METRIC_IDS, options);
+};
+
+/**
  * Hook for Demographics tab data
  */
 export const useDemographicsData = (options = DEFAULT_OPTIONS) => {
@@ -163,6 +284,13 @@ export const useDemographicsData = (options = DEFAULT_OPTIONS) => {
  */
 export const useCompetitionData = (options = DEFAULT_OPTIONS) => {
   return useTabData('competition', COMPETITION_METRIC_IDS, options);
+};
+
+/**
+ * Hook for Competition tab data with year-over-year comparison
+ */
+export const useCompetitionDataWithYearComparison = (options = DEFAULT_OPTIONS) => {
+  return useTabDataWithYearComparison('competition', COMPETITION_METRIC_IDS, options);
 };
 
 /**

@@ -8,9 +8,15 @@ import { transformDashboardData, validateDashboardData } from './dashboardTransf
 // Tab-specific transformation functions
 const transformations = {
   dashboard: transformDashboardData,
+  dashboard_previous: transformDashboardData, // Use same transformation for previous year data
   revenue: (data) => {
     // For now, return the raw API response so components can transform it themselves
     console.log('🔄 Revenue transformation: passing through raw API data');
+    return data;
+  },
+  revenue_previous: (data) => {
+    // Use same transformation for previous year revenue data
+    console.log('🔄 Previous year revenue transformation: passing through raw API data');
     return data;
   },
   demographics: (data) => {
@@ -18,9 +24,19 @@ const transformations = {
     console.log('🔄 Demographics transformation not implemented yet');
     return {};
   },
+  demographics_previous: (data) => {
+    // TODO: Implement demographics transformation for previous year
+    console.log('🔄 Previous year demographics transformation not implemented yet');
+    return {};
+  },
   competition: (data) => {
     // TODO: Implement competition transformation
     console.log('🔄 Competition transformation not implemented yet');
+    return {};
+  },
+  competition_previous: (data) => {
+    // TODO: Implement competition transformation for previous year
+    console.log('🔄 Previous year competition transformation not implemented yet');
     return {};
   }
 };
@@ -28,9 +44,13 @@ const transformations = {
 // Tab-specific validation functions
 const validators = {
   dashboard: validateDashboardData,
+  dashboard_previous: validateDashboardData,
   revenue: (data) => true, // TODO: Implement
+  revenue_previous: (data) => true, // TODO: Implement
   demographics: (data) => true, // TODO: Implement
-  competition: (data) => true // TODO: Implement
+  demographics_previous: (data) => true, // TODO: Implement
+  competition: (data) => true, // TODO: Implement
+  competition_previous: (data) => true // TODO: Implement
 };
 
 // Main transformation router

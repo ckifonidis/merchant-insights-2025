@@ -2,10 +2,28 @@ import { useTranslation } from 'react-i18next';
 import { competitionMetrics, weeklyTurnoverData } from '../../data/mockData.js';
 import { UniversalMetricCard, UniversalTimelineChart, UniversalCalendarHeatmap } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
+import { useCompetitionDataWithYearComparison } from '../../hooks/useTabData.js';
 import CampaignButton from '../ui/CampaignButton';
 
 const Competition = ({ filters }) => {
   const { t } = useTranslation();
+
+  // Get competition data from API with year-over-year comparison
+  const { 
+    current: competitionApiData, 
+    previous: previousCompetitionData, 
+    dateRanges, 
+    loading, 
+    error,
+    hasPreviousYearData 
+  } = useCompetitionDataWithYearComparison();
+
+  console.log('🎯 Competition year-over-year data:', { 
+    current: competitionApiData, 
+    previous: previousCompetitionData, 
+    dateRanges,
+    hasPrevious: hasPreviousYearData() 
+  });
 
   // Icons for metrics
   const RevenueIcon = () => (

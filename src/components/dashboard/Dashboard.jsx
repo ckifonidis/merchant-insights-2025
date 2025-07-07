@@ -3,11 +3,26 @@ import { getIcon } from '../../utils/configHelpers.jsx';
 import { UniversalMetricCard, TimeSeriesChart } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
 import CampaignButton from '../ui/CampaignButton';
-import { useDashboardData } from '../../hooks/useTabData.js';
+import { useDashboardDataWithYearComparison } from '../../hooks/useTabData.js';
 
 const Dashboard = ({ filters }) => {
   const { t } = useTranslation();
-  const { data, loading, error, refresh } = useDashboardData();
+  const { 
+    current: data, 
+    previous: previousData, 
+    dateRanges, 
+    loading, 
+    error, 
+    refresh,
+    hasPreviousYearData 
+  } = useDashboardDataWithYearComparison();
+
+  console.log('🎯 Dashboard year-over-year data:', { 
+    current: data, 
+    previous: previousData, 
+    dateRanges,
+    hasPrevious: hasPreviousYearData() 
+  });
 
 
 
