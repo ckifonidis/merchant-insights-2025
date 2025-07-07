@@ -120,6 +120,9 @@ export const useDashboardData = (options = DEFAULT_OPTIONS) => {
 // Static array with Object.freeze to ensure immutability
 const REVENUE_METRIC_IDS = Object.freeze([
   'total_revenue',
+  'avg_daily_revenue',
+  'avg_ticket_per_user',
+  'goformore_amount',
   'rewarded_amount',
   'redeemed_amount', 
   'revenue_per_day',

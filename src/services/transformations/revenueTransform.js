@@ -188,10 +188,71 @@ export const transformRevenueByChannel = (apiResponse) => {
 };
 
 /**
+ * Transform revenue scalar metrics API response to UI format for metric cards
+ * @param {Object} apiResponse - API response with scalar metrics
+ * @returns {Object} Object with metric ID as key and {merchant, competition} values
+ */
+export const transformRevenueScalarMetrics = (apiResponse) => {
+  console.log('🔄 Transforming revenue scalar metrics:', apiResponse);
+  
+  // Handle both full API response and Redux store format
+  let metrics;
+  if (apiResponse?.payload?.metrics) {
+    metrics = apiResponse.payload.metrics;
+  } else if (Array.isArray(apiResponse)) {
+    metrics = apiResponse;
+  } else {
+    console.warn('⚠️ No metrics data in scalar response', apiResponse);
+    return {};
+  }
+  
+  const result = {};
+  
+  // Group metrics by metricID
+  const metricGroups = {};
+  metrics.forEach(metric => {
+    if (!metricGroups[metric.metricID]) {
+      metricGroups[metric.metricID] = {};
+    }
+    
+    if (metric.merchantId === 'competition') {
+      metricGroups[metric.metricID].competition = parseFloat(metric.scalarValue) || 0;
+    } else {
+      metricGroups[metric.metricID].merchant = parseFloat(metric.scalarValue) || 0;
+    }
+  });
+  
+  // Transform to standard format with value, change, valueType
+  Object.keys(metricGroups).forEach(metricID => {
+    const data = metricGroups[metricID];
+    
+    // Calculate percentage change (mock data for now - would come from API in production)
+    const merchantChange = (Math.random() - 0.5) * 20; // -10% to +10%
+    const competitionChange = (Math.random() - 0.5) * 20;
+    
+    result[metricID] = {
+      merchant: {
+        value: data.merchant || 0,
+        change: merchantChange,
+        valueType: metricID.includes('amount') || metricID.includes('revenue') ? 'currency' : 'number'
+      },
+      competition: {
+        value: data.competition || 0,
+        change: competitionChange,
+        valueType: metricID.includes('amount') || metricID.includes('revenue') ? 'currency' : 'number'
+      }
+    };
+  });
+  
+  console.log('✅ Transformed scalar metrics:', result);
+  return result;
+};
+
+/**
  * Main revenue transformation function
  * Routes different types of revenue data to appropriate transformers
  * @param {Object} apiResponse - API response
- * @param {String} dataType - Type of revenue data ('interests', 'channel', 'metrics')
+ * @param {String} dataType - Type of revenue data ('interests', 'channel', 'metrics', 'scalars')
  * @returns {Object} Transformed data
  */
 export const transformRevenueData = (apiResponse, dataType = 'metrics') => {
@@ -203,6 +264,8 @@ export const transformRevenueData = (apiResponse, dataType = 'metrics') => {
         return transformRevenueByInterests(apiResponse);
       case 'channel':
         return transformRevenueByChannel(apiResponse);
+      case 'scalars':
+        return transformRevenueScalarMetrics(apiResponse);
       case 'metrics':
       default:
         // For regular metrics, just return the metrics array
@@ -212,6 +275,7 @@ export const transformRevenueData = (apiResponse, dataType = 'metrics') => {
     console.error(`❌ Revenue transformation failed for ${dataType}:`, error);
     return dataType === 'interests' ? [] : 
            dataType === 'channel' ? { merchant: { physical: 0, ecommerce: 0 }, competitor: { physical: 0, ecommerce: 0 } } :
+           dataType === 'scalars' ? {} :
            [];
   }
 };
@@ -246,5 +310,6 @@ export default {
   transformRevenueData,
   transformRevenueByInterests,
   transformRevenueByChannel,
+  transformRevenueScalarMetrics,
   validateRevenueData
 };

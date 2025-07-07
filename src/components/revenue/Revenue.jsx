@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
-import { getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff } from '../../utils/configHelpers.jsx';
+// Removed unused imports: getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff
 import { UniversalMetricCard, UniversalBarChart, UniversalBreakdownChart, TimeSeriesChart } from '../ui';
 import { METRIC_VARIANTS } from '../../utils/constants';
 import { useRevenueData } from '../../hooks/useTabData.js';
@@ -28,6 +28,11 @@ const Revenue = ({ filters }) => {
     }
     return transformRevenueData(revenueApiData, 'channel');
   }, [revenueApiData]);
+
+  const revenueScalarMetrics = useMemo(() => {
+    if (!revenueApiData?.payload?.metrics) return {};
+    return transformRevenueData(revenueApiData, 'scalars');
+  }, [revenueApiData]);
   
   // Clean development logging
   if (import.meta.env.DEV) {
@@ -35,7 +40,8 @@ const Revenue = ({ filters }) => {
       loading,
       hasData: !!revenueApiData?.payload?.metrics,
       interestsCount: revenueByInterests?.length,
-      channelData: !!revenueByChannelData
+      channelData: !!revenueByChannelData,
+      scalarMetricsCount: Object.keys(revenueScalarMetrics).length
     });
   }
 
@@ -53,83 +59,119 @@ const Revenue = ({ filters }) => {
         </p>
       </div>
 
-      {/* Revenue Metrics - Inlined */}
+      {/* Revenue Metrics - Using API Data */}
       <div className="space-y-6 mb-8">
-        {(() => {
-          const tabConfig = getTabConfig('revenue');
-          if (!tabConfig) return null;
-
-          const filteredMetrics = getFilteredMetrics(tabConfig.metrics);
-          
-          // Group metrics: regular metrics and Go For More metrics
-          const regularMetrics = filteredMetrics.filter(metric => !metric.conditional);
-          const goForMoreMetrics = filteredMetrics.filter(metric => metric.conditional === 'goForMore');
-
-          return (
-            <>
-              {/* Regular Revenue Metrics */}
-              <div className="space-y-4">
-                {regularMetrics.map((metric) => {
-                  const iconElement = (
-                    <div className={getColorClass(metric.color)}>
-                      {getIcon(metric.icon, "w-5 h-5")}
-                    </div>
-                  );
-
-                  return (
-                    <UniversalMetricCard
-                      key={metric.id}
-                      variant={METRIC_VARIANTS.detailed}
-                      title={t(metric.name)}
-                      icon={iconElement}
-                      merchantData={{
-                        value: metric.merchant.value,
-                        change: metric.merchant.valueDiff,
-                        valueType: metric.valueType
-                      }}
-                      competitorData={metric.supportsCompetition ? {
-                        value: metric.competitor.value,
-                        change: metric.competitor.valueDiff,
-                        valueType: metric.valueType
-                      } : {}}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Go For More Metrics */}
-              {goForMoreMetrics.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">
-                    {t('revenue.goForMore')}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {goForMoreMetrics.map((metric) => {
-                      const iconElement = (
-                        <div className={getColorClass(metric.color)}>
-                          {getIcon(metric.icon, "w-5 h-5")}
-                        </div>
-                      );
-
-                      return (
-                        <UniversalMetricCard
-                          key={metric.id}
-                          variant={METRIC_VARIANTS.single}
-                          title={t(metric.name)}
-                          subtitle={t('dashboard.merchant')}
-                          icon={iconElement}
-                          value={formatValue(metric.merchant.value, metric.valueType)}
-                          change={formatValueDiff(metric.merchant.valueDiff, metric.merchant.valueDiffType)}
-                          iconBackground="bg-gray-50"
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-gray-500">Loading revenue metrics...</div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-red-500">Error loading metrics: {error}</div>
+          </div>
+        ) : (
+          <>
+            {/* Regular Revenue Metrics */}
+            <div className="space-y-4">
+              {/* Total Revenue */}
+              {revenueScalarMetrics.total_revenue && (
+                <UniversalMetricCard
+                  variant={METRIC_VARIANTS.detailed}
+                  title={t('revenue.totalRevenue')}
+                  icon={<div className="text-blue-600"><div className="w-5 h-5">💰</div></div>}
+                  merchantData={revenueScalarMetrics.total_revenue.merchant}
+                  competitorData={revenueScalarMetrics.total_revenue.competition}
+                />
               )}
-            </>
-          );
-        })()}
+              
+              {/* Average Daily Revenue */}
+              {revenueScalarMetrics.avg_daily_revenue && (
+                <UniversalMetricCard
+                  variant={METRIC_VARIANTS.detailed}
+                  title={t('revenue.avgDailyRevenue')}
+                  icon={<div className="text-green-600"><div className="w-5 h-5">📈</div></div>}
+                  merchantData={revenueScalarMetrics.avg_daily_revenue.merchant}
+                  competitorData={revenueScalarMetrics.avg_daily_revenue.competition}
+                />
+              )}
+              
+              {/* Average Transaction */}
+              {revenueScalarMetrics.avg_ticket_per_user && (
+                <UniversalMetricCard
+                  variant={METRIC_VARIANTS.detailed}
+                  title={t('revenue.avgTransaction')}
+                  icon={<div className="text-purple-600"><div className="w-5 h-5">🎫</div></div>}
+                  merchantData={revenueScalarMetrics.avg_ticket_per_user.merchant}
+                  competitorData={revenueScalarMetrics.avg_ticket_per_user.competition}
+                />
+              )}
+            </div>
+
+            {/* Go For More Metrics */}
+            {(revenueScalarMetrics.goformore_amount || revenueScalarMetrics.rewarded_amount || revenueScalarMetrics.redeemed_amount) && (
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  {t('revenue.goForMore')}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Go For More Total */}
+                  {revenueScalarMetrics.goformore_amount && (
+                    <UniversalMetricCard
+                      variant={METRIC_VARIANTS.single}
+                      title={t('revenue.goForMoreTotal')}
+                      subtitle={t('dashboard.merchant')}
+                      icon={<div className="text-orange-600"><div className="w-5 h-5">🎁</div></div>}
+                      value={new Intl.NumberFormat('el-GR', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(revenueScalarMetrics.goformore_amount.merchant.value)}
+                      change={`${revenueScalarMetrics.goformore_amount.merchant.change > 0 ? '+' : ''}${revenueScalarMetrics.goformore_amount.merchant.change.toFixed(1)}%`}
+                      iconBackground="bg-gray-50"
+                    />
+                  )}
+                  
+                  {/* Rewarded Amount */}
+                  {revenueScalarMetrics.rewarded_amount && (
+                    <UniversalMetricCard
+                      variant={METRIC_VARIANTS.single}
+                      title={t('revenue.rewarded')}
+                      subtitle={t('dashboard.merchant')}
+                      icon={<div className="text-green-600"><div className="w-5 h-5">💰</div></div>}
+                      value={new Intl.NumberFormat('el-GR', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(revenueScalarMetrics.rewarded_amount.merchant.value)}
+                      change={`${revenueScalarMetrics.rewarded_amount.merchant.change > 0 ? '+' : ''}${revenueScalarMetrics.rewarded_amount.merchant.change.toFixed(1)}%`}
+                      iconBackground="bg-gray-50"
+                    />
+                  )}
+                  
+                  {/* Redeemed Amount */}
+                  {revenueScalarMetrics.redeemed_amount && (
+                    <UniversalMetricCard
+                      variant={METRIC_VARIANTS.single}
+                      title={t('revenue.redeemed')}
+                      subtitle={t('dashboard.merchant')}
+                      icon={<div className="text-red-600"><div className="w-5 h-5">🎫</div></div>}
+                      value={new Intl.NumberFormat('el-GR', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(revenueScalarMetrics.redeemed_amount.merchant.value)}
+                      change={`${revenueScalarMetrics.redeemed_amount.merchant.change > 0 ? '+' : ''}${revenueScalarMetrics.redeemed_amount.merchant.change.toFixed(1)}%`}
+                      iconBackground="bg-gray-50"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Revenue Charts - Using TimeSeriesChart */}

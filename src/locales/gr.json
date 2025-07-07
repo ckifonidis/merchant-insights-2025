@@ -69,14 +69,19 @@
     "totalRevenue": "Συνολικά Έσοδα",
     "avgDailyRevenue": "Μέσα Ημερήσια Έσοδα",
     "avgTransaction": "Μέσο Ποσό ανά Συναλλαγή",
+    "goForMore": "Go For More",
+    "goForMoreTotal": "Συνολικά Έσοδα Go For More",
+    "rewarded": "Συνολικές Ανταμοιβές",
+    "redeemed": "Συνολικές Εξαργυρώσεις",
     "goForMoreRevenue": "Συνολικά Έσοδα",
     "goForMoreRewarded": "Συνολικό Ποσό Ανταμοιβών",
     "goForMoreRedeemed": "Συνολικό Ποσό Εξαργύρωσης",
     "revenueTrend": "Τάση Εσόδων",
     "revenueChange": "Μεταβολή Εσόδων % από Πέρυσι",
+    "trends": "Τάσεις Εσόδων",
+    "changes": "Μεταβολές Εσόδων",
     "byShoppingInterests": "Έσοδα ανά Ενδιαφέροντα Αγορών",
-    "byChannel": "Έσοδα ανά Κανάλι",
-    "goForMore": "Go For More"
+    "byChannel": "Έσοδα ανά Κανάλι"
   },
   "demographics": {
     "title": "Αναλυτικά Πελατών",

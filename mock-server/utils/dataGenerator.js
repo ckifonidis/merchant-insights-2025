@@ -52,6 +52,18 @@ function generateMetricResponse(metricID, options = {}) {
         scalarValue: generateScalarValue('avgTicket', isCompetition)
       };
       
+    case 'avg_daily_revenue':
+      return {
+        ...baseMetric,
+        scalarValue: generateScalarValue('avgDailyRevenue', isCompetition)
+      };
+      
+    case 'goformore_amount':
+      return {
+        ...baseMetric,
+        scalarValue: generateScalarValue('goformoreAmount', isCompetition)
+      };
+      
     case 'rewarded_amount':
       return {
         ...baseMetric,
@@ -244,6 +256,10 @@ function generateScalarValue(type, isCompetition = false) {
       return Math.floor((Math.random() * 40000 + 25000) * competitionMultiplier).toString();
     case 'avgTicket':
       return (Math.random() * 80 + 40 * competitionMultiplier).toFixed(2);
+    case 'avgDailyRevenue':
+      return (Math.random() * 50000 + 30000 * competitionMultiplier).toFixed(2);
+    case 'goformoreAmount':
+      return (Math.random() * 800000 + 400000 * competitionMultiplier).toFixed(2);
     case 'rewardedAmount':
       return (Math.random() * 500000 + 200000 * competitionMultiplier).toFixed(2);
     case 'redeemedAmount':

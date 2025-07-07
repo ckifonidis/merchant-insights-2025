@@ -26,6 +26,10 @@ export const METRIC_IDS = {
   TOTAL_REVENUE: 'total_revenue',
   TOTAL_TRANSACTIONS: 'total_transactions',
   AVG_TICKET_PER_USER: 'avg_ticket_per_user',
+  AVG_DAILY_REVENUE: 'avg_daily_revenue',
+  
+  // Go For More Metrics
+  GOFORMORE_AMOUNT: 'goformore_amount',
   
   // Customer Analytics (Series Data)
   CONVERTED_CUSTOMERS_BY_ACTIVITY: 'converted_customers_by_activity',
