@@ -189,7 +189,7 @@ export const useTabDataWithYearComparison = (tabName, metricIDs, options = DEFAU
     performYearOverYearFetch();
   }, [performYearOverYearFetch]);
 
-  return {
+  const hookResult = {
     current: yearOverYearData.current,
     previous: yearOverYearData.previous,
     dateRanges: yearOverYearData.dateRanges,
@@ -205,6 +205,8 @@ export const useTabDataWithYearComparison = (tabName, metricIDs, options = DEFAU
       return yearOverYearData.previous && Object.keys(yearOverYearData.previous).length > 0;
     }
   };
+  
+  return hookResult;
 };
 
 // Static metric arrays to prevent infinite loops

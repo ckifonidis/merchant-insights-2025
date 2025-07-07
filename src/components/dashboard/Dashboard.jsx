@@ -17,12 +17,6 @@ const Dashboard = ({ filters }) => {
     hasPreviousYearData 
   } = useDashboardDataWithYearComparison();
 
-  console.log('🎯 Dashboard year-over-year data:', { 
-    current: data, 
-    previous: previousData, 
-    dateRanges,
-    hasPrevious: hasPreviousYearData() 
-  });
 
 
 
@@ -54,49 +48,49 @@ const Dashboard = ({ filters }) => {
         <p className="text-gray-600">{t('dashboard.subtitle')}</p>
       </div>
 
-      {/* Dashboard Metrics - Using Redux Store */}
+      {/* Dashboard Metrics - Auto-calculating YoY from API data */}
       <div className="space-y-4 mb-8">
-        {data.totalRevenue && (
-          <UniversalMetricCard
-            variant={METRIC_VARIANTS.detailed}
-            title={t('dashboard.totalRevenue')}
-            icon={
-              <div className="text-green-600">
-                {getIcon('dollar-sign', "w-5 h-5")}
-              </div>
-            }
-            merchantData={data.totalRevenue.merchant}
-            competitorData={data.totalRevenue.competitor?.value ? data.totalRevenue.competitor : undefined}
-          />
-        )}
+        <UniversalMetricCard
+          variant={METRIC_VARIANTS.detailed}
+          title={t('dashboard.totalRevenue')}
+          icon={
+            <div className="text-green-600">
+              {getIcon('dollar-sign', "w-5 h-5")}
+            </div>
+          }
+          metricId="total_revenue"
+          currentData={data}
+          previousData={previousData}
+          valueType="currency"
+        />
         
-        {data.totalTransactions && (
-          <UniversalMetricCard
-            variant={METRIC_VARIANTS.detailed}
-            title={t('dashboard.totalTransactions')}
-            icon={
-              <div className="text-blue-600">
-                {getIcon('shopping-bag', "w-5 h-5")}
-              </div>
-            }
-            merchantData={data.totalTransactions.merchant}
-            competitorData={data.totalTransactions.competitor?.value ? data.totalTransactions.competitor : undefined}
-          />
-        )}
+        <UniversalMetricCard
+          variant={METRIC_VARIANTS.detailed}
+          title={t('dashboard.totalTransactions')}
+          icon={
+            <div className="text-blue-600">
+              {getIcon('shopping-bag', "w-5 h-5")}
+            </div>
+          }
+          metricId="total_transactions"
+          currentData={data}
+          previousData={previousData}
+          valueType="number"
+        />
         
-        {data.avgTransaction && (
-          <UniversalMetricCard
-            variant={METRIC_VARIANTS.detailed}
-            title={t('dashboard.avgTransaction')}
-            icon={
-              <div className="text-purple-600">
-                {getIcon('pie-chart', "w-5 h-5")}
-              </div>
-            }
-            merchantData={data.avgTransaction.merchant}
-            competitorData={data.avgTransaction.competitor?.value ? data.avgTransaction.competitor : undefined}
-          />
-        )}
+        <UniversalMetricCard
+          variant={METRIC_VARIANTS.detailed}
+          title={t('dashboard.avgTransaction')}
+          icon={
+            <div className="text-purple-600">
+              {getIcon('pie-chart', "w-5 h-5")}
+            </div>
+          }
+          metricId="avg_ticket_per_user"
+          currentData={data}
+          previousData={previousData}
+          valueType="currency"
+        />
       </div>
 
       {/* Dashboard Charts - Using unified TimeSeriesChart */}

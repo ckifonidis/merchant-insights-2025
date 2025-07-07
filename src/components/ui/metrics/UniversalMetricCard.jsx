@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ChangeIndicator from './ChangeIndicator';
 import { formatValue } from '../../../utils/formatters';
 import { CSS_CLASSES, METRIC_VARIANTS } from '../../../utils/constants';
+import { prepareMetricCardData } from '../../../utils/yearOverYearHelpers';
 
 /**
  * Universal metric card that consolidates all metric display patterns
@@ -26,6 +27,11 @@ const UniversalMetricCard = ({
   // Comparison variant props
   merchantData = {},
   competitorData = {},
+  
+  // Year-over-year data props (for detailed variant)
+  metricId,
+  currentData,
+  previousData,
   
   // Additional options
   showIcon = true,
@@ -137,8 +143,25 @@ const UniversalMetricCard = ({
     );
   }
 
-  // Detailed variant (like DashboardMetrics cards) - Original design
+  // Detailed variant (like DashboardMetrics cards) - Auto-calculate YoY from API data
   if (variant === METRIC_VARIANTS.detailed) {
+    // Auto-calculate YoY data if metricId and year data provided
+    let finalMerchantData = merchantData;
+    let finalCompetitorData = competitorData;
+    
+    
+    if (metricId && currentData && previousData) {
+      const autoCalculatedData = prepareMetricCardData({
+        metricId,
+        currentData,
+        previousData,
+        valueType
+      });
+      
+      finalMerchantData = autoCalculatedData.merchantData;
+      finalCompetitorData = autoCalculatedData.competitorData;
+    }
+    
     return (
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <h3 className="text-base font-semibold text-gray-700 mb-3 pb-2 border-b border-gray-100">
@@ -156,14 +179,14 @@ const UniversalMetricCard = ({
               </p>
               <div className="flex items-center">
                 <h3 className="text-2xl font-bold">
-                  {formatValue(merchantData.value, merchantData.valueType || valueType)}
+                  {finalMerchantData.value !== null ? formatValue(finalMerchantData.value, finalMerchantData.valueType || valueType) : '-'}
                 </h3>
-                {merchantData.change !== undefined && (
+                {finalMerchantData.change !== null && finalMerchantData.change !== undefined && (
                   <div className={`rounded-full p-1.5 ml-2 ${
-                    merchantData.change > 0 ? 'bg-green-100' : 'bg-red-100'
+                    finalMerchantData.change > 0 ? 'bg-green-100' : 'bg-red-100'
                   }`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={merchantData.change > 0 ? 'text-green-600' : 'text-red-600'}>
-                      {merchantData.change > 0 ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={finalMerchantData.change > 0 ? 'text-green-600' : 'text-red-600'}>
+                      {finalMerchantData.change > 0 ? (
                         <>
                           <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
                           <polyline points="16 7 22 7 22 13"></polyline>
@@ -178,56 +201,58 @@ const UniversalMetricCard = ({
                   </div>
                 )}
               </div>
-              {merchantData.change !== undefined && (
-                <div className="text-sm text-gray-600">
-                  {merchantData.change > 0 ? '+' : ''}{merchantData.change}% {t('dashboard.vsLastYear')}
-                </div>
-              )}
+              <div className="text-sm text-gray-600">
+                {finalMerchantData.change !== null && finalMerchantData.change !== undefined ? (
+                  `${finalMerchantData.change > 0 ? '+' : ''}${finalMerchantData.change.toFixed(1)}% ${t('dashboard.vsLastYear')}`
+                ) : (
+                  `- ${t('dashboard.vsLastYear')}`
+                )}
+              </div>
             </div>
           </div>
 
           {/* Competition Section */}
-          {competitorData.value !== undefined && (
-            <div className="flex items-start w-full">
-              <div className="icon-circle bg-gray-50 mt-1">
-                {icon}
-              </div>
-              <div className="ml-3 flex-grow">
-                <p className="text-sm font-medium text-gray-700">
-                  {t('dashboard.competition')}
-                </p>
-                <div className="flex items-center">
-                  <h3 className="text-2xl font-bold">
-                    {formatValue(competitorData.value, competitorData.valueType || valueType)}
-                  </h3>
-                  {competitorData.change !== undefined && (
-                    <div className={`rounded-full p-1.5 ml-2 ${
-                      competitorData.change > 0 ? 'bg-green-100' : 'bg-red-100'
-                    }`}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={competitorData.change > 0 ? 'text-green-600' : 'text-red-600'}>
-                        {competitorData.change > 0 ? (
-                          <>
-                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                            <polyline points="16 7 22 7 22 13"></polyline>
-                          </>
-                        ) : (
-                          <>
-                            <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
-                            <polyline points="16 17 22 17 22 11"></polyline>
-                          </>
-                        )}
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                {competitorData.change !== undefined && (
-                  <div className="text-sm text-gray-600">
-                    {competitorData.change > 0 ? '+' : ''}{competitorData.change}% {t('dashboard.vsLastYear')}
+          <div className="flex items-start w-full">
+            <div className="icon-circle bg-gray-50 mt-1">
+              {icon}
+            </div>
+            <div className="ml-3 flex-grow">
+              <p className="text-sm font-medium text-gray-700">
+                {t('dashboard.competition')}
+              </p>
+              <div className="flex items-center">
+                <h3 className="text-2xl font-bold">
+                  {finalCompetitorData.value !== null ? formatValue(finalCompetitorData.value, finalCompetitorData.valueType || valueType) : '-'}
+                </h3>
+                {finalCompetitorData.change !== null && finalCompetitorData.change !== undefined && (
+                  <div className={`rounded-full p-1.5 ml-2 ${
+                    finalCompetitorData.change > 0 ? 'bg-green-100' : 'bg-red-100'
+                  }`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={finalCompetitorData.change > 0 ? 'text-green-600' : 'text-red-600'}>
+                      {finalCompetitorData.change > 0 ? (
+                        <>
+                          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                          <polyline points="16 7 22 7 22 13"></polyline>
+                        </>
+                      ) : (
+                        <>
+                          <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
+                          <polyline points="16 17 22 17 22 11"></polyline>
+                        </>
+                      )}
+                    </svg>
                   </div>
                 )}
               </div>
+              <div className="text-sm text-gray-600">
+                {finalCompetitorData.change !== null && finalCompetitorData.change !== undefined ? (
+                  `${finalCompetitorData.change > 0 ? '+' : ''}${finalCompetitorData.change.toFixed(1)}% ${t('dashboard.vsLastYear')}`
+                ) : (
+                  `- ${t('dashboard.vsLastYear')}`
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     );
