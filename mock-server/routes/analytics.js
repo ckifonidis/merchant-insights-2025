@@ -44,6 +44,15 @@ router.post('/QUERY', (req, res) => {
     let allMetrics = [];
     
     metricIDs.forEach(metricID => {
+      // List of merchant-only metrics (Go For More and loyalty program metrics)
+      const merchantOnlyMetrics = [
+        'goformore_amount',
+        'rewarded_amount', 
+        'redeemed_amount',
+        'rewarded_points',
+        'redeemed_points'
+      ];
+      
       // Generate merchant data with filters
       const merchantData = generateFilterAwareMetric(metricID, {
         filterValues,
@@ -53,16 +62,20 @@ router.post('/QUERY', (req, res) => {
         isCompetition: false
       });
       
-      // Generate competition data with same filters
-      const competitionData = generateFilterAwareMetric(metricID, {
-        filterValues,
-        startDate,
-        endDate,
-        merchantId: 'competition',
-        isCompetition: true
-      });
+      allMetrics.push(merchantData);
       
-      allMetrics.push(merchantData, competitionData);
+      // Only generate competition data for non-merchant-only metrics
+      if (!merchantOnlyMetrics.includes(metricID)) {
+        const competitionData = generateFilterAwareMetric(metricID, {
+          filterValues,
+          startDate,
+          endDate,
+          merchantId: 'competition',
+          isCompetition: true
+        });
+        
+        allMetrics.push(competitionData);
+      }
     });
 
     console.log(`✅ Generated ${allMetrics.length} metric responses`);

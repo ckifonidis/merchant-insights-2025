@@ -381,13 +381,27 @@ function hasCompetitionFilter(filterValues) {
 }
 
 function generateResponseWithBothMerchantAndCompetition(metricID, options) {
+  // List of merchant-only metrics (Go For More and loyalty program metrics)
+  const merchantOnlyMetrics = [
+    'goformore_amount',
+    'rewarded_amount', 
+    'redeemed_amount',
+    'rewarded_points',
+    'redeemed_points'
+  ];
+  
   // Generate merchant data
   const merchantData = generateMetricResponse(metricID, {
     ...options,
     merchantId: 'merchant'
   });
   
-  // Generate competition data
+  // For merchant-only metrics, don't generate competition data
+  if (merchantOnlyMetrics.includes(metricID)) {
+    return [merchantData];
+  }
+  
+  // Generate competition data for all other metrics
   const competitionData = generateMetricResponse(metricID, {
     ...options,
     merchantId: 'competition'

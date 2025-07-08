@@ -212,11 +212,12 @@ export const transformRevenueScalarMetrics = (apiResponse) => {
   const metricGroups = {};
   metrics.forEach(metric => {
     if (!metricGroups[metric.metricID]) {
-      metricGroups[metric.metricID] = {};
+      metricGroups[metric.metricID] = { merchant: 0, competition: null };
     }
     
     if (metric.merchantId === 'competition') {
-      metricGroups[metric.metricID].competition = parseFloat(metric.scalarValue) || 0;
+      // Handle null values for Go For More metrics (merchant-only)
+      metricGroups[metric.metricID].competition = metric.scalarValue === null ? null : (parseFloat(metric.scalarValue) || 0);
     } else {
       metricGroups[metric.metricID].merchant = parseFloat(metric.scalarValue) || 0;
     }
@@ -236,11 +237,11 @@ export const transformRevenueScalarMetrics = (apiResponse) => {
         change: merchantChange,
         valueType: metricID.includes('amount') || metricID.includes('revenue') ? 'currency' : 'number'
       },
-      competition: {
+      competition: data.competition !== null && data.competition !== undefined ? {
         value: data.competition || 0,
         change: competitionChange,
         valueType: metricID.includes('amount') || metricID.includes('revenue') ? 'currency' : 'number'
-      }
+      } : null
     };
   });
   

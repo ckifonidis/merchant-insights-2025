@@ -48,6 +48,19 @@ const Revenue = ({ filters }) => {
     return transformRevenueData(revenueApiData, 'scalars');
   }, [revenueApiData]);
   
+  // Metric configuration for year-over-year support
+  const metricConfig = {
+    // Standard revenue metrics support YoY (use detailed variant)
+    total_revenue: { supportsYoY: true, variant: METRIC_VARIANTS.detailed },
+    avg_daily_revenue: { supportsYoY: true, variant: METRIC_VARIANTS.detailed },
+    avg_ticket_per_user: { supportsYoY: true, variant: METRIC_VARIANTS.detailed },
+    
+    // Go For More metrics are merchant-only, no YoY (use single variant)
+    goformore_amount: { supportsYoY: false, variant: METRIC_VARIANTS.single },
+    rewarded_amount: { supportsYoY: false, variant: METRIC_VARIANTS.single },
+    redeemed_amount: { supportsYoY: false, variant: METRIC_VARIANTS.single }
+  };
+
   // Clean development logging
   if (import.meta.env.DEV) {
     console.log('📊 Revenue data ready:', {
@@ -55,7 +68,8 @@ const Revenue = ({ filters }) => {
       hasData: !!revenueApiData?.payload?.metrics,
       interestsCount: revenueByInterests?.length,
       channelData: !!revenueByChannelData,
-      scalarMetricsCount: Object.keys(revenueScalarMetrics).length
+      scalarMetricsCount: Object.keys(revenueScalarMetrics).length,
+      scalarMetrics: revenueScalarMetrics
     });
   }
 
@@ -135,13 +149,9 @@ const Revenue = ({ filters }) => {
                       title={t('revenue.goForMoreTotal')}
                       subtitle={t('dashboard.merchant')}
                       icon={<div className="text-orange-600"><div className="w-5 h-5">🎁</div></div>}
-                      value={new Intl.NumberFormat('el-GR', {
-                        style: 'currency',
-                        currency: 'EUR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      }).format(revenueScalarMetrics.goformore_amount.merchant.value)}
-                      change={`${revenueScalarMetrics.goformore_amount.merchant.change > 0 ? '+' : ''}${revenueScalarMetrics.goformore_amount.merchant.change.toFixed(1)}%`}
+                      value={revenueScalarMetrics.goformore_amount.merchant.value}
+                      change={revenueScalarMetrics.goformore_amount.merchant.change}
+                      valueType={revenueScalarMetrics.goformore_amount.merchant.valueType}
                       iconBackground="bg-gray-50"
                     />
                   )}
@@ -153,13 +163,9 @@ const Revenue = ({ filters }) => {
                       title={t('revenue.rewarded')}
                       subtitle={t('dashboard.merchant')}
                       icon={<div className="text-green-600"><div className="w-5 h-5">💰</div></div>}
-                      value={new Intl.NumberFormat('el-GR', {
-                        style: 'currency',
-                        currency: 'EUR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      }).format(revenueScalarMetrics.rewarded_amount.merchant.value)}
-                      change={`${revenueScalarMetrics.rewarded_amount.merchant.change > 0 ? '+' : ''}${revenueScalarMetrics.rewarded_amount.merchant.change.toFixed(1)}%`}
+                      value={revenueScalarMetrics.rewarded_amount.merchant.value}
+                      change={revenueScalarMetrics.rewarded_amount.merchant.change}
+                      valueType={revenueScalarMetrics.rewarded_amount.merchant.valueType}
                       iconBackground="bg-gray-50"
                     />
                   )}
@@ -171,13 +177,9 @@ const Revenue = ({ filters }) => {
                       title={t('revenue.redeemed')}
                       subtitle={t('dashboard.merchant')}
                       icon={<div className="text-red-600"><div className="w-5 h-5">🎫</div></div>}
-                      value={new Intl.NumberFormat('el-GR', {
-                        style: 'currency',
-                        currency: 'EUR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      }).format(revenueScalarMetrics.redeemed_amount.merchant.value)}
-                      change={`${revenueScalarMetrics.redeemed_amount.merchant.change > 0 ? '+' : ''}${revenueScalarMetrics.redeemed_amount.merchant.change.toFixed(1)}%`}
+                      value={revenueScalarMetrics.redeemed_amount.merchant.value}
+                      change={revenueScalarMetrics.redeemed_amount.merchant.change}
+                      valueType={revenueScalarMetrics.redeemed_amount.merchant.valueType}
                       iconBackground="bg-gray-50"
                     />
                   )}
