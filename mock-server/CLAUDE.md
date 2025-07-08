@@ -166,9 +166,14 @@ The mock server is automatically used when:
 - `customers_per_day` - Daily unique customer count time series
 
 ### Revenue Metrics
-- `rewarded_amount` - Total loyalty rewards issued
-- `redeemed_amount` - Total loyalty rewards redeemed
-- Additional revenue breakdown metrics
+- `avg_daily_revenue` - Average daily revenue with competition comparison
+- `goformore_amount` - **Merchant-only** Go For More loyalty program total
+- `rewarded_amount` - **Merchant-only** Total loyalty rewards issued
+- `redeemed_amount` - **Merchant-only** Total loyalty rewards redeemed
+- `rewarded_points` - **Merchant-only** Total points rewarded
+- `redeemed_points` - **Merchant-only** Total points redeemed
+- `converted_customers_by_interest` - Revenue breakdown by shopping interests
+- `revenue_by_channel` - Revenue distribution by channel (physical vs e-commerce)
 
 ### Demographics Metrics
 - `converted_customers_by_age` - Age group breakdown
@@ -179,6 +184,47 @@ The mock server is automatically used when:
 - Same metrics as merchant with `merchantId: "competition"`
 - Automatically generated with realistic competitive data
 - Responds to same filters as merchant data
+- **Exception**: Go For More metrics are merchant-only (no competition data generated)
+
+## GO FOR MORE MERCHANT-ONLY IMPLEMENTATION
+
+### Business Logic
+Go For More is NBG's loyalty program and only applies to merchants, not competition. The mock server correctly implements this business rule:
+
+#### **Merchant-Only Metrics**
+- `goformore_amount` - Only returns merchant data
+- `rewarded_amount` - Only returns merchant data  
+- `redeemed_amount` - Only returns merchant data
+- `rewarded_points` - Only returns merchant data
+- `redeemed_points` - Only returns merchant data
+
+#### **API Optimization**
+```json
+// Request with Go For More metrics
+{
+  "payload": {
+    "metricIDs": ["total_revenue", "goformore_amount", "rewarded_amount"]
+  }
+}
+
+// Response - Notice fewer metrics returned (4 instead of 6)
+{
+  "payload": {
+    "metrics": [
+      {"metricID": "total_revenue", "merchantId": "ATTICA"},
+      {"metricID": "total_revenue", "merchantId": "competition"},
+      {"metricID": "goformore_amount", "merchantId": "ATTICA"},
+      {"metricID": "rewarded_amount", "merchantId": "ATTICA"}
+    ]
+  }
+}
+```
+
+#### **Technical Implementation**
+- Analytics route checks `merchantOnlyMetrics` array
+- Skips competition data generation for Go For More metrics
+- Reduces API response size and processing time
+- Maintains filter integration for merchant data
 
 ## TESTING AND VALIDATION
 

@@ -19,7 +19,9 @@
 7. **Filter Integration (100% + CRITICAL FIXES)** - Complete Redux-based filter system with API integration, **fixed cache bypass and Apply button workflow**
 
 ### 🎯 PENDING WORK (Priority Order)
-1. **Real Data Integration** (LOW - 8-12 hours) - Replace mock data with API calls
+1. **Demographics Tab Completion** (MEDIUM - 4-6 hours) - Complete customer segmentation metrics
+2. **Competition Tab Implementation** (MEDIUM - 6-8 hours) - Build competition analysis features
+3. **Real Data Integration** (LOW - 8-12 hours) - Replace mock data with production API calls
 
 ### 🚨 KNOWN ISSUES & IMPROVEMENTS NEEDED
 **✅ Step 1 - General Improvements (COMPLETED):**
@@ -93,6 +95,15 @@
 - ✅ **Clean console** - suppresses warnings for expected empty states during loading
 - ✅ **Dashboard integration** - all metric cards now auto-calculate and display YoY percentages
 - ✅ **Production ready** - works seamlessly with existing year-over-year Redux architecture
+
+**✅ Go For More Merchant-Only Implementation (100% COMPLETE + PRODUCTION READY):**
+- ✅ **Mock server optimization** - No competition data generated for Go For More metrics (`goformore_amount`, `rewarded_amount`, `redeemed_amount`)
+- ✅ **Component configuration** - YoY support flags defined at component level (Go For More metrics use `single` variant)
+- ✅ **API efficiency** - Reduced API responses from 6 to 4 metrics for Go For More requests
+- ✅ **Business accuracy** - Correctly reflects NBG loyalty program as merchant-specific
+- ✅ **Error handling** - UniversalMetricCard shows "-" for missing competition data
+- ✅ **Filter integration** - Go For More metrics respect demographic filters as intended
+- ✅ **Transformation layer** - Enhanced to handle missing competition data gracefully
 
 ## 🚨 INFINITE LOOP PREVENTION
 
@@ -486,33 +497,38 @@ This section provides the definitive mapping of all chart components to their re
 
 ### **TAB 2: REVENUE IMPLEMENTATION STATUS**
 
+#### **Implementation Status**
+**✅ 100% API Integrated** - Production ready with full filter support and year-over-year comparison
+
 #### **Revenue Metrics (Scalar Values)**
 | Metric | API MetricID | Component | Status | Data Source | Notes |
 |--------|--------------|-----------|---------|-------------|--------|
-| Total Revenue | `total_revenue` | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | Static config data |
-| Average Daily Revenue | N/A | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | Static config data |
-| Average Transaction | `avg_ticket_per_user` | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | Static config data |
-| **Go For More Metrics:** | | | | | |
-| Total Revenue (GFM) | `rewarded_amount` | `GoForMoreMetricCard` | 🔴 | `tabConfigs.json` | **Missing API mapping** |
-| Total Rewarded | `rewarded_amount` | `GoForMoreMetricCard` | 🔴 | `tabConfigs.json` | **Missing API mapping** |
-| Total Redeemed | `redeemed_amount` | `GoForMoreMetricCard` | 🔴 | `tabConfigs.json` | **Missing API mapping** |
+| Total Revenue | `total_revenue` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation with YoY |
+| Average Daily Revenue | `avg_daily_revenue` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation with YoY |
+| Average Transaction | `avg_ticket_per_user` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation with YoY |
+| **Go For More Metrics (Merchant-Only):** | | | | | |
+| Total Go For More | `goformore_amount` | `UniversalMetricCard` | ✅ | API via Redux | **Merchant-only, no competition** |
+| Total Rewarded | `rewarded_amount` | `UniversalMetricCard` | ✅ | API via Redux | **Merchant-only, no competition** |
+| Total Redeemed | `redeemed_amount` | `UniversalMetricCard` | ✅ | API via Redux | **Merchant-only, no competition** |
 
-**Redux Hook:** ❌ Not implemented - Uses `getTabConfig('revenue')`
-**Transformation:** ❌ Not implemented - `revenueTransform.js` placeholder
-**File:** `src/components/revenue/Revenue.jsx:28-101`
+**Redux Hook:** ✅ Implemented - Uses `useRevenueData()` → `useTabData('revenue', REVENUE_METRIC_IDS)`
+**Transformation:** ✅ Implemented - `revenueTransform.js` with scalar, interests, and channel transformations
+**File:** `src/components/revenue/Revenue.jsx` - Complete API integration
+**YoY Support:** ✅ Configured at component level - Regular metrics support YoY, Go For More metrics are single variant
 
 #### **Revenue Charts**
 | Chart | API MetricID | Component | Status | Data Source | Notes |
 |-------|--------------|-----------|---------|-------------|--------|
-| Revenue Trend | `revenue_per_day` | `TimeSeriesChart` | 🔴 | Mock fallback | No API integration |
-| Revenue Change | `revenue_per_day` | `TimeSeriesChart` | 🔴 | Mock fallback | Year-over-year calc needed |
-| Revenue by Interests | ❌ Missing | `UniversalBreakdownChart` | 🔴 | `mockData.revenueByInterests` | **No API MetricID defined** |
-| Revenue by Channel | ❌ Missing | `UniversalBreakdownChart` | 🔴 | `mockData.revenueByChannel` | **No API MetricID defined** |
+| Revenue Trend | `revenue_per_day` | `TimeSeriesChart` | ✅ | API via Redux | Full implementation |
+| Revenue Change | `revenue_per_day` | `TimeSeriesChart` | ✅ | API via Redux | Year-over-year calc implemented |
+| Revenue by Interests | `converted_customers_by_interest` | `UniversalBarChart` | ✅ | API via Redux | Real revenue data by interest |
+| Revenue by Channel | `revenue_by_channel` | `UniversalBreakdownChart` | ✅ | API via Redux | Percentage + absolute values |
 
-**Critical Missing:** 
-- Revenue breakdown metrics not defined in API schema
-- Go For More specific MetricIDs not implemented
-- No transformation layer for revenue data
+**✅ Complete Implementation:** 
+- All revenue metrics using API data with proper transformations
+- Go For More metrics correctly implemented as merchant-only
+- Year-over-year comparison system fully functional
+- Filter integration working with cache bypass
 
 ---
 
