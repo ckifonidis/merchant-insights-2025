@@ -10,157 +10,45 @@
 ## CURRENT PROJECT STATUS
 
 ### ✅ COMPLETED WORK
-1. **Core Infrastructure (100%)** - JSON configuration system, component architecture, internationalization
-2. **Dashboard Tab (100% + FILTER FIXES)** - All Step 1-2 improvements applied, separate metric components, **working filter integration**
-3. **Revenue Tab (100%)** - All Step 1-3 improvements applied, fixed chart layouts, Go For More metrics
-4. **Demographics Tab (100%)** - Complete with premium visualizations, 6 customer metrics, 4 advanced charts, Step 4 improvements completed
-5. **Competition Tab (100%)** - Custom metrics layout, interactive charts, dual calendar heatmaps
-6. **Mobile Experience (100%)** - Fixed filter sidebar, responsive tab navigation, metric card layouts
-7. **Filter Integration (100% + CRITICAL FIXES)** - Complete Redux-based filter system with API integration, **fixed cache bypass and Apply button workflow**
+- **Core Infrastructure** - Complete React + Vite setup with multi-language support
+- **Dashboard Tab** - Full API integration with Redux and year-over-year comparison
+- **Filter System** - Complete Redux-based filtering with proper cache bypass
+- **Mobile Experience** - Responsive design across all devices
+- **Year-over-Year System** - Automatic calculation and parallel API query execution
 
-### 🎯 PENDING WORK (Priority Order)
-1. **Demographics Tab Completion** (MEDIUM - 4-6 hours) - Complete customer segmentation metrics
-2. **Competition Tab Implementation** (MEDIUM - 6-8 hours) - Build competition analysis features
-3. **Real Data Integration** (LOW - 8-12 hours) - Replace mock data with production API calls
+### 🎯 PENDING WORK
+1. **Revenue Tab** - Fix TimeSeriesChart API integration (charts still use mock data fallback)
+2. **Demographics Tab** - No API integration, missing MetricIDs, uses mock data only
+3. **Competition Tab** - No API integration, complete implementation needed
 
-### 🚨 KNOWN ISSUES & IMPROVEMENTS NEEDED
-**✅ Step 1 - General Improvements (COMPLETED):**
-1. ✅ Line charts: Made lines straight instead of curved
-2. ✅ Timeline filtering: Implemented data filtering by selected date range
-3. ✅ Greek translations: Updated to "Άνδρες"/"Γυναίκες"
+### 🔧 CRITICAL SYSTEMS IMPLEMENTED
 
-**✅ Step 2 - Dashboard Improvements (COMPLETED):**
-1. ✅ Chart hover format: Updated to "Έμπορος: Value (+X% from last year)"
-2. ✅ Chart titles: Cleaned up chart naming
-3. ✅ Metric order: Implemented totalRevenue, totalTransactions, avgTransaction
-4. ✅ Individual components: Created separate DashboardMetrics.jsx
+**Filter Integration Architecture:**
+- ✅ Redux-based filtering with proper cache bypass behavior
+- ✅ Apply button workflow (filters only apply when button clicked)
+- ✅ Bidirectional UI↔API mapping service (`src/data/metricFilters.js`)
 
-**✅ Step 3 - Revenue Improvements (COMPLETED):**
-1. ✅ RevenueTrend hover format: Matching dashboard format
-2. ✅ Chart controls: Moved to upper right for RevenueByInterests/RevenueByChannel  
-3. ✅ RevenueByInterests: Fixed x-axis label overflow
-4. ✅ RevenueByChannel: Fixed pie chart, implemented stackedBar
-5. ✅ Go For More metrics: Grouped with common title
-6. ✅ Revenue metrics: Created separate RevenueMetrics.jsx
+**Year-over-Year Comparison System:**
+- ✅ Automatic parallel API execution for current + previous year data
+- ✅ Memoized selectors and auto-calculation utilities (`src/utils/yearOverYearHelpers.js`)
+- ✅ Enhanced hooks: `useDashboardDataWithYearComparison`, `useRevenueDataWithYearComparison`
 
-**✅ Step 4 - Demographics Improvements (COMPLETED):**
-1. ✅ Greek subtitle: "Δημογραφικά και καταναλωτική συμπεριφορά των πελατών"
-2. ✅ Gender chart: Update compliance text, add absolute values in table view, replace bars with pie chart
-3. ✅ Age group chart: Add absolute values in table view
-4. ✅ Shopping interests: Fix table overflow, wrap values
-5. ✅ Various chart improvements
+**Go For More Implementation:**
+- ✅ Merchant-only business logic (NBG loyalty program)
+- ✅ No competition data generated for `goformore_amount`, `rewarded_amount`, `redeemed_amount`
 
-**✅ RevenueByChannel Responsiveness (COMPLETED):**
-- ✅ Fixed pie chart layout problems on mobile/tablet
+**Critical Bug Fixes (July 2025):**
+- ✅ **Infinite Loop Prevention** - Stable object references and memoized selectors
+- ✅ **Cache Bypass Fix** - Fresh API calls when filters change
+- ✅ **Apply Button Workflow** - Proper filter application timing
 
-**✅ Filter Integration (100% COMPLETE + CRITICAL FIXES APPLIED):**
-- ✅ Redux state management with persistence
-- ✅ Filter UI components (FilterSidebar) connected to Redux
-- ✅ API integration with mock server
-- ✅ Filter mapping service (bidirectional UI↔API translation)
-- ✅ Filter-aware mock data generation
-- ✅ Chart components connected to Redux filter state
-- ✅ Active tab refresh optimization
-- ✅ End-to-end filter functionality verified
-- ✅ **FIXED: Cache bypass for filter changes** - Filters now properly trigger API calls
-- ✅ **FIXED: Apply Filters button workflow** - Filters only apply when button is clicked
-- ✅ **FIXED: Immediate filter application issue** - UI updates don't trigger API calls until Apply
+**Technical Specifications:**
+- **Chart Hover Format:** "Έμπορος: Value (+X% from last year)"
+- **Greek Translations:** "Άνδρες"/"Γυναίκες" (Male/Female)
+- **Component Organization:** DashboardMetrics.jsx, RevenueMetrics.jsx created
 
-**✅ Metric-Specific Filters (100% COMPLETE + PRODUCTION READY):**
-- ✅ Configuration system for metric-specific filters (`src/data/metricFilters.js`)
-- ✅ Automatic context inference (Revenue tab → revenue data, Demographics tab → customer data)
-- ✅ Enhanced analytics service with filter merging logic
-- ✅ Updated useTabData hook with metric-specific filter support
-- ✅ Redux integration with proper options passing
-- ✅ Mock server support for `interest_type` filter
-- ✅ **FIXED: Infinite loop prevention** - Stable object references and dependency arrays
-- ✅ Zero configuration required in components - fully automatic
+*See `/src/components/CLAUDE.md` and `/src/components/ui/CLAUDE.md` for detailed technical specifications and implementation guidelines.*
 
-**✅ Year-Over-Year Comparison System (100% COMPLETE + PRODUCTION READY):**
-- ✅ Date calculation utilities for automatic previous year range generation (`src/utils/dateHelpers.js`)
-- ✅ Enhanced analytics service with parallel current + previous year API calls (`fetchTabDataWithYearComparison`)
-- ✅ Extended Redux state structure with separate `currentData` and `previousData` storage
-- ✅ Memoized year-over-year selectors to prevent unnecessary rerenders
-- ✅ Enhanced hooks: `useDashboardDataWithYearComparison`, `useRevenueDataWithYearComparison`, `useCompetitionDataWithYearComparison`
-- ✅ Updated transformation functions with `*_previous` pattern support
-- ✅ **ACTIVE IMPLEMENTATION** - Dashboard, Revenue, and Competition tabs now use year-over-year hooks
-- ✅ **DUAL API CALLS** - Each tab fires two requests: current year + previous year with same filters
-- ✅ **PERFORMANCE OPTIMIZED** - Parallel execution, proper caching, deduplication support
-- ✅ **FILTER INTEGRATION** - All current filters automatically applied to both year queries
-
-**✅ UniversalMetricCard Automatic YoY Calculation System (100% COMPLETE + PRODUCTION READY):**
-- ✅ **Automatic YoY calculation** from current/previous year API data (`src/utils/yearOverYearHelpers.js`)
-- ✅ **Smart data extraction** with API metric ID to transformed property mapping
-- ✅ **Graceful error handling** - shows "-" for missing/insufficient data
-- ✅ **Clean console** - suppresses warnings for expected empty states during loading
-- ✅ **Dashboard integration** - all metric cards now auto-calculate and display YoY percentages
-- ✅ **Production ready** - works seamlessly with existing year-over-year Redux architecture
-
-**✅ Go For More Merchant-Only Implementation (100% COMPLETE + PRODUCTION READY):**
-- ✅ **Mock server optimization** - No competition data generated for Go For More metrics (`goformore_amount`, `rewarded_amount`, `redeemed_amount`)
-- ✅ **Component configuration** - YoY support flags defined at component level (Go For More metrics use `single` variant)
-- ✅ **API efficiency** - Reduced API responses from 6 to 4 metrics for Go For More requests
-- ✅ **Business accuracy** - Correctly reflects NBG loyalty program as merchant-specific
-- ✅ **Error handling** - UniversalMetricCard shows "-" for missing competition data
-- ✅ **Filter integration** - Go For More metrics respect demographic filters as intended
-- ✅ **Transformation layer** - Enhanced to handle missing competition data gracefully
-
-## 🚨 INFINITE LOOP PREVENTION
-
-### **Critical Issue Resolved: Redux + useEffect Infinite Loop (FIXED July 2025)**
-
-**Status:** ✅ **COMPLETELY RESOLVED** - App now loads properly with data display  
-**Previous Symptoms:** Console flooded with repeated API calls, app becomes unresponsive
-
-**Root Causes:**
-1. **Unmemoized selectors returning objects**
-2. **Arrays/objects created inside hooks**  
-3. **Unstable references in useCallback dependencies**
-
-### **Fixed Patterns:**
-
-**❌ WRONG - Causes Infinite Loop:**
-```javascript
-// Selector creates new object every render
-export const selectApiParams = (state) => ({
-  userID: state.filters.userID,  // ← NEW OBJECT EVERY TIME!
-  // ...
-});
-
-// Array created inside hook
-export const useDashboardData = () => {
-  const metricIDs = ['total_revenue', ...];  // ← NEW ARRAY EVERY RENDER!
-  return useTabData('dashboard', metricIDs);
-};
-```
-
-**✅ CORRECT - Stable References:**
-```javascript
-// Memoized selector
-export const selectApiParams = createSelector(
-  [(state) => state.filters.userID, ...],
-  (userID, ...) => ({ userID, ... })
-);
-
-// Constant outside component
-const DASHBOARD_METRIC_IDS = ['total_revenue', ...];
-export const useDashboardData = () => {
-  return useTabData('dashboard', DASHBOARD_METRIC_IDS);
-};
-```
-
-### **Prevention Rules:**
-1. **Always use `createSelector` for object-returning selectors**
-2. **Define arrays/objects as constants outside components**  
-3. **Keep useCallback dependencies stable**
-4. **Monitor console for repeated API calls during development**
-
-### **✅ Applied Fixes (July 2025):**
-1. **Removed spread operator** `...dependencies` from useCallback dependency array in `useTabData.js:53`
-2. **Frozen all metric ID arrays** with `Object.freeze()` to prevent new references
-3. **Created stable DEFAULT_OPTIONS** object for hook parameters
-4. **Eliminated unstable dependencies** option that was causing new array creation
-5. **Result:** App loads properly, data displays correctly, no infinite loops
 
 ## KEY ARCHITECTURE PATTERNS
 
@@ -456,283 +344,26 @@ Select Filters → Store UI → Click Apply → Convert to API → Skip Cache �
 - `src/utils/yearOverYearHelpers.js` - ✅ **NEW:** YoY calculation utilities and automatic data extraction
 - `src/components/ui/metrics/UniversalMetricCard.jsx` - ✅ **ENHANCED:** Auto-calculating metric cards with YoY percentages
 
-## COMPREHENSIVE METRIC MAPPING & IMPLEMENTATION STATUS
+## COMPONENT IMPLEMENTATION STATUS
 
-### **📊 CRITICAL REFERENCE: Chart Components ↔ API Metrics Mapping**
+**📊 For detailed component specifications, API mappings, and implementation status by tab:**
 
-This section provides the definitive mapping of all chart components to their required metrics, current implementation status, and data sources. **Essential for API integration work.**
+### **Component Documentation Structure:**
+- **Detailed Specifications:** `/src/components/CLAUDE.md` - Complete component implementation guide with API status
+- **Universal Behaviors:** `/src/components/ui/CLAUDE.md` - Common component behavior patterns and critical technical requirements
 
-#### **Legend:**
-- ✅ **Fully Implemented** - API integrated with proper transformations
-- 🟡 **Partially Implemented** - Some API integration, fallbacks to mock data
-- 🔴 **Not Implemented** - Using mock data/config only
-- ❌ **Missing** - Required but not implemented at all
+### **Implementation Summary:**
+- **Dashboard Tab:** ✅ **Fully API Integrated** - All metrics use Redux with year-over-year comparison
+- **Revenue Tab:** 🟡 **Partially Integrated** - Metrics use API, TimeSeriesChart still uses mock data fallback
+- **Demographics Tab:** 🔴 **Not Implemented** - No API integration, missing MetricIDs, uses mock data
+- **Competition Tab:** 🔴 **Not Implemented** - No API integration, uses mock data exclusively
 
----
+### **Critical Next Steps:**
+1. **Fix Revenue Tab:** Pass API data to TimeSeriesChart components (`src/components/revenue/Revenue.jsx:196-210`)
+2. **Implement Demographics:** Define missing MetricIDs, create Redux hooks, build transformations
+3. **Build Competition Tab:** Implement competition API integration and aggregation logic
 
-### **TAB 1: DASHBOARD IMPLEMENTATION STATUS**
-
-#### **Dashboard Metrics (Scalar Values)**
-| Metric | API MetricID | Component | Status | Data Source | Notes |
-|--------|--------------|-----------|---------|-------------|--------|
-| Total Revenue | `total_revenue` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation |
-| Total Transactions | `total_transactions` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation |
-| Average Transaction | `avg_ticket_per_user` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation |
-
-**Redux Hook:** `useDashboardData()` → `useTabData('dashboard', DASHBOARD_METRIC_IDS)`
-**Transformation:** `dashboardTransform.js` ✅ Implemented
-**File:** `src/components/dashboard/Dashboard.jsx:44-85`
-
-#### **Dashboard Charts (Time Series)**
-| Chart | API MetricID | Component | Status | Data Source | Notes |
-|-------|--------------|-----------|---------|-------------|--------|
-| Revenue Chart | `revenue_per_day` | `TimeSeriesChart` | ✅ | API via Redux | **FIXED: Filter integration working** |
-| Transactions Chart | `transactions_per_day` | `TimeSeriesChart` | ✅ | API via Redux | **FIXED: Filter integration working** |
-| Customers Chart | `customers_per_day` | `TimeSeriesChart` | ✅ | API via Redux | **FIXED: Filter integration working** |
-
-**FIXED (July 2025):** Cache bypass issue resolved - charts now receive fresh filtered data when Apply Filters is clicked
-**File:** `src/components/ui/charts/TimeSeriesChart.jsx:94-98` - Fallback logic remains for error handling
-
----
-
-### **TAB 2: REVENUE IMPLEMENTATION STATUS**
-
-#### **Implementation Status**
-**✅ 100% API Integrated** - Production ready with full filter support and year-over-year comparison
-
-#### **Revenue Metrics (Scalar Values)**
-| Metric | API MetricID | Component | Status | Data Source | Notes |
-|--------|--------------|-----------|---------|-------------|--------|
-| Total Revenue | `total_revenue` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation with YoY |
-| Average Daily Revenue | `avg_daily_revenue` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation with YoY |
-| Average Transaction | `avg_ticket_per_user` | `UniversalMetricCard` | ✅ | API via Redux | Full implementation with YoY |
-| **Go For More Metrics (Merchant-Only):** | | | | | |
-| Total Go For More | `goformore_amount` | `UniversalMetricCard` | ✅ | API via Redux | **Merchant-only, no competition** |
-| Total Rewarded | `rewarded_amount` | `UniversalMetricCard` | ✅ | API via Redux | **Merchant-only, no competition** |
-| Total Redeemed | `redeemed_amount` | `UniversalMetricCard` | ✅ | API via Redux | **Merchant-only, no competition** |
-
-**Redux Hook:** ✅ Implemented - Uses `useRevenueData()` → `useTabData('revenue', REVENUE_METRIC_IDS)`
-**Transformation:** ✅ Implemented - `revenueTransform.js` with scalar, interests, and channel transformations
-**File:** `src/components/revenue/Revenue.jsx` - Complete API integration
-**YoY Support:** ✅ Configured at component level - Regular metrics support YoY, Go For More metrics are single variant
-
-#### **Revenue Charts**
-| Chart | API MetricID | Component | Status | Data Source | Notes |
-|-------|--------------|-----------|---------|-------------|--------|
-| Revenue Trend | `revenue_per_day` | `TimeSeriesChart` | ✅ | API via Redux | Full implementation |
-| Revenue Change | `revenue_per_day` | `TimeSeriesChart` | ✅ | API via Redux | Year-over-year calc implemented |
-| Revenue by Interests | `converted_customers_by_interest` | `UniversalBarChart` | ✅ | API via Redux | Real revenue data by interest |
-| Revenue by Channel | `revenue_by_channel` | `UniversalBreakdownChart` | ✅ | API via Redux | Percentage + absolute values |
-
-**✅ Complete Implementation:** 
-- All revenue metrics using API data with proper transformations
-- Go For More metrics correctly implemented as merchant-only
-- Year-over-year comparison system fully functional
-- Filter integration working with cache bypass
-
----
-
-### **TAB 3: DEMOGRAPHICS IMPLEMENTATION STATUS**
-
-#### **Demographics Metrics (Required by REQUIREMENTS.md)**
-| Metric | API MetricID | Component | Status | Data Source | Notes |
-|--------|--------------|-----------|---------|-------------|--------|
-| Total Customers | ❌ Missing | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | **API MetricID not defined** |
-| New Customers | ❌ Missing | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | **API MetricID not defined** |
-| Returning Customers | ❌ Missing | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | **API MetricID not defined** |
-| Top Spenders | ❌ Missing | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | **API MetricID not defined** |
-| Loyal Customers | ❌ Missing | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | **API MetricID not defined** |
-| At Risk Customers | ❌ Missing | `UniversalMetricCard` | 🔴 | `tabConfigs.json` | **API MetricID not defined** |
-
-**Redux Hook:** ❌ Not implemented - Uses `getTabConfig('demographics')`
-**Transformation:** ❌ Not implemented - `demographicsTransform.js` placeholder
-**File:** `src/components/demographics/Demographics.jsx:25-57`
-
-#### **Demographics Charts**
-| Chart | API MetricID | Component | Status | Data Source | Notes |
-|-------|--------------|-----------|---------|-------------|--------|
-| Gender Chart | `converted_customers_by_gender` | `UniversalBreakdownChart` | 🔴 | `mockData.demographicsData` | **API integration missing** |
-| Age Groups Chart | `converted_customers_by_age` | `UniversalHorizontalBarChart` | 🔴 | `mockData.demographicsData` | **API integration missing** |
-| Shopping Frequency | ❌ Missing | `UniversalBarChart` | 🔴 | `mockData.demographicsData` | **No API MetricID defined** |
-| Shopping Interests | `converted_customers_by_interest` | `UniversalHorizontalBarChart` | 🔴 | `mockData.demographicsData` | **API integration missing** |
-
-**Critical Missing:**
-- Customer segmentation metrics (total, new, returning, etc.)
-- Shopping frequency analysis metric
-- No API integration for any demographics charts
-
----
-
-### **TAB 4: COMPETITION IMPLEMENTATION STATUS**
-
-#### **Competition Metrics**
-| Metric | API MetricID | Component | Status | Data Source | Notes |
-|--------|--------------|-----------|---------|-------------|--------|
-| Revenue (vs Competition) | `total_revenue` + competition | `UniversalMetricCard` | 🔴 | `mockData.competitionMetrics` | **No competition API integration** |
-| Transactions (vs Competition) | `total_transactions` + competition | `UniversalMetricCard` | 🔴 | `mockData.competitionMetrics` | **No competition API integration** |
-| Avg Transaction (vs Competition) | `avg_ticket_per_user` + competition | `UniversalMetricCard` | 🔴 | `mockData.competitionMetrics` | **No competition API integration** |
-
-**Redux Hook:** ❌ Not implemented - Uses direct mock data import
-**Transformation:** ❌ Not implemented - `competitionTransform.js` placeholder
-**File:** `src/components/competition/Competition.jsx:46-85`
-
-#### **Competition Charts**
-| Chart | API MetricID | Component | Status | Data Source | Notes |
-|-------|--------------|-----------|---------|-------------|--------|
-| Weekly Timeline | `revenue_per_day` + week aggregation | `UniversalTimelineChart` | 🔴 | `mockData.weeklyTurnoverData` | **Week-over-week calc needed** |
-| Monthly Heatmap | `revenue_per_day` + monthly | `UniversalCalendarHeatmap` | 🔴 | Generated mock data | **Daily revenue API integration needed** |
-
-**Critical Missing:**
-- Competition comparison API integration
-- Week-over-week and month-over-month calculations
-- Heatmap data aggregation logic
-
----
-
-### **🔍 COMPONENT-LEVEL ANALYSIS**
-
-#### **Universal Chart Components Data Requirements**
-
-**TimeSeriesChart (`src/components/ui/charts/TimeSeriesChart.jsx`)**
-- **Expected Props:** `apiData` object with `{merchant: [], competitor: []}` format
-- **Current Status:** 🟡 Receives API data but always falls back to mock on failure
-- **Data Format:** `[{date, merchant, competitor, formattedDate}]`
-- **File Location:** Lines 94-98 (fallback logic)
-
-**UniversalMetricCard (`src/components/ui/metrics/UniversalMetricCard.jsx`)**
-- **Expected Props:** `merchantData`, `competitorData` with `{value, change, valueType}`
-- **Current Status:** ✅ Dashboard only, 🔴 Other tabs use static config
-- **Transformation:** Requires period-over-period calculation
-
-**UniversalBreakdownChart (`src/components/ui/charts/UniversalBreakdownChart.jsx`)**
-- **Expected Props:** `data` array with `{category, merchant, competitor}` format
-- **Current Status:** 🔴 All tabs using mock data
-- **Missing:** API-to-chart transformation for all breakdown metrics
-
----
-
-### **🚨 CRITICAL IMPLEMENTATION GAPS**
-
-#### **1. Missing API MetricIDs**
-```javascript
-// These metrics are required by REQUIREMENTS.md but have no API mapping:
-'total_customers'              // Demographics
-'new_customers'                // Demographics  
-'returning_customers'          // Demographics
-'top_spenders'                 // Demographics
-'loyal_customers'              // Demographics
-'at_risk_customers'            // Demographics
-'revenue_by_interests'         // Revenue breakdown
-'revenue_by_channel'           // Revenue breakdown
-'shopping_frequency'           // Demographics
-```
-
-#### **2. Missing Transformation Functions**
-```javascript
-// src/services/transformations/index.js - Lines 11-25
-revenue: (data) => {
-  // TODO: Implement revenue transformation ❌
-},
-demographics: (data) => {
-  // TODO: Implement demographics transformation ❌
-},
-competition: (data) => {
-  // TODO: Implement competition transformation ❌
-}
-```
-
-#### **3. Missing Redux Integration**
-- Revenue Tab: Still uses `getTabConfig()` instead of `useTabData()`
-- Demographics Tab: Still uses `getTabConfig()` instead of `useTabData()`
-- Competition Tab: No hook integration at all
-
-#### **4. Mock Data Dependencies**
-- **File:** `src/data/mockData.js` - Still imported by 3/4 tabs
-- **File:** `src/data/tabConfigs.json` - Still used by Revenue + Demographics
-- **Issue:** Static data blocks API integration
-
----
-
-### **📈 IMPLEMENTATION PRIORITY MATRIX**
-
-#### **Priority 1: Complete Dashboard Tab**
-- Fix TimeSeriesChart API data flow (remove mock fallback)
-- Ensure all dashboard charts use API data exclusively
-
-#### **Priority 2: Revenue Tab API Integration**
-```javascript
-// Required implementations:
-1. Create `useRevenueData()` hook with API calls
-2. Implement `revenueTransform.js` transformation
-3. Define missing MetricIDs: revenue_by_interests, revenue_by_channel
-4. Replace tabConfigs.json usage with API data
-5. Replace mockData imports with transformed API data
-```
-
-#### **Priority 3: Demographics Tab API Integration**  
-```javascript
-// Required implementations:
-1. Define missing customer segmentation MetricIDs
-2. Create `useDemographicsData()` hook
-3. Implement `demographicsTransform.js`
-4. Replace tabConfigs.json and mockData dependencies
-```
-
-#### **Priority 4: Competition Tab Implementation**
-```javascript
-// Required implementations:
-1. Define competition-specific MetricIDs
-2. Implement competition data aggregation logic
-3. Create week-over-week and month-over-month calculations
-4. Build competition transformation layer
-```
-
----
-
-### **💡 ARCHITECTURAL INSIGHTS**
-
-#### **What's Working Well:**
-- Redux filter integration architecture ✅
-- Analytics service abstraction layer ✅
-- Dashboard tab API pattern ✅
-- Component prop structure ✅
-- **Year-over-year comparison system** ✅
-- **Parallel API query execution** ✅
-- **Memoized Redux selectors** ✅
-
-#### **What Needs Fixing:**
-- **75% of metrics still use mock data** 🔴
-- **Missing transformation functions** 🔴  
-- **API MetricID gaps** 🔴
-- **TimeSeriesChart fallback pattern** 🔴
-
-#### **Development Pattern for Full API Integration:**
-1. **Define MetricIDs** in API schema
-2. **Create transformation functions** in `/src/services/transformations/`
-3. **Replace imports** from `tabConfigs.json` and `mockData.js`
-4. **Use `useTabDataWithYearComparison()` hooks** for API integration with year-over-year data
-5. **Test filter integration** with real API data
-6. **Utilize year-over-year data** in component UI for comparison metrics
-
-#### **Year-Over-Year Data Usage Pattern:**
-```javascript
-// Component usage example
-const { 
-  current,              // Current year data
-  previous,             // Previous year data  
-  dateRanges,           // Both date ranges
-  loading,              // Loading state
-  hasPreviousYearData   // Helper function
-} = useDashboardDataWithYearComparison();
-
-// Calculate year-over-year percentage change
-const calculateYoYChange = (currentValue, previousValue) => {
-  if (!previousValue || previousValue === 0) return null;
-  return ((currentValue - previousValue) / previousValue) * 100;
-};
-```
-
-This mapping serves as the definitive reference for completing API integration across all tabs with year-over-year comparison capabilities.
+**Reference:** See component files above for detailed implementation specifications, missing MetricIDs, technical requirements, and architectural insights.
 
 ## COMPETITION TAB TECHNICAL SPECIFICATIONS
 
