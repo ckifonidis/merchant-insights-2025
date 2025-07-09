@@ -39,7 +39,14 @@ const transformApiDataToChartFormat = (apiData, dataType) => {
     dataMap.set(item.date, {
       date: item.date,
       displayDate: item.formattedDate || item.date,
-      [keys.merchant]: item.value
+      // Use the property names expected by processTimelineData
+      merchantRevenue: dataType === 'revenue' ? item.value : 0,
+      merchantTransactions: dataType === 'transactions' ? item.value : 0,
+      merchantCustomers: dataType === 'customers' ? item.value : 0,
+      // Initialize competitor values
+      competitorRevenue: 0,
+      competitorTransactions: 0,
+      competitorCustomers: 0
     });
   });
 
@@ -47,9 +54,20 @@ const transformApiDataToChartFormat = (apiData, dataType) => {
   competitorData.forEach(item => {
     const existing = dataMap.get(item.date) || {
       date: item.date,
-      displayDate: item.formattedDate || item.date
+      displayDate: item.formattedDate || item.date,
+      merchantRevenue: 0,
+      merchantTransactions: 0,
+      merchantCustomers: 0,
+      competitorRevenue: 0,
+      competitorTransactions: 0,
+      competitorCustomers: 0
     };
-    existing[keys.competitor] = item.value;
+    
+    // Set competitor values based on dataType
+    if (dataType === 'revenue') existing.competitorRevenue = item.value;
+    if (dataType === 'transactions') existing.competitorTransactions = item.value;
+    if (dataType === 'customers') existing.competitorCustomers = item.value;
+    
     dataMap.set(item.date, existing);
   });
 
@@ -85,7 +103,9 @@ const TimeSeriesChart = ({
   valueFormatter = null, // Custom formatter function
   unit = '', // Unit to display (e.g., '€', 'transactions')
   className = '',
-  apiData = null // API data from Dashboard component
+  apiData = null, // API data from Dashboard component
+  yAxisMode = 'absolute', // NEW: 'absolute' | 'percentage_change'
+  metricConfig = {} // NEW: Configuration from tabConfigs.json
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('bars');
@@ -103,8 +123,17 @@ const TimeSeriesChart = ({
   let processedData;
 
   if (apiData) {
-    // Transform API data to chart format
-    processedData = transformApiDataToChartFormat(apiData, dataType);
+    // FIXED: API data now goes through timeline aggregation too!
+    // Step 1: Transform API data to standard format
+    const standardizedApiData = transformApiDataToChartFormat(apiData, dataType);
+    
+    // Step 2: Apply timeline aggregation (same as mock data)
+    processedData = processTimelineData(
+      standardizedApiData,
+      timeline,
+      filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
+      filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+    );
   } else {
     // Use existing mock data processing
     processedData = processTimelineData(
@@ -158,20 +187,47 @@ const TimeSeriesChart = ({
   };
 
   const dataMapping = getDataMapping();
-  const formatter = valueFormatter || dataMapping.defaultFormatter;
+  
+  // Apply Y-axis mode transformation
+  const transformDataForYAxis = (data, mode) => {
+    if (mode === 'percentage_change') {
+      // Calculate percentage change from previous year for each data point
+      // For now, using mock percentage change data
+      // TODO: Implement real percentage change calculation when previous year API data is available
+      return data.map(item => ({
+        ...item,
+        [dataMapping.merchantKey]: ((Math.random() - 0.5) * 40).toFixed(1), // -20% to +20%
+        [dataMapping.competitorKey]: dataMapping.competitorKey ? 
+          ((Math.random() - 0.5) * 30).toFixed(1) : undefined // -15% to +15%
+      }));
+    }
+    return data; // Return absolute values unchanged
+  };
+
+  // Apply Y-axis transformation
+  const yAxisTransformedData = transformDataForYAxis(processedData, yAxisMode);
+  
+  // Update formatter based on Y-axis mode
+  const formatter = valueFormatter || (yAxisMode === 'percentage_change' 
+    ? (value) => `${value}%` 
+    : dataMapping.defaultFormatter);
 
   // Transform data for chart
-  const chartData = processedData.map(item => {
+  const chartData = yAxisTransformedData.map(item => {
     const result = {
       date: item.displayDate,
       [dataMapping.merchantLabel]: dataMapping.merchantKey ? 
-        Math.round(item[dataMapping.merchantKey]) : 0,
+        (yAxisMode === 'percentage_change' ? 
+          parseFloat(item[dataMapping.merchantKey]) : 
+          Math.round(item[dataMapping.merchantKey])) : 0,
       merchantChange: ((Math.random() - 0.5) * 20).toFixed(1)
     };
 
     // Add competitor data if available
     if (showComparison && dataMapping.competitorKey) {
-      result[dataMapping.competitorLabel] = Math.round(item[dataMapping.competitorKey]);
+      result[dataMapping.competitorLabel] = yAxisMode === 'percentage_change' ? 
+        parseFloat(item[dataMapping.competitorKey]) : 
+        Math.round(item[dataMapping.competitorKey]);
       result.competitorChange = ((Math.random() - 0.5) * 15).toFixed(1);
     }
 
@@ -303,6 +359,7 @@ const TimeSeriesChart = ({
           type="timeline"
           value={timeline}
           onChange={setTimeline}
+          dateRange={filters?.dateRange}
         />
       ]}
       contentClassName={chartType === 'table' ? 'max-h-80 overflow-y-auto' : ''}

@@ -54,6 +54,7 @@ export const CHART_CONFIG = {
     { value: 'daily', labelKey: 'chartOptions.daily' },
     { value: 'weekly', labelKey: 'chartOptions.weekly' },
     { value: 'monthly', labelKey: 'chartOptions.monthly' },
+    { value: 'quarterly', labelKey: 'chartOptions.quarterly' },
     { value: 'yearly', labelKey: 'chartOptions.yearly' }
   ]
 };

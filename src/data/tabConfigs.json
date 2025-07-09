@@ -66,7 +66,17 @@
         "supportsMultiView": true,
         "supportsTimeline": true,
         "defaultView": "bars",
-        "defaultTimeline": "daily"
+        "defaultTimeline": "daily",
+        "config": {
+          "yAxisMode": "absolute",
+          "availableViews": ["bars", "line", "table"],
+          "timelineRules": {
+            "weekly": 14,
+            "monthly": 30,
+            "quarterly": 90,
+            "yearly": 365
+          }
+        }
       },
       {
         "id": "revenueOverTime",
@@ -76,7 +86,17 @@
         "supportsMultiView": true,
         "supportsTimeline": true,
         "defaultView": "bars",
-        "defaultTimeline": "daily"
+        "defaultTimeline": "daily",
+        "config": {
+          "yAxisMode": "absolute",
+          "availableViews": ["bars", "line", "table"],
+          "timelineRules": {
+            "weekly": 14,
+            "monthly": 30,
+            "quarterly": 90,
+            "yearly": 365
+          }
+        }
       },
       {
         "id": "customersOverTime",
@@ -87,7 +107,17 @@
         "supportsTimeline": true,
         "defaultView": "bars",
         "defaultTimeline": "daily",
-        "note": "dashboard.merchantDataOnly"
+        "note": "dashboard.merchantDataOnly",
+        "config": {
+          "yAxisMode": "absolute",
+          "availableViews": ["bars", "line", "table"],
+          "timelineRules": {
+            "weekly": 14,
+            "monthly": 30,
+            "quarterly": 90,
+            "yearly": 365
+          }
+        }
       },
       {
         "id": "monthlyRevenue",

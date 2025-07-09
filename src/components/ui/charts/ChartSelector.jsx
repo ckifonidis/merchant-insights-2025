@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { CHART_CONFIG } from '../../../utils/constants';
+import { getAvailableTimelines } from '../../../utils/timelineHelpers';
 
 /**
  * Reusable chart selector component for chart type and timeline selection
@@ -15,7 +16,9 @@ const ChartSelector = ({
   className = '',
   placeholder,
   isDisabled = false,
-  size = 'sm' // 'sm', 'md', 'lg'
+  size = 'sm', // 'sm', 'md', 'lg'
+  availableOptions = null, // NEW: Filter available options (for timeline filtering)
+  dateRange = null // NEW: Date range for timeline availability calculation
 }) => {
   const { t } = useTranslation();
 
@@ -37,6 +40,24 @@ const ChartSelector = ({
 
   const selectOptions = options || getDefaultOptions();
   
+  // Apply filtering based on availability (for timeline filtering)
+  const getFilteredOptions = () => {
+    if (type === 'timeline' && dateRange) {
+      // Get available timelines based on date range
+      const availableTimelines = getAvailableTimelines(dateRange.start, dateRange.end);
+      return selectOptions.filter(option => availableTimelines.includes(option.value));
+    }
+    
+    if (availableOptions) {
+      // Filter based on provided available options
+      return selectOptions.filter(option => availableOptions.includes(option.value));
+    }
+    
+    return selectOptions;
+  };
+  
+  const finalOptions = getFilteredOptions();
+  
   // Size-based styling
   const sizeClasses = {
     sm: 'text-sm min-w-32',
@@ -45,7 +66,7 @@ const ChartSelector = ({
   };
 
   // Find current value object
-  const currentValue = selectOptions.find(option => option.value === value) || null;
+  const currentValue = finalOptions.find(option => option.value === value) || null;
 
   // Custom styles for react-select
   const customStyles = {
@@ -80,7 +101,7 @@ const ChartSelector = ({
       <Select
         value={currentValue}
         onChange={(selectedOption) => onChange(selectedOption?.value)}
-        options={selectOptions}
+        options={finalOptions}
         isSearchable={false}
         isDisabled={isDisabled}
         placeholder={placeholder}

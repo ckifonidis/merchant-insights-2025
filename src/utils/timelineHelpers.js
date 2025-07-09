@@ -169,12 +169,14 @@ const processQuarterlyData = (data) => {
     .slice(-8) // Last 8 quarters
     .map(quarterKey => {
       const group = quarterlyGroups[quarterKey];
-      const quarterStart = new Date(quarterKey.replace('-Q', '-') + '-01');
-      const quarter = Math.ceil((quarterStart.getMonth() + 1) / 3);
+      
+      // Parse quarter from quarterKey format 'yyyy-QQ' (e.g., '2024-02' for Q2)
+      const [year, quarterPart] = quarterKey.split('-');
+      const quarter = parseInt(quarterPart); // QQ format gives 01, 02, 03, 04
       
       return {
         date: quarterKey,
-        displayDate: `Q${quarter} ${quarterStart.getFullYear()}`, // e.g., "Q2 2025"
+        displayDate: `Q${quarter} ${year}`, // e.g., "Q2 2025"
         merchantTransactions: Math.round(sum(group.merchantTransactions)),
         competitorTransactions: Math.round(sum(group.competitorTransactions)),
         merchantRevenue: Math.round(sum(group.merchantRevenue)),
@@ -227,6 +229,55 @@ const processYearlyData = (data) => {
         merchantCustomers: Math.round(sum(group.merchantCustomers))
       };
     });
+};
+
+/**
+ * Get available timeline options based on date range
+ * @param {string} startDate - Start date in YYYY-MM-DD format
+ * @param {string} endDate - End date in YYYY-MM-DD format
+ * @param {object} config - Optional configuration overrides
+ * @returns {Array} Array of available timeline values
+ */
+export const getAvailableTimelines = (startDate, endDate, config = {}) => {
+  if (!startDate || !endDate) {
+    console.warn('getAvailableTimelines: Invalid date inputs, defaulting to daily only');
+    return ['daily'];
+  }
+
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      console.warn('getAvailableTimelines: Invalid date format, defaulting to daily only');
+      return ['daily'];
+    }
+
+    const diffTime = Math.abs(end - start);
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Configuration-driven availability rules (matches documentation requirements)
+    const rules = {
+      weekly: 14,     // Weekly becomes available when at least 14 days are selected
+      monthly: 30,    // Monthly becomes available when at least 30 days are selected
+      quarterly: 90,  // Quarterly becomes available when at least 90 days are selected
+      yearly: 365,    // Yearly becomes available when at least 365 days are selected
+      ...config.timelineRules // Allow configuration override
+    };
+
+    const available = ['daily']; // Always available
+    
+    if (days >= rules.weekly) available.push('weekly');
+    if (days >= rules.monthly) available.push('monthly');
+    if (days >= rules.quarterly) available.push('quarterly');
+    if (days >= rules.yearly) available.push('yearly');
+    
+    console.log(`📅 Timeline availability for ${days} days:`, available);
+    return available;
+  } catch (error) {
+    console.error('Error calculating timeline availability:', error);
+    return ['daily'];
+  }
 };
 
 // Helper functions
