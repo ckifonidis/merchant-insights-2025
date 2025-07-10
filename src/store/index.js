@@ -1,12 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
-import analyticsReducer from './slices/analyticsSlice.js';
 import filtersReducer from './slices/filtersSlice.js';
+import filterOptionsReducer from './slices/filterOptionsSlice.js';
+import dataReducer from './slices/dataSlice.js';
 
 // Configure the store with middleware
 export const store = configureStore({
   reducer: {
-    analytics: analyticsReducer,
-    filters: filtersReducer
+    // Core slices - normalized structure
+    filters: filtersReducer,
+    filterOptions: filterOptionsReducer,
+    data: dataReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -16,7 +19,7 @@ export const store = configureStore({
         // Ignore these field paths in all actions
         ignoredActionsPaths: ['meta.arg', 'payload.timestamp'],
         // Ignore these paths in the state
-        ignoredPaths: ['analytics.lastUpdated']
+        ignoredPaths: ['data.meta.lastUpdated']
       }
     }),
   devTools: process.env.NODE_ENV !== 'production'

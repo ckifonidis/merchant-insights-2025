@@ -10,6 +10,7 @@ import ChartTable from './ChartTable';
 import { ChangeIndicator } from '../metrics';
 import { formatCurrency } from '../../../utils/formatters';
 import { COLORS, CHART_CONFIG } from '../../../utils/constants';
+import { useTimeSeriesChartDataReadOnly } from '../../../hooks/useNormalizedData.js';
 
 /**
  * Transform API data to chart format
@@ -103,7 +104,7 @@ const TimeSeriesChart = ({
   valueFormatter = null, // Custom formatter function
   unit = '', // Unit to display (e.g., '€', 'transactions')
   className = '',
-  apiData = null, // API data from Dashboard component
+  metricId = null, // Connect to store via metricId
   yAxisMode = 'absolute', // NEW: 'absolute' | 'percentage_change'
   metricConfig = {} // NEW: Configuration from tabConfigs.json
 }) => {
@@ -111,36 +112,77 @@ const TimeSeriesChart = ({
   const [chartType, setChartType] = useState('bars');
   const [timeline, setTimeline] = useState('daily');
 
-  // Use API data if available, otherwise fall back to mock data
-  const rawData = apiData || generateTimeSeriesData(
-    filters?.dateRange?.start,
-    filters?.dateRange?.end
-  );
+  // Connect to store when metricId is provided
+  const storeData = metricId ? useTimeSeriesChartDataReadOnly(metricId) : null;
+  
+  // Show loading state if data is being fetched
+  if (metricId && storeData?.isLoading) {
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 animate-pulse">
+        <div className="h-6 bg-gray-200 rounded mb-3"></div>
+        <div className="h-64 bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
+
+  // Show error state if metricId provided but no store connection
+  if (metricId && !storeData) {
+    return (
+      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+        <div className="text-red-800">Error: Unable to connect to chart data store</div>
+      </div>
+    );
+  }
+
+  // Use store data only - no fallback to mock data
+  const rawData = storeData?.chartData;
 
 
 
   // Process data based on timeline selection
-  let processedData;
+  let processedData = [];
 
-  if (apiData) {
-    // FIXED: API data now goes through timeline aggregation too!
-    // Step 1: Transform API data to standard format
-    const standardizedApiData = transformApiDataToChartFormat(apiData, dataType);
+  if (rawData) {
+    console.log(`🔍 TimeSeriesChart DEBUG - rawData format:`, {
+      rawDataType: typeof rawData,
+      isArray: Array.isArray(rawData),
+      rawDataKeys: typeof rawData === 'object' ? Object.keys(rawData) : 'not object',
+      rawData: rawData
+    });
+
+    // The rawData from selector is in format: { merchant: [...], competitor: [...] }
+    // We need to transform this to unified array format for processTimelineData
     
-    // Step 2: Apply timeline aggregation (same as mock data)
-    processedData = processTimelineData(
-      standardizedApiData,
-      timeline,
-      filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
-      filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
-    );
-  } else {
-    // Use existing mock data processing
-    processedData = processTimelineData(
-      rawData,
-      timeline,
-      filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
-      filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+    if (rawData.merchant || rawData.competitor) {
+      // Transform chart data to unified array format
+      const transformedData = transformApiDataToChartFormat(rawData, dataType);
+      
+      processedData = processTimelineData(
+        transformedData,
+        timeline,
+        filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
+        filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+      );
+    } else if (Array.isArray(rawData)) {
+      // Fallback: Already in array format
+      processedData = processTimelineData(
+        rawData,
+        timeline,
+        filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
+        filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
+      );
+    } else {
+      console.log(`⚠️ TimeSeriesChart: Unexpected rawData format:`, rawData);
+      processedData = [];
+    }
+  }
+
+  // Show no data state if no data available
+  if (!rawData || processedData.length === 0) {
+    return (
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="text-gray-600 text-center">No data available for this metric</div>
+      </div>
     );
   }
 

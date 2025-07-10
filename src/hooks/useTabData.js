@@ -1,15 +1,15 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  fetchTabData, 
-  fetchTabDataWithYearComparison,
-  selectTabData, 
-  selectTabLoading, 
-  selectTabError,
-  selectTabYearOverYearData,
-  selectTabYearOverYearLoading,
-  selectTabYearOverYearError
-} from '../store/slices/analyticsSlice.js';
+  fetchMetricsData, 
+  fetchMetricsDataWithYearComparison
+} from '../store/slices/dataSlice.js';
+import { 
+  selectMetricsData,
+  selectMetricsLoading,
+  selectMetricsError,
+  selectMetricsByIds
+} from '../store/selectors/dataSelectors.js';
 import { 
   selectApiRequestParams, 
   selectFiltersChanged, 
@@ -33,10 +33,11 @@ const DEFAULT_OPTIONS = Object.freeze({
 export const useTabData = (tabName, metricIDs, options = DEFAULT_OPTIONS) => {
   const dispatch = useDispatch();
   
-  // Get data from Redux store
-  const tabData = useSelector(state => selectTabData(state, tabName));
-  const loading = useSelector(state => selectTabLoading(state, tabName));
-  const error = useSelector(state => selectTabError(state, tabName));
+  // Get data from normalized store using selectors
+  const allMetricsData = useSelector(selectMetricsData);
+  const loading = useSelector(selectMetricsLoading);
+  const error = useSelector(selectMetricsError);
+  const tabData = useSelector(state => selectMetricsByIds(state, metricIDs));
   const filters = useSelector(selectApiRequestParams);
   const filtersChanged = useSelector(selectFiltersChanged);
   const selectedTab = useSelector(selectSelectedTab);
@@ -58,8 +59,7 @@ export const useTabData = (tabName, metricIDs, options = DEFAULT_OPTIONS) => {
     }
 
     const effectiveFilters = customFilters || filters;
-    dispatch(fetchTabData({ 
-      tabName, 
+    dispatch(fetchMetricsData({ 
       metricIDs, 
       filters: effectiveFilters,
       options: {
@@ -67,7 +67,7 @@ export const useTabData = (tabName, metricIDs, options = DEFAULT_OPTIONS) => {
         autoInferContext
       }
     }));
-  }, [dispatch, tabName, metricIDs, filters, customFilters, metricSpecificFilters, autoInferContext]);
+  }, [dispatch, metricIDs, filters, customFilters, metricSpecificFilters, autoInferContext]);
 
   // Initial fetch - deduplication handled automatically
   useEffect(() => {

@@ -1,6 +1,7 @@
 /**
- * Filter Mapping Service
- * Translates UI filter values to API-compatible format
+ * Enhanced Filter Mapping Service
+ * Handles bidirectional conversion between UI and API filter formats
+ * for the new normalized filter state structure
  */
 
 import { ANALYTICS_PROVIDER_IDS } from '../data/apiSchema.js';
@@ -11,32 +12,32 @@ class FilterMappingService {
   }
 
   /**
-   * Convert UI filters to API filterValues array
+   * Convert API filters from normalized state to API filterValues array
+   * This method works with the new filters.api structure
    */
-  mapUIFiltersToAPI(uiFilters) {
+  mapAPIFiltersToFilterValues(apiFilters) {
     const filterValues = [];
 
     // Gender mapping
-    if (uiFilters.gender && uiFilters.gender !== 'all') {
-      const genderValue = uiFilters.gender === 'male' ? 'm' : 'f';
+    if (apiFilters.gender && apiFilters.gender !== 'a') {
       filterValues.push({
         providerId: this.providerId,
         filterId: 'gender',
-        value: `["${genderValue}"]`
+        value: `["${apiFilters.gender}"]`
       });
     }
 
     // Age groups mapping
-    if (uiFilters.ageGroups && uiFilters.ageGroups.length > 0) {
+    if (apiFilters.ageGroups && apiFilters.ageGroups.length > 0) {
       const ageGroupMapping = {
-        'genZ': 'generation_z',
-        'millennials': 'millennials', 
-        'genX': 'generation_x',
-        'boomers': 'baby_boomers',
-        'silent': 'silent_generation'
+        '18-24': 'generation_z',
+        '25-40': 'millennials', 
+        '41-56': 'generation_x',
+        '57-75': 'baby_boomers',
+        '76-96': 'silent_generation'
       };
       
-      const mappedAgeGroups = uiFilters.ageGroups
+      const mappedAgeGroups = apiFilters.ageGroups
         .map(group => ageGroupMapping[group])
         .filter(Boolean);
       
@@ -50,319 +51,342 @@ class FilterMappingService {
     }
 
     // Channel mapping
-    if (uiFilters.channel && uiFilters.channel !== 'all') {
+    if (apiFilters.channel && apiFilters.channel !== 'all') {
       filterValues.push({
         providerId: this.providerId,
         filterId: 'channel',
-        value: `["${uiFilters.channel}"]`
+        value: `["${apiFilters.channel}"]`
       });
     }
 
     // Shopping interests mapping
-    if (uiFilters.shoppingInterests && uiFilters.shoppingInterests.length > 0) {
+    if (apiFilters.shoppingInterests && apiFilters.shoppingInterests.length > 0) {
       filterValues.push({
         providerId: this.providerId,
         filterId: 'shopping_interests',
-        value: JSON.stringify(uiFilters.shoppingInterests)
+        value: JSON.stringify(apiFilters.shoppingInterests)
       });
     }
 
-    // Customer location mapping
-    if (uiFilters.customerLocation && uiFilters.customerLocation.length > 0) {
-      // Extract municipalities from the location hierarchy
-      const municipalities = uiFilters.customerLocation
-        .filter(location => location.includes('/'))
-        .map(location => {
-          const parts = location.split('/');
-          return parts[parts.length - 1]; // Get the municipality name
-        })
-        .filter(Boolean);
-
-      if (municipalities.length > 0) {
-        filterValues.push({
-          providerId: this.providerId,
-          filterId: 'home_location',
-          value: JSON.stringify(municipalities)
-        });
-      }
-    }
-
-    // Go For More mapping (if applicable)
-    if (uiFilters.goForMore && uiFilters.goForMore !== 'all') {
-      const goForMoreValue = uiFilters.goForMore === 'yes' ? 'true' : 'false';
+    // Regional location mapping
+    if (apiFilters.regions && apiFilters.regions.length > 0) {
       filterValues.push({
         providerId: this.providerId,
-        filterId: 'go_for_more_participant',
-        value: goForMoreValue
+        filterId: 'customer_region_type',
+        value: JSON.stringify(apiFilters.regions)
       });
     }
 
-    // Age range mapping (if specific age range is set)
-    if (uiFilters.ageRange) {
+    // Municipal location mapping
+    if (apiFilters.municipalities && apiFilters.municipalities.length > 0) {
       filterValues.push({
         providerId: this.providerId,
-        filterId: 'age',
-        value: `${uiFilters.ageRange.min}|${uiFilters.ageRange.max}`
+        filterId: 'home_location',
+        value: JSON.stringify(apiFilters.municipalities)
       });
     }
 
-    // Interest type mapping (revenue vs customers for breakdown charts)
-    if (uiFilters.interestType) {
+    // Go For More mapping
+    if (apiFilters.goForMore !== null) {
       filterValues.push({
         providerId: this.providerId,
-        filterId: 'interest_type',
-        value: uiFilters.interestType // 'revenue' or 'customers'
+        filterId: 'customer_activity_promotion',
+        value: `["${apiFilters.goForMore ? 'active' : 'inactive'}"]`
       });
     }
 
-    // Data origin mapping (own_data vs competition_comparison)
-    if (uiFilters.dataOrigin) {
+    // Store mapping
+    if (apiFilters.stores && apiFilters.stores.length > 0) {
       filterValues.push({
         providerId: this.providerId,
-        filterId: 'data_origin',
-        value: uiFilters.dataOrigin
+        filterId: 'store',
+        value: JSON.stringify(apiFilters.stores)
       });
     }
 
+    console.log('🔄 API filters mapped to filterValues:', filterValues);
     return filterValues;
   }
 
   /**
-   * Convert API filterValues back to UI format (for persistence)
+   * Convert legacy UI filters to new normalized API format
+   * This helps with migration from the old filter structure
    */
-  mapAPIFiltersToUI(filterValues = []) {
-    const uiFilters = {
-      gender: 'all',
-      ageGroups: [],
-      channel: 'all',
-      shoppingInterests: [],
-      customerLocation: [],
-      goForMore: null,
-      interestType: null,
-      dataOrigin: null
+  mapLegacyUIFiltersToAPI(legacyUIFilters) {
+    const apiFilters = {
+      dateRange: {
+        start: legacyUIFilters.dateRange?.start?.split('T')[0] || legacyUIFilters.dateRange?.startDate,
+        end: legacyUIFilters.dateRange?.end?.split('T')[0] || legacyUIFilters.dateRange?.endDate
+      },
+      channel: legacyUIFilters.channel || 'all',
+      gender: 'a', // Default to 'all'
+      ageGroups: legacyUIFilters.ageGroups || [],
+      regions: [],
+      municipalities: [],
+      goForMore: legacyUIFilters.goForMore || null,
+      shoppingInterests: legacyUIFilters.shoppingInterests || [],
+      stores: legacyUIFilters.stores || []
     };
 
-    filterValues.forEach(filter => {
-      switch (filter.filterId) {
-        case 'gender':
-          try {
-            const genderArray = JSON.parse(filter.value);
-            if (genderArray.includes('m')) uiFilters.gender = 'male';
-            else if (genderArray.includes('f')) uiFilters.gender = 'female';
-          } catch (e) {
-            console.warn('Failed to parse gender filter:', filter.value);
+    // Convert gender
+    if (legacyUIFilters.gender === 'male') {
+      apiFilters.gender = 'm';
+    } else if (legacyUIFilters.gender === 'female') {
+      apiFilters.gender = 'f';
+    }
+
+    // Convert customer location to regions/municipalities
+    if (legacyUIFilters.customerLocation && legacyUIFilters.customerLocation.length > 0) {
+      const regions = [];
+      const municipalities = [];
+      
+      legacyUIFilters.customerLocation.forEach(location => {
+        if (location.includes('/')) {
+          // This is a municipality path like "ΑΤΤΙΚΗ/ΑΘΗΝΑ"
+          const parts = location.split('/');
+          const region = parts[0];
+          const municipality = parts[parts.length - 1];
+          
+          if (!regions.includes(region)) {
+            regions.push(region);
           }
-          break;
-
-        case 'age_group':
-          try {
-            const ageGroups = JSON.parse(filter.value);
-            const reverseMapping = {
-              'generation_z': 'genZ',
-              'millennials': 'millennials',
-              'generation_x': 'genX', 
-              'baby_boomers': 'boomers',
-              'silent_generation': 'silent'
-            };
-            uiFilters.ageGroups = ageGroups
-              .map(group => reverseMapping[group])
-              .filter(Boolean);
-          } catch (e) {
-            console.warn('Failed to parse age group filter:', filter.value);
+          municipalities.push(municipality);
+        } else {
+          // This is just a region
+          if (!regions.includes(location)) {
+            regions.push(location);
           }
-          break;
+        }
+      });
+      
+      apiFilters.regions = regions;
+      apiFilters.municipalities = municipalities;
+    }
 
-        case 'channel':
-          try {
-            const channels = JSON.parse(filter.value);
-            uiFilters.channel = channels[0] || 'all';
-          } catch (e) {
-            console.warn('Failed to parse channel filter:', filter.value);
-          }
-          break;
+    return apiFilters;
+  }
 
-        case 'shopping_interests':
-          try {
-            uiFilters.shoppingInterests = JSON.parse(filter.value);
-          } catch (e) {
-            console.warn('Failed to parse shopping interests filter:', filter.value);
-          }
-          break;
+  /**
+   * Convert normalized UI filters to API format
+   * This method works with the new filters.ui structure
+   */
+  mapNormalizedUIFiltersToAPI(uiFilters) {
+    const apiFilters = {
+      dateRange: {
+        start: uiFilters.dateRange.start,
+        end: uiFilters.dateRange.end
+      },
+      channel: uiFilters.channel.selected,
+      gender: 'a', // Default
+      ageGroups: uiFilters.demographics.ageGroups.selected,
+      regions: uiFilters.location.regions.selected,
+      municipalities: uiFilters.location.municipalities.selected,
+      goForMore: uiFilters.goForMore.selected,
+      shoppingInterests: uiFilters.shoppingInterests.selected,
+      stores: uiFilters.stores.selected
+    };
 
-        case 'home_location':
-          try {
-            uiFilters.customerLocation = JSON.parse(filter.value);
-          } catch (e) {
-            console.warn('Failed to parse location filter:', filter.value);
-          }
-          break;
+    // Convert gender to API format
+    if (uiFilters.demographics.gender.selected === 'male') {
+      apiFilters.gender = 'm';
+    } else if (uiFilters.demographics.gender.selected === 'female') {
+      apiFilters.gender = 'f';
+    }
 
-        case 'go_for_more_participant':
-          uiFilters.goForMore = filter.value === 'true' ? 'yes' : 'no';
-          break;
+    return apiFilters;
+  }
 
-        case 'age':
-          try {
-            const [min, max] = filter.value.split('|').map(Number);
-            uiFilters.ageRange = { min, max };
-          } catch (e) {
-            console.warn('Failed to parse age range filter:', filter.value);
-          }
-          break;
-
-        case 'interest_type':
-          uiFilters.interestType = filter.value;
-          break;
-
-        case 'data_origin':
-          uiFilters.dataOrigin = filter.value;
-          break;
+  /**
+   * Convert API filters back to normalized UI format
+   * Useful for loading saved filter sets or API responses
+   */
+  mapAPIFiltersToNormalizedUI(apiFilters, existingUIFilters = {}) {
+    const uiFilters = {
+      dateRange: {
+        start: apiFilters.dateRange.start,
+        end: apiFilters.dateRange.end,
+        preset: 'custom' // Will need to be determined based on the actual dates
+      },
+      channel: {
+        selected: apiFilters.channel,
+        options: existingUIFilters.channel?.options || ['all', 'ecommerce', 'physical']
+      },
+      demographics: {
+        gender: {
+          selected: apiFilters.gender === 'm' ? 'male' : 
+                   apiFilters.gender === 'f' ? 'female' : 'all',
+          options: existingUIFilters.demographics?.gender?.options || ['all', 'male', 'female']
+        },
+        ageGroups: {
+          selected: apiFilters.ageGroups || [],
+          options: existingUIFilters.demographics?.ageGroups?.options || [],
+          multiSelect: true
+        }
+      },
+      location: {
+        regions: {
+          selected: apiFilters.regions || [],
+          options: existingUIFilters.location?.regions?.options || [],
+          multiSelect: true
+        },
+        municipalities: {
+          selected: apiFilters.municipalities || [],
+          options: existingUIFilters.location?.municipalities?.options || [],
+          multiSelect: true
+        }
+      },
+      goForMore: {
+        selected: apiFilters.goForMore,
+        available: existingUIFilters.goForMore?.available || false
+      },
+      shoppingInterests: {
+        selected: apiFilters.shoppingInterests || [],
+        options: existingUIFilters.shoppingInterests?.options || [],
+        multiSelect: true
+      },
+      stores: {
+        selected: apiFilters.stores || [],
+        options: existingUIFilters.stores?.options || [],
+        multiSelect: true
       }
-    });
+    };
 
     return uiFilters;
   }
 
   /**
-   * Check if a dataset meets minimum size requirements
+   * Validate filter values
    */
-  validateDatasetSize(data, minimumSize = 20) {
-    if (!data) return false;
+  validateFilters(apiFilters) {
+    const errors = [];
     
-    if (Array.isArray(data)) {
-      return data.length >= minimumSize;
+    // Date range validation
+    if (!apiFilters.dateRange?.start || !apiFilters.dateRange?.end) {
+      errors.push('Date range is required');
+    } else {
+      const startDate = new Date(apiFilters.dateRange.start);
+      const endDate = new Date(apiFilters.dateRange.end);
+      
+      if (startDate >= endDate) {
+        errors.push('End date must be after start date');
+      }
+      
+      // Check if date range is reasonable (not too far in the past or future)
+      const now = new Date();
+      const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate());
+      const oneYearFromNow = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+      
+      if (startDate < twoYearsAgo) {
+        errors.push('Start date cannot be more than 2 years in the past');
+      }
+      
+      if (endDate > oneYearFromNow) {
+        errors.push('End date cannot be more than 1 year in the future');
+      }
     }
-    
-    if (typeof data === 'object' && data.seriesValues) {
-      const totalPoints = data.seriesValues.reduce((total, series) => {
-        return total + (series.seriesPoints?.length || 0);
-      }, 0);
-      return totalPoints >= minimumSize;
-    }
-    
-    return true; // For scalar values, assume they're valid
-  }
 
-  /**
-   * Create insufficient data placeholder
-   */
-  createInsufficientDataPlaceholder(metricId, merchantId = 'merchant') {
+    // Gender validation
+    if (apiFilters.gender && !['a', 'm', 'f'].includes(apiFilters.gender)) {
+      errors.push('Invalid gender value');
+    }
+
+    // Channel validation
+    if (apiFilters.channel && !['all', 'ecommerce', 'physical'].includes(apiFilters.channel)) {
+      errors.push('Invalid channel value');
+    }
+
     return {
-      metricID: metricId,
-      percentageValue: false,
-      scalarValue: null,
-      seriesValues: null,
-      merchantId,
-      insufficientData: true,
-      message: 'Insufficient data for current filter selection'
+      isValid: errors.length === 0,
+      errors
     };
   }
 
   /**
-   * Apply filters to mock data generation
+   * Generate a hash of filter values for caching purposes
    */
-  applyFiltersToMockData(baseData, filterValues) {
-    if (!filterValues || filterValues.length === 0) {
-      return baseData;
+  generateFilterHash(apiFilters) {
+    const filterString = JSON.stringify(apiFilters, Object.keys(apiFilters).sort());
+    
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < filterString.length; i++) {
+      const char = filterString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
     }
-
-    const parsedFilters = this.parseFilterValues(filterValues);
-    let filteredData = { ...baseData };
-
-    // Apply gender filter
-    if (parsedFilters.gender) {
-      filteredData = this.applyGenderFilter(filteredData, parsedFilters.gender);
-    }
-
-    // Apply age group filter
-    if (parsedFilters.ageGroups) {
-      filteredData = this.applyAgeGroupFilter(filteredData, parsedFilters.ageGroups);
-    }
-
-    // Apply shopping interests filter
-    if (parsedFilters.shoppingInterests) {
-      filteredData = this.applyShoppingInterestsFilter(filteredData, parsedFilters.shoppingInterests);
-    }
-
-    // Apply location filter
-    if (parsedFilters.locations) {
-      filteredData = this.applyLocationFilter(filteredData, parsedFilters.locations);
-    }
-
-    return filteredData;
+    
+    return Math.abs(hash).toString(36);
   }
 
   /**
-   * Parse filterValues array into structured object
+   * Compare two filter objects to see if they're equivalent
    */
-  parseFilterValues(filterValues) {
-    const parsed = {};
-
-    filterValues.forEach(filter => {
-      switch (filter.filterId) {
-        case 'gender':
-          try {
-            parsed.gender = JSON.parse(filter.value);
-          } catch (e) {
-            console.warn('Failed to parse gender filter');
-          }
-          break;
-
-        case 'age_group':
-          try {
-            parsed.ageGroups = JSON.parse(filter.value);
-          } catch (e) {
-            console.warn('Failed to parse age group filter');
-          }
-          break;
-
-        case 'shopping_interests':
-          try {
-            parsed.shoppingInterests = JSON.parse(filter.value);
-          } catch (e) {
-            console.warn('Failed to parse shopping interests filter');
-          }
-          break;
-
-        case 'home_location':
-          try {
-            parsed.locations = JSON.parse(filter.value);
-          } catch (e) {
-            console.warn('Failed to parse location filter');
-          }
-          break;
-
-        case 'interest_type':
-          parsed.interestType = filter.value; // revenue or customers
-          break;
-
-        case 'data_origin':
-          parsed.dataOrigin = filter.value;
-          break;
-      }
-    });
-
-    return parsed;
+  areFiltersEqual(filters1, filters2) {
+    return this.generateFilterHash(filters1) === this.generateFilterHash(filters2);
   }
 
-  applyGenderFilter(data, genderFilter) {
-    // This will be implemented based on the specific data structure
-    return data;
+  /**
+   * Get a human-readable description of applied filters
+   */
+  getFilterDescription(uiFilters) {
+    const descriptions = [];
+    
+    // Date range
+    descriptions.push(`${uiFilters.dateRange.start} to ${uiFilters.dateRange.end}`);
+    
+    // Channel
+    if (uiFilters.channel.selected !== 'all') {
+      descriptions.push(`Channel: ${uiFilters.channel.selected}`);
+    }
+    
+    // Gender
+    if (uiFilters.demographics.gender.selected !== 'all') {
+      descriptions.push(`Gender: ${uiFilters.demographics.gender.selected}`);
+    }
+    
+    // Age groups
+    if (uiFilters.demographics.ageGroups.selected.length > 0) {
+      descriptions.push(`Age groups: ${uiFilters.demographics.ageGroups.selected.join(', ')}`);
+    }
+    
+    // Regions
+    if (uiFilters.location.regions.selected.length > 0) {
+      descriptions.push(`Regions: ${uiFilters.location.regions.selected.length} selected`);
+    }
+    
+    // Municipalities
+    if (uiFilters.location.municipalities.selected.length > 0) {
+      descriptions.push(`Municipalities: ${uiFilters.location.municipalities.selected.length} selected`);
+    }
+    
+    // Go For More
+    if (uiFilters.goForMore.selected !== null) {
+      descriptions.push(`Go For More: ${uiFilters.goForMore.selected ? 'Yes' : 'No'}`);
+    }
+    
+    // Shopping interests
+    if (uiFilters.shoppingInterests.selected.length > 0) {
+      descriptions.push(`Shopping interests: ${uiFilters.shoppingInterests.selected.length} selected`);
+    }
+    
+    // Stores
+    if (uiFilters.stores.selected.length > 0) {
+      descriptions.push(`Stores: ${uiFilters.stores.selected.length} selected`);
+    }
+    
+    return descriptions.join(' | ');
   }
 
-  applyAgeGroupFilter(data, ageGroupFilter) {
-    // This will be implemented based on the specific data structure
-    return data;
-  }
-
-  applyShoppingInterestsFilter(data, interestsFilter) {
-    // This will be implemented based on the specific data structure
-    return data;
-  }
-
-  applyLocationFilter(data, locationFilter) {
-    // This will be implemented based on the specific data structure
-    return data;
+  /**
+   * Legacy method for backward compatibility
+   * Maps old-style UI filters to API filterValues array
+   */
+  mapUIFiltersToAPI(uiFilters) {
+    // First convert to normalized API format
+    const apiFilters = this.mapLegacyUIFiltersToAPI(uiFilters);
+    
+    // Then convert to filterValues array
+    return this.mapAPIFiltersToFilterValues(apiFilters);
   }
 }
 

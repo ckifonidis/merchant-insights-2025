@@ -23,6 +23,7 @@ function AppContent() {
   const filters = useSelector(selectUIFilters);
   const { isMobile } = useResponsive();
   const dispatch = useDispatch();
+  
 
   // Update Redux with active tab
   const handleTabChange = (newTab) => {

@@ -1,10 +1,33 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 import Select from 'react-select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Shopping interest labels mapping
+const SHOPPING_INTEREST_LABELS = {
+  'SHOPINT1': 'Fashion & Apparel',
+  'SHOPINT2': 'Electronics & Tech',
+  'SHOPINT3': 'Home & Garden',
+  'SHOPINT4': 'Sports & Fitness',
+  'SHOPINT5': 'Books & Media',
+  'SHOPINT6': 'Beauty & Personal Care',
+  'SHOPINT7': 'Food & Beverages',
+  'SHOPINT8': 'Travel & Tourism',
+  'SHOPINT9': 'Automotive',
+  'SHOPINT10': 'Health & Wellness',
+  'SHOPINT11': 'Entertainment',
+  'SHOPINT12': 'Jewelry & Accessories',
+  'SHOPINT13': 'Toys & Games',
+  'SHOPINT14': 'Art & Crafts',
+  'SHOPINT15': 'Office & Business',
+  'other_category': 'Other'
+};
+
 const UniversalBarChart = ({ 
   data, 
+  metricId,
   title,
   merchantColor = '#007B85',
   competitorColor = '#73AA3C',
@@ -12,10 +35,134 @@ const UniversalBarChart = ({
   showAbsoluteValues = false,
   totalValue = null,
   note = null,
-  filters 
+  filters,
+  formatValue = (value) => `${value}%`,
+  formatTooltipValue = null,
+  maxCategories = null
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('bars');
+
+  // Memoized selector for raw metric data when metricId is provided
+  const selectRawMetricData = useMemo(() => {
+    if (!metricId) return null;
+    
+    return createSelector(
+      [state => state.data.metrics],
+      (metrics) => {
+        const metric = metrics?.[metricId];
+        if (!metric?.merchant?.current) return null;
+        
+        return {
+          merchant: metric.merchant.current,
+          competitor: metric.competitor?.current || {}
+        };
+      }
+    );
+  }, [metricId]);
+
+  const rawData = useSelector(selectRawMetricData || (() => null));
+  const loading = useSelector(state => 
+    metricId ? (state.data.loading?.metrics || state.data.loading?.specificMetrics?.[metricId]) : false
+  );
+  const error = useSelector(state => 
+    metricId ? (state.data.errors?.metrics || state.data.errors?.specificMetrics?.[metricId]) : null
+  );
+
+  // Debug logging for converted_customers_by_interest
+  const allMetrics = useSelector(state => state.data.metrics);
+  const allLoading = useSelector(state => state.data.loading);
+  const allErrors = useSelector(state => state.data.errors);
+  
+  if (metricId === 'converted_customers_by_interest') {
+    console.log('🔍 DEBUG converted_customers_by_interest:', {
+      metricId,
+      rawData,
+      loading,
+      error,
+      allMetricsKeys: Object.keys(allMetrics || {}),
+      hasMetric: !!allMetrics?.[metricId],
+      metricValue: allMetrics?.[metricId],
+      allLoading,
+      allErrors
+    });
+  }
+
+  // Calculate breakdown data from raw metric data when metricId is provided
+  const processedData = useMemo(() => {
+    if (data) return data; // Use provided data if available
+    if (!rawData || !metricId) return [];
+
+    // Handle converted_customers_by_interest specifically
+    if (metricId === 'converted_customers_by_interest') {
+      const merchantData = rawData.merchant;
+      const competitorData = rawData.competitor;
+      
+      // Calculate totals for percentage calculation
+      const merchantTotal = Object.values(merchantData).reduce((sum, val) => sum + (val || 0), 0);
+      const competitorTotal = Object.values(competitorData).reduce((sum, val) => sum + (val || 0), 0);
+      
+      let result = Object.keys(merchantData).map(interest => {
+        const merchantAbsolute = merchantData[interest] || 0;
+        const competitorAbsolute = competitorData[interest] || 0;
+        
+        return {
+          category: SHOPPING_INTEREST_LABELS[interest] || interest,
+          // Store both absolute and percentage values
+          merchant: merchantTotal > 0 ? Number(((merchantAbsolute / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number(((competitorAbsolute / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute,
+          competitorAbsolute
+        };
+      });
+
+      // Sort by total revenue (merchant + competitor) and limit if maxCategories is set
+      result = result
+        .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
+      
+      if (maxCategories) {
+        result = result.slice(0, maxCategories);
+      }
+
+      // Truncate long category names
+      result = result.map(item => ({
+        ...item,
+        category: item.category.length > 15 ? item.category.substring(0, 15) + '...' : item.category
+      }));
+
+      return result;
+    }
+
+    // Add other metric types here as needed
+    return [];
+  }, [data, rawData, metricId, maxCategories]);
+
+  // Show loading state when using metricId
+  if (metricId && loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading data...</div>
+      </div>
+    );
+  }
+
+  // Show error state when using metricId
+  if (metricId && error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Error loading data: {error}</div>
+      </div>
+    );
+  }
+
+  // Show no data state
+  if (processedData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">No data available</div>
+      </div>
+    );
+  }
 
   // Chart type options
   const chartTypeOptions = [
@@ -30,9 +177,14 @@ const UniversalBarChart = ({
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="font-medium text-gray-900 mb-2">{label}</p>
           {payload.map((entry, index) => {
+            const dataPoint = processedData.find(item => item.category === label);
             const isMerchant = entry.dataKey === 'merchant';
-            const absoluteValue = isMerchant && showAbsoluteValues && totalValue ? 
-              Math.round(entry.value * totalValue / 100) : null;
+            const absoluteValue = isMerchant ? dataPoint?.merchantAbsolute : dataPoint?.competitorAbsolute;
+            
+            let displayValue = formatValue(entry.value);
+            if (formatTooltipValue && absoluteValue !== undefined && absoluteValue !== null) {
+              displayValue = `${formatValue(entry.value)} (${formatTooltipValue(absoluteValue)})`;
+            }
 
             return (
               <div key={index} className="flex items-center space-x-2">
@@ -41,10 +193,7 @@ const UniversalBarChart = ({
                   style={{ backgroundColor: entry.color }}
                 />
                 <span className="text-sm text-gray-700">
-                  {entry.name}: {entry.value}%
-                  {absoluteValue && (
-                    <span className="text-gray-500 ml-1">({absoluteValue.toLocaleString()} customers)</span>
-                  )}
+                  {entry.name}: {displayValue}
                 </span>
               </div>
             );
@@ -78,25 +227,25 @@ const UniversalBarChart = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((row, index) => {
-            const absoluteValue = showAbsoluteValues && totalValue ? 
-              Math.round(row.merchant * totalValue / 100) : null;
-            
+          {processedData.map((row, index) => {
             return (
               <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {row.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {row.merchant}%
+                  {formatValue(row.merchant)}
                 </td>
                 {showAbsoluteValues && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {absoluteValue?.toLocaleString()}
+                    {row.merchantAbsolute ? 
+                      (formatTooltipValue ? formatTooltipValue(row.merchantAbsolute) : row.merchantAbsolute.toLocaleString()) : 
+                      '-'
+                    }
                   </td>
                 )}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {row.competitor}%
+                  {formatValue(row.competitor)}
                 </td>
               </tr>
             );
@@ -111,7 +260,7 @@ const UniversalBarChart = ({
     <div className="h-96">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={data}
+          data={processedData}
           margin={{ top: 5, right: 30, left: 20, bottom: 80 }}
         >
           <CartesianGrid strokeDasharray="3 3" />

@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 import Select from 'react-select';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useResponsive } from '../../../hooks/useResponsive';
 
 const UniversalBreakdownChart = ({ 
   data, 
+  metricId,
   colors, 
   formatValue = (value) => `${value}%`,
   showAbsoluteValues = false,
@@ -17,6 +20,95 @@ const UniversalBreakdownChart = ({
   const [chartType, setChartType] = useState('stacked');
   const { isMobile, isTablet } = useResponsive();
 
+  // Memoized selector for raw metric data when metricId is provided
+  const selectRawMetricData = useMemo(() => {
+    if (!metricId) return null;
+    
+    return createSelector(
+      [state => state.data.metrics],
+      (metrics) => {
+        const metric = metrics?.[metricId];
+        if (!metric?.merchant?.current) return null;
+        
+        return {
+          merchant: metric.merchant.current,
+          competitor: metric.competitor?.current || {}
+        };
+      }
+    );
+  }, [metricId]);
+
+  const rawData = useSelector(selectRawMetricData || (() => null));
+  const loading = useSelector(state => 
+    metricId ? (state.data.loading?.metrics || state.data.loading?.specificMetrics?.[metricId]) : false
+  );
+  const error = useSelector(state => 
+    metricId ? (state.data.errors?.metrics || state.data.errors?.specificMetrics?.[metricId]) : null
+  );
+
+  // Calculate breakdown data from raw metric data when metricId is provided
+  const processedData = useMemo(() => {
+    if (data) return data; // Use provided data if available
+    if (!rawData || !metricId) return [];
+
+    // Handle revenue_by_channel specifically
+    if (metricId === 'revenue_by_channel') {
+      const merchantData = rawData.merchant;
+      const competitorData = rawData.competitor;
+      
+      // Calculate totals for percentage calculation
+      const merchantTotal = (merchantData.physical || 0) + (merchantData.ecommerce || 0);
+      const competitorTotal = (competitorData.physical || 0) + (competitorData.ecommerce || 0);
+      
+      return [
+        {
+          category: 'Physical Store',
+          merchant: merchantTotal > 0 ? Number((((merchantData.physical || 0) / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number((((competitorData.physical || 0) / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute: merchantData.physical || 0,
+          competitorAbsolute: competitorData.physical || 0
+        },
+        {
+          category: 'E-commerce', 
+          merchant: merchantTotal > 0 ? Number((((merchantData.ecommerce || 0) / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number((((competitorData.ecommerce || 0) / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute: merchantData.ecommerce || 0,
+          competitorAbsolute: competitorData.ecommerce || 0
+        }
+      ];
+    }
+
+    // Add other metric types here as needed
+    return [];
+  }, [data, rawData, metricId]);
+
+  // Show loading state when using metricId
+  if (metricId && loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading data...</div>
+      </div>
+    );
+  }
+
+  // Show error state when using metricId
+  if (metricId && error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Error loading data: {error}</div>
+      </div>
+    );
+  }
+
+  // Show no data state
+  if (processedData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">No data available</div>
+      </div>
+    );
+  }
+
   // Chart type options
   const chartTypeOptions = [
     { value: 'stacked', label: 'Stacked Bar' },
@@ -25,7 +117,7 @@ const UniversalBreakdownChart = ({
   ];
 
   // Process data for pie charts with defensive programming
-  const merchantPieData = data.filter(item => {
+  const merchantPieData = processedData.filter(item => {
     const merchantValue = typeof item.merchant === 'number' && !isNaN(item.merchant) ? item.merchant : 0;
     return merchantValue > 0; // Only include items with valid positive values
   }).map(item => ({
@@ -36,7 +128,7 @@ const UniversalBreakdownChart = ({
     color: colors[item.category] || colors[item.key] || '#999999'
   }));
 
-  const competitorPieData = data.filter(item => {
+  const competitorPieData = processedData.filter(item => {
     const competitorValue = typeof item.competitor === 'number' && !isNaN(item.competitor) ? item.competitor : 0;
     return competitorValue > 0; // Only include items with valid positive values
   }).map(item => ({
@@ -51,13 +143,12 @@ const UniversalBreakdownChart = ({
   const PieTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      console.log('🔍 Pie tooltip data:', { data, formatTooltipValue, absoluteValue: data.absoluteValue });
       
       let displayValue;
       if (formatTooltipValue && data.absoluteValue !== undefined && data.absoluteValue !== null) {
         displayValue = formatTooltipValue(data.absoluteValue);
       } else {
-        displayValue = `${data.percentage.toFixed(1)}%`;
+        displayValue = `${data.percentage.toFixed(2)}%`;
       }
       
       return (
@@ -93,7 +184,7 @@ const UniversalBreakdownChart = ({
         fontSize="12"
         fontWeight="bold"
       >
-        {`${(percent * 100).toFixed(1)}%`}
+        {`${(percent * 100).toFixed(2)}%`}
       </text>
     );
   };
@@ -121,10 +212,7 @@ const UniversalBreakdownChart = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((row, index) => {
-            const absoluteValue = showAbsoluteValues && totalValue ? 
-              Math.round(row.merchant * totalValue / 100) : null;
-            
+          {processedData.map((row, index) => {
             return (
               <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -135,7 +223,10 @@ const UniversalBreakdownChart = ({
                 </td>
                 {showAbsoluteValues && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {absoluteValue?.toLocaleString()}
+                    {row.merchantAbsolute ? 
+                      (formatTooltipValue ? formatTooltipValue(row.merchantAbsolute) : row.merchantAbsolute.toLocaleString()) : 
+                      '-'
+                    }
                   </td>
                 )}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -158,7 +249,7 @@ const UniversalBreakdownChart = ({
           <h4 className="text-sm font-medium text-gray-700 mb-3">{t('dashboard.merchant')}</h4>
           <div className="w-full h-12 bg-gray-100 rounded-lg overflow-hidden mb-3 relative group">
             <div className="flex h-full">
-              {data.map((item, index) => {
+              {processedData.map((item, index) => {
                 const color = colors[item.category] || colors[item.key];
                 const absoluteValue = item.merchantAbsolute;
                 const formattedAbsolute = formatTooltipValue && absoluteValue ? 
@@ -173,7 +264,7 @@ const UniversalBreakdownChart = ({
                       width: `${item.merchant}%`,
                       backgroundColor: color
                     }}
-                    title={`${item.category}: ${item.merchant.toFixed(1)}%${formattedAbsolute ? ` (${formattedAbsolute})` : ''}`}
+                    title={`${item.category}: ${item.merchant.toFixed(2)}%${formattedAbsolute ? ` (${formattedAbsolute})` : ''}`}
                   />
                 );
               })}
@@ -191,7 +282,7 @@ const UniversalBreakdownChart = ({
           
           {/* Legend for Merchant */}
           <div className="flex justify-center space-x-6 flex-wrap">
-            {data.map((item, index) => {
+            {processedData.map((item, index) => {
               const color = colors[item.category] || colors[item.key];
               const absoluteValue = item.merchantAbsolute;
               const formattedAbsolute = formatTooltipValue && absoluteValue ? 
@@ -205,7 +296,7 @@ const UniversalBreakdownChart = ({
                     style={{ backgroundColor: color }}
                   />
                   <span className="text-sm text-gray-700">
-                    {item.category} ({item.merchant.toFixed(1)}%{formattedAbsolute ? ` - ${formattedAbsolute}` : ''})
+                    {item.category} ({item.merchant.toFixed(2)}%{formattedAbsolute ? ` - ${formattedAbsolute}` : ''})
                   </span>
                 </div>
               );
@@ -218,7 +309,7 @@ const UniversalBreakdownChart = ({
           <h4 className="text-sm font-medium text-gray-700 mb-3">{t('dashboard.competition')}</h4>
           <div className="w-full h-12 bg-gray-100 rounded-lg overflow-hidden mb-3">
             <div className="flex h-full">
-              {data.map((item, index) => {
+              {processedData.map((item, index) => {
                 const color = colors[item.category] || colors[item.key];
                 const absoluteValue = item.competitorAbsolute;
                 const formattedAbsolute = formatTooltipValue && absoluteValue ? 
@@ -233,7 +324,7 @@ const UniversalBreakdownChart = ({
                       width: `${item.competitor}%`,
                       backgroundColor: color
                     }}
-                    title={`${item.category}: ${item.competitor.toFixed(1)}%${formattedAbsolute ? ` (${formattedAbsolute})` : ''}`}
+                    title={`${item.category}: ${item.competitor.toFixed(2)}%${formattedAbsolute ? ` (${formattedAbsolute})` : ''}`}
                   />
                 );
               })}
@@ -242,7 +333,7 @@ const UniversalBreakdownChart = ({
           
           {/* Legend for Competition */}
           <div className="flex justify-center space-x-6 flex-wrap">
-            {data.map((item, index) => {
+            {processedData.map((item, index) => {
               const color = colors[item.category] || colors[item.key];
               const absoluteValue = item.competitorAbsolute;
               const formattedAbsolute = formatTooltipValue && absoluteValue ? 
@@ -256,7 +347,7 @@ const UniversalBreakdownChart = ({
                     style={{ backgroundColor: color }}
                   />
                   <span className="text-sm text-gray-700">
-                    {item.category} ({item.competitor.toFixed(1)}%{formattedAbsolute ? ` - ${formattedAbsolute}` : ''})
+                    {item.category} ({item.competitor.toFixed(2)}%{formattedAbsolute ? ` - ${formattedAbsolute}` : ''})
                   </span>
                 </div>
               );

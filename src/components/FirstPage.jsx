@@ -88,6 +88,7 @@ const FirstPage = ({ onInterestClick }) => {
                 value: competitionMetrics.revenue.merchantVsCompetition,
                 competitorChange: competitionMetrics.revenue.competitionChangeFromLastYear
               }}
+              metricId="rewarded_amount"
             />
 
             {/* Transactions Metric */}
@@ -102,6 +103,7 @@ const FirstPage = ({ onInterestClick }) => {
                 value: competitionMetrics.transactions.merchantVsCompetition,
                 competitorChange: competitionMetrics.transactions.competitionChangeFromLastYear
               }}
+              metricId="rewarded_amount"
             />
 
             {/* Average Transaction Amount Metric */}
@@ -116,6 +118,7 @@ const FirstPage = ({ onInterestClick }) => {
                 value: competitionMetrics.avgTransactionAmount.merchantVsCompetition,
                 competitorChange: competitionMetrics.avgTransactionAmount.competitionChangeFromLastYear
               }}
+              metricId="rewarded_amount"
             />
           </div>
         </div>

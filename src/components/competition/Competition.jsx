@@ -72,6 +72,7 @@ const Competition = ({ filters }) => {
             value: competitionMetrics.revenue.merchantVsCompetition,
             competitorChange: competitionMetrics.revenue.competitionChangeFromLastYear
           }}
+          metricId="total_revenue"
         />
 
         {/* Transactions Metric */}
@@ -86,6 +87,7 @@ const Competition = ({ filters }) => {
             value: competitionMetrics.transactions.merchantVsCompetition,
             competitorChange: competitionMetrics.transactions.competitionChangeFromLastYear
           }}
+          metricId="total_transactions"
         />
 
         {/* Average Transaction Amount Metric */}
@@ -100,6 +102,7 @@ const Competition = ({ filters }) => {
             value: competitionMetrics.avgTransactionAmount.merchantVsCompetition,
             competitorChange: competitionMetrics.avgTransactionAmount.competitionChangeFromLastYear
           }}
+          metricId="avg_ticket_per_user"
         />
       </div>
 

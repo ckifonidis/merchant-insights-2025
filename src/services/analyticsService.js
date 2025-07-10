@@ -71,11 +71,10 @@ class AnalyticsService {
     const rawResponse = await this.queryAnalytics(request);
     console.log(`📥 Raw API response for ${tabName}:`, rawResponse);
 
-    // Transform the response
-    const transformedData = transformTabData(tabName, rawResponse);
-    console.log(`🔄 Transformed data for ${tabName}:`, transformedData);
+    // Return raw response - let components handle transformation
+    console.log(`📤 Returning raw API response for ${tabName} (components will transform)`);
 
-    return transformedData;
+    return rawResponse;
   }
 
   /**
@@ -131,16 +130,10 @@ class AnalyticsService {
       console.log(`📥 Current year API response for ${tabName}:`, currentResponse);
       console.log(`📥 Previous year API response for ${tabName}:`, previousResponse);
 
-      // Transform both responses
-      const currentData = transformTabData(tabName, currentResponse);
-      const previousData = transformTabData(`${tabName}_previous`, previousResponse);
-
-      console.log(`🔄 Current year transformed data for ${tabName}:`, currentData);
-      console.log(`🔄 Previous year transformed data for ${tabName}:`, previousData);
-
+      // Return raw API responses - let API normalizer handle processing
       return {
-        current: currentData,
-        previous: previousData,
+        current: currentResponse,
+        previous: previousResponse,
         dateRanges: {
           current: { startDate: filters.startDate, endDate: filters.endDate },
           previous: { startDate: previousYearDates.startDate, endDate: previousYearDates.endDate }

@@ -3,11 +3,15 @@ import { useTranslation } from 'react-i18next';
 import ChangeIndicator from './ChangeIndicator';
 import { formatValue } from '../../../utils/formatters';
 import { CSS_CLASSES, METRIC_VARIANTS } from '../../../utils/constants';
-import { prepareMetricCardData } from '../../../utils/yearOverYearHelpers';
+import { useSelector } from 'react-redux';
+import { createMetricSelector } from '../../../store/selectors/dataSelectors.js';
 
 /**
  * Universal metric card that consolidates all metric display patterns
  * Replaces: MetricCard, ComparisonMetricCard, and inline metric cards
+ * 
+ * ALWAYS requires metricId - connects to Redux store for all data
+ * Throws error if metricId is missing
  */
 const UniversalMetricCard = ({
   // Layout variant
@@ -19,19 +23,17 @@ const UniversalMetricCard = ({
   icon,
   className = '',
   
-  // Single variant props
+  // Single variant props (DEPRECATED - use metricId instead)
   value,
   change,
   valueType = 'number',
   
-  // Comparison variant props
+  // Comparison variant props (DEPRECATED - use metricId instead)
   merchantData = {},
   competitorData = {},
   
-  // Year-over-year data props (for detailed variant)
+  // REQUIRED: Metric ID for store connection
   metricId,
-  currentData,
-  previousData,
   
   // Additional options
   showIcon = true,
@@ -40,6 +42,44 @@ const UniversalMetricCard = ({
   size = 'medium' // 'small', 'medium', 'large'
 }) => {
   const { t } = useTranslation();
+
+  // ALWAYS require metricId - no fallback to props
+  if (!metricId) {
+    const errorMessage = `UniversalMetricCard: metricId is required. Component title: "${title || 'Unknown'}"`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  // Connect to store using metricId - get data in exact store format
+  const storeData = useSelector(createMetricSelector(metricId));
+  
+  // Log store data access for debugging
+  if (import.meta.env.DEV) {
+    console.log(`📊 UniversalMetricCard [${metricId}]:`, {
+      title,
+      variant,
+      storeData,
+      hasMerchantData: !!storeData?.merchant?.current,
+      hasCompetitorData: !!storeData?.competitor?.current
+    });
+  }
+  
+  // Calculate year-over-year percentage change
+  const calculateYoYChange = (current, previous) => {
+    if (!current || !previous || previous === 0) return null;
+    return ((current - previous) / previous) * 100;
+  };
+
+  // Always use store data - no fallback to props
+  // Store format: { merchant: { current: value, previous: value }, competitor: { current: value, previous: value } }
+  const finalMerchantData = {
+    value: storeData?.merchant?.current,
+    change: calculateYoYChange(storeData?.merchant?.current, storeData?.merchant?.previous)
+  };
+  const finalCompetitorData = {
+    value: storeData?.competitor?.current,
+    change: calculateYoYChange(storeData?.competitor?.current, storeData?.competitor?.previous)
+  };
 
   // Size-based classes
   const sizeClasses = {
@@ -119,12 +159,19 @@ const UniversalMetricCard = ({
 
   // Single variant (original MetricCard)
   if (variant === METRIC_VARIANTS.single) {
+    // Always use store data (metricId is required)
+    const singleData = {
+      value: finalMerchantData.value,
+      change: finalMerchantData.change,
+      valueType
+    };
+
     return (
       <div className={`${CSS_CLASSES.card} ${currentSize.container} ${className}`}>
         {layout === 'vertical' && renderIcon()}
         {renderHeader()}
         <div className="mt-3">
-          {renderMetricSection({ value, change, valueType })}
+          {renderMetricSection(singleData)}
         </div>
       </div>
     );
@@ -136,30 +183,32 @@ const UniversalMetricCard = ({
       <div className={`${CSS_CLASSES.card} ${currentSize.container} ${className}`}>
         {renderHeader()}
         <div className="grid grid-cols-2 gap-4 mt-3">
-          {renderMetricSection(merchantData, t('dashboard.merchant'))}
-          {renderMetricSection(competitorData, t('dashboard.competition'))}
+          {renderMetricSection(finalMerchantData, t('dashboard.merchant'))}
+          {renderMetricSection(finalCompetitorData, t('dashboard.competition'))}
         </div>
       </div>
     );
   }
 
-  // Detailed variant (like DashboardMetrics cards) - Auto-calculate YoY from API data
+  // Detailed variant (like DashboardMetrics cards) - Always uses store data
   if (variant === METRIC_VARIANTS.detailed) {
-    // Auto-calculate YoY data if metricId and year data provided
-    let finalMerchantData = merchantData;
-    let finalCompetitorData = competitorData;
-    
-    
-    if (metricId && currentData && previousData) {
-      const autoCalculatedData = prepareMetricCardData({
-        metricId,
-        currentData,
-        previousData,
-        valueType
-      });
-      
-      finalMerchantData = autoCalculatedData.merchantData;
-      finalCompetitorData = autoCalculatedData.competitorData;
+    // Show loading state if data is being fetched
+    if (storeData?.isLoading) {
+      return (
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded mb-3"></div>
+          <div className="h-16 bg-gray-200 rounded"></div>
+        </div>
+      );
+    }
+
+    // Show error state if no store connection
+    if (!storeData) {
+      return (
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+          <div className="text-red-800">Error: Unable to connect to metric data store for metricId: {metricId}</div>
+        </div>
+      );
     }
     
     return (

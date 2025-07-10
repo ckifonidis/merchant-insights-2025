@@ -1,26 +1,21 @@
 import { useTranslation } from 'react-i18next';
-import { getIcon } from '../../utils/configHelpers.jsx';
-import { UniversalMetricCard, TimeSeriesChart } from '../ui';
-import { METRIC_VARIANTS } from '../../utils/constants';
 import CampaignButton from '../ui/CampaignButton';
-import { useDashboardDataWithYearComparison } from '../../hooks/useTabData.js';
+import TotalRevenueMetric from './metrics/TotalRevenueMetric.jsx';
+import TotalTransactionsMetric from './metrics/TotalTransactionsMetric.jsx';
+import AvgTransactionMetric from './metrics/AvgTransactionMetric.jsx';
+import RevenueTimeSeriesChart from './charts/RevenueTimeSeriesChart.jsx';
+import TransactionsTimeSeriesChart from './charts/TransactionsTimeSeriesChart.jsx';
+import CustomersTimeSeriesChart from './charts/CustomersTimeSeriesChart.jsx';
+import { useDashboardDataNormalized } from '../../hooks/useNormalizedData.js';
 
 const Dashboard = ({ filters }) => {
   const { t } = useTranslation();
-  const { 
-    current: data, 
-    previous: previousData, 
-    dateRanges, 
-    loading, 
-    error, 
-    refresh,
-    hasPreviousYearData 
-  } = useDashboardDataWithYearComparison();
+  
+  // 1. Dashboard triggers ONE batched API call for all dashboard metrics
+  const { data, loading, error, isLoading } = useDashboardDataNormalized();
 
-
-
-
-  if (loading) {
+  // 2. Show loading state while data is being fetched
+  if (loading || isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-center h-64">
@@ -30,6 +25,7 @@ const Dashboard = ({ filters }) => {
     );
   }
 
+  // 3. Show error state if API call failed
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -48,75 +44,28 @@ const Dashboard = ({ filters }) => {
         <p className="text-gray-600">{t('dashboard.subtitle')}</p>
       </div>
 
-      {/* Dashboard Metrics - Auto-calculating YoY from API data */}
+      {/* Dashboard Metrics - Bespoke components handle configuration and data */}
       <div className="space-y-4 mb-8">
-        <UniversalMetricCard
-          variant={METRIC_VARIANTS.detailed}
-          title={t('dashboard.totalRevenue')}
-          icon={
-            <div className="text-green-600">
-              {getIcon('dollar-sign', "w-5 h-5")}
-            </div>
-          }
-          metricId="total_revenue"
-          currentData={data}
-          previousData={previousData}
-          valueType="currency"
-        />
-        
-        <UniversalMetricCard
-          variant={METRIC_VARIANTS.detailed}
-          title={t('dashboard.totalTransactions')}
-          icon={
-            <div className="text-blue-600">
-              {getIcon('shopping-bag', "w-5 h-5")}
-            </div>
-          }
-          metricId="total_transactions"
-          currentData={data}
-          previousData={previousData}
-          valueType="number"
-        />
-        
-        <UniversalMetricCard
-          variant={METRIC_VARIANTS.detailed}
-          title={t('dashboard.avgTransaction')}
-          icon={
-            <div className="text-purple-600">
-              {getIcon('pie-chart', "w-5 h-5")}
-            </div>
-          }
-          metricId="avg_ticket_per_user"
-          currentData={data}
-          previousData={previousData}
-          valueType="currency"
-        />
+        <TotalRevenueMetric title={t('dashboard.totalRevenue')} />
+        <TotalTransactionsMetric title={t('dashboard.totalTransactions')} />
+        <AvgTransactionMetric title={t('dashboard.avgTransaction')} />
       </div>
 
-      {/* Dashboard Charts - Using unified TimeSeriesChart */}
+      {/* Dashboard Charts - Bespoke components handle configuration and data */}
       <div className="space-y-6">
-        <TimeSeriesChart
-          filters={filters}
-          dataType="revenue"
+        <RevenueTimeSeriesChart
           title={t('dashboard.revenue')}
-          showComparison={true}
-          apiData={data.revenueTimeSeries}
+          filters={filters}
         />
 
-        <TimeSeriesChart
-          filters={filters}
-          dataType="transactions"
+        <TransactionsTimeSeriesChart
           title={t('dashboard.transactions')}
-          showComparison={true}
-          apiData={data.transactionsTimeSeries}
+          filters={filters}
         />
 
-        <TimeSeriesChart
-          filters={filters}
-          dataType="customers"
+        <CustomersTimeSeriesChart
           title={t('dashboard.customers')}
-          showComparison={false}
-          apiData={data.customersTimeSeries}
+          filters={filters}
         />
       </div>
 

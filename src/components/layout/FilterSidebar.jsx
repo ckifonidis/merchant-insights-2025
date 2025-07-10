@@ -7,7 +7,14 @@ import { subDays, startOfYear } from 'date-fns';
 import { shoppingInterests, greekLocations, stores, merchantInfo } from '../../data/mockData';
 import { 
   selectUIFilters, 
-  updateUIFilters, 
+  setCustomDateRange,
+  setChannel,
+  setGender,
+  setAgeGroups,
+  setRegions,
+  setGoForMore,
+  setShoppingInterests,
+  setStores,
   applyFilters, 
   resetFilters 
 } from '../../store/slices/filtersSlice.js';
@@ -19,8 +26,8 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
   const uiFilters = useSelector(selectUIFilters);
 
   // Local state for date pickers (using controlled dates from Redux)
-  const [startDate, setStartDate] = useState(uiFilters.dateRange?.start || subDays(new Date(), 31));
-  const [endDate, setEndDate] = useState(uiFilters.dateRange?.end || subDays(new Date(), 1));
+  const [startDate, setStartDate] = useState(uiFilters?.dateRange?.start ? new Date(uiFilters.dateRange.start) : subDays(new Date(), 31));
+  const [endDate, setEndDate] = useState(uiFilters?.dateRange?.end ? new Date(uiFilters.dateRange.end) : subDays(new Date(), 1));
 
   // Options for dropdowns
   const channelOptions = [
@@ -80,8 +87,31 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
   });
 
   const handleFilterChange = (filterKey, value) => {
-    const updatedFilters = { ...uiFilters, [filterKey]: value };
-    dispatch(updateUIFilters(updatedFilters));
+    switch (filterKey) {
+      case 'channel':
+        dispatch(setChannel(value));
+        break;
+      case 'gender':
+        dispatch(setGender(value));
+        break;
+      case 'ageGroups':
+        dispatch(setAgeGroups(value));
+        break;
+      case 'customerLocation':
+        dispatch(setRegions(value));
+        break;
+      case 'goForMore':
+        dispatch(setGoForMore(value));
+        break;
+      case 'shoppingInterests':
+        dispatch(setShoppingInterests(value));
+        break;
+      case 'stores':
+        dispatch(setStores(value));
+        break;
+      default:
+        console.warn('Unknown filter key:', filterKey);
+    }
   };
 
   const handleDateChange = (dateKey, date) => {
@@ -91,24 +121,22 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
       setEndDate(date);
     }
     
-    const updatedFilters = {
-      ...uiFilters,
-      dateRange: {
-        start: dateKey === 'start' ? date : startDate,
-        end: dateKey === 'end' ? date : endDate
-      }
-    };
-    dispatch(updateUIFilters(updatedFilters));
+    const newStartDate = dateKey === 'start' ? date : startDate;
+    const newEndDate = dateKey === 'end' ? date : endDate;
+    
+    dispatch(setCustomDateRange({
+      start: newStartDate.toISOString(),
+      end: newEndDate.toISOString()
+    }));
   };
 
   const handleApplyFilters = () => {
     // Update with final date range
-    const finalFilters = {
-      ...uiFilters,
-      dateRange: { start: startDate, end: endDate }
-    };
+    dispatch(setCustomDateRange({
+      start: startDate.toISOString(),
+      end: endDate.toISOString()
+    }));
     
-    dispatch(updateUIFilters(finalFilters));
     dispatch(applyFilters());
     
     if (isMobile) {
@@ -193,7 +221,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
           </label>
           <Select
             options={channelOptions}
-            value={channelOptions.find(option => option.value === uiFilters.channel)}
+            value={channelOptions.find(option => option.value === uiFilters?.channel?.selected)}
             onChange={(option) => handleFilterChange('channel', option.value)}
             className="text-sm"
             styles={{
@@ -220,7 +248,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
             </label>
             <Select
               options={genderOptions}
-              value={genderOptions.find(option => option.value === uiFilters.gender)}
+              value={genderOptions.find(option => option.value === uiFilters?.demographics?.gender?.selected)}
               onChange={(option) => handleFilterChange('gender', option.value)}
               className="text-sm"
               styles={{
@@ -244,7 +272,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
             <Select
               isMulti
               options={ageGroupOptions}
-              value={ageGroupOptions.filter(option => uiFilters.ageGroups?.includes(option.value))}
+              value={ageGroupOptions.filter(option => uiFilters?.demographics?.ageGroups?.selected?.includes(option.value))}
               onChange={(options) => handleFilterChange('ageGroups', options ? options.map(opt => opt.value) : [])}
               className="text-sm"
             />
@@ -258,7 +286,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
             <Select
               isMulti
               options={locationOptions}
-              value={locationOptions.filter(option => uiFilters.customerLocation?.includes(option.value))}
+              value={locationOptions.filter(option => uiFilters?.location?.regions?.selected?.includes(option.value))}
               onChange={(options) => handleFilterChange('customerLocation', options ? options.map(opt => opt.value) : [])}
               className="text-sm"
             />
@@ -273,7 +301,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
             </label>
             <Select
               options={goForMoreOptions}
-              value={goForMoreOptions.find(option => option.value === uiFilters.goForMore)}
+              value={goForMoreOptions.find(option => option.value === uiFilters?.goForMore?.selected)}
               onChange={(option) => handleFilterChange('goForMore', option?.value)}
               isClearable
               className="text-sm"
@@ -289,7 +317,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
           <Select
             isMulti
             options={shoppingInterestOptions}
-            value={shoppingInterestOptions.filter(option => uiFilters.shoppingInterests?.includes(option.value))}
+            value={shoppingInterestOptions.filter(option => uiFilters?.shoppingInterests?.selected?.includes(option.value))}
             onChange={(options) => handleFilterChange('shoppingInterests', options ? options.map(opt => opt.value) : [])}
             className="text-sm"
           />
@@ -303,7 +331,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
           <Select
             isMulti
             options={storeOptions}
-            value={storeOptions.filter(option => uiFilters.stores?.includes(option.value))}
+            value={storeOptions.filter(option => uiFilters?.stores?.selected?.includes(option.value))}
             onChange={(options) => handleFilterChange('stores', options ? options.map(opt => opt.value) : [])}
             className="text-sm"
           />
