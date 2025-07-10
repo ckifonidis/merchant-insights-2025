@@ -3,17 +3,22 @@ import { TimeSeriesChart } from '../../ui';
 
 /**
  * Customers TimeSeries chart component for Dashboard
- * Encapsulates configuration and connects to store via dataType
+ * Bespoke component that passes configuration to universal component
  * Note: Customer data is merchant-only (no competition)
  */
 const CustomersTimeSeriesChart = ({ title, filters }) => {
   return (
     <TimeSeriesChart
-      filters={filters}
-      dataType="customers"
-      title={title}
-      showComparison={false}
       metricId="customers_per_day"
+      yAxisMode="absolute"
+      showCompetitor={false}
+      dateRange={filters?.dateRange}
+      yearOverYear={true}
+      allowedChartTypes={['line', 'bar', 'table']}
+      colors={{ merchant: '#007B85', competitor: '#73AA3C' }}
+      formatValue={(value) => value.toLocaleString()}
+      labels={{ merchant: 'Customers', competitor: 'Competition' }}
+      title={title}
     />
   );
 };

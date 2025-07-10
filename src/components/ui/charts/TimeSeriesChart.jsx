@@ -1,122 +1,142 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { generateTimeSeriesData } from '../../../data/mockData';
 import { processTimelineData } from '../../../utils/timelineHelpers';
 import ChartContainer from './ChartContainer';
 import ChartSelector from './ChartSelector';
 import ChartTooltip from './ChartTooltip';
 import ChartTable from './ChartTable';
 import { ChangeIndicator } from '../metrics';
-import { formatCurrency } from '../../../utils/formatters';
-import { COLORS, CHART_CONFIG } from '../../../utils/constants';
-import { useTimeSeriesChartDataReadOnly } from '../../../hooks/useNormalizedData.js';
+import { CHART_CONFIG } from '../../../utils/constants';
 
 /**
- * Transform API data to chart format
- * The apiData comes from dashboard transformation and has structure:
- * { merchant: [{date, value, formattedDate}], competitor: [{date, value, formattedDate}] }
- */
-const transformApiDataToChartFormat = (apiData, dataType) => {
-  if (!apiData || (!apiData.merchant && !apiData.competitor)) {
-    console.warn('⚠️ No API data available for chart:', dataType);
-    return [];
-  }
-
-  // Get merchant and competitor data arrays
-  const merchantData = apiData.merchant || [];
-  const competitorData = apiData.competitor || [];
-
-
-
-  // Create a map of dates to values
-  const dataMap = new Map();
-
-  // Get the correct property names for this data type
-  const keys = getDataKey(dataType);
-
-  // Process merchant data
-  merchantData.forEach(item => {
-    dataMap.set(item.date, {
-      date: item.date,
-      displayDate: item.formattedDate || item.date,
-      // Use the property names expected by processTimelineData
-      merchantRevenue: dataType === 'revenue' ? item.value : 0,
-      merchantTransactions: dataType === 'transactions' ? item.value : 0,
-      merchantCustomers: dataType === 'customers' ? item.value : 0,
-      // Initialize competitor values
-      competitorRevenue: 0,
-      competitorTransactions: 0,
-      competitorCustomers: 0
-    });
-  });
-
-  // Process competitor data
-  competitorData.forEach(item => {
-    const existing = dataMap.get(item.date) || {
-      date: item.date,
-      displayDate: item.formattedDate || item.date,
-      merchantRevenue: 0,
-      merchantTransactions: 0,
-      merchantCustomers: 0,
-      competitorRevenue: 0,
-      competitorTransactions: 0,
-      competitorCustomers: 0
-    };
-    
-    // Set competitor values based on dataType
-    if (dataType === 'revenue') existing.competitorRevenue = item.value;
-    if (dataType === 'transactions') existing.competitorTransactions = item.value;
-    if (dataType === 'customers') existing.competitorCustomers = item.value;
-    
-    dataMap.set(item.date, existing);
-  });
-
-  // Convert map to array and sort by date
-  return Array.from(dataMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
-};
-
-/**
- * Get data keys based on chart type
- */
-const getDataKey = (dataType) => {
-  switch (dataType) {
-    case 'revenue':
-      return { merchant: 'merchantRevenue', competitor: 'competitorRevenue' };
-    case 'transactions':
-      return { merchant: 'merchantTransactions', competitor: 'competitorTransactions' };
-    case 'customers':
-      return { merchant: 'merchantCustomers', competitor: 'competitorCustomers' };
-    default:
-      return { merchant: 'merchantRevenue', competitor: 'competitorRevenue' };
-  }
-};
-
-/**
- * Universal TimeSeriesChart component that handles revenue, transactions, and customers
- * Consolidates RevenueChart, TransactionsChart, and CustomersChart
+ * Simplified Universal TimeSeriesChart Component
+ * 
+ * Takes raw store data and performs all transformations internally.
+ * Follows the established bespoke → universal pattern.
  */
 const TimeSeriesChart = ({
-  filters,
-  dataType = 'revenue', // 'revenue', 'transactions', 'customers'
-  title,
-  showComparison = true, // Whether to show merchant vs competition
-  valueFormatter = null, // Custom formatter function
-  unit = '', // Unit to display (e.g., '€', 'transactions')
-  className = '',
-  metricId = null, // Connect to store via metricId
-  yAxisMode = 'absolute', // NEW: 'absolute' | 'percentage_change'
-  metricConfig = {} // NEW: Configuration from tabConfigs.json
+  // 1. Metric ID to get data from store
+  metricId,
+  
+  // 2. Y-axis mode
+  yAxisMode = 'absolute', // 'absolute' | 'percentage'
+  
+  // 3. Competitor flag
+  showCompetitor = true,
+  
+  // 4. Filter values for aggregation options
+  dateRange = null,
+  
+  // 5. Year over year comparison
+  yearOverYear = false,
+  
+  // 6. Chart type control
+  allowedChartTypes = ['line', 'bar', 'table'],
+  
+  // 7. Colors
+  colors = { merchant: '#007B85', competitor: '#73AA3C' },
+  
+  // 8. Value formatter
+  formatValue = (value) => value.toString(),
+  
+  // 9. Labels
+  labels = { merchant: 'Merchant', competitor: 'Competition' },
+  
+  // Additional props
+  title = '',
+  className = ''
 }) => {
   const { t } = useTranslation();
-  const [chartType, setChartType] = useState('bars');
+  const [chartType, setChartType] = useState(allowedChartTypes[0] || 'line');
   const [timeline, setTimeline] = useState('daily');
 
-  // Connect to store when metricId is provided
-  const storeData = metricId ? useTimeSeriesChartDataReadOnly(metricId) : null;
-  
-  // Show loading state if data is being fetched
-  if (metricId && storeData?.isLoading) {
+  // Get raw data from store
+  const rawStoreData = useSelector(state => state.data.metrics[metricId]);
+  const isLoading = useSelector(state => state.data.loading.specificMetrics[metricId]);
+  const error = useSelector(state => state.data.errors.specificMetrics[metricId]);
+
+  // Check if metric exists in store
+  if (!rawStoreData && metricId) {
+    return (
+      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+        <div className="text-red-800">Error: Unable to connect to metric data store for metricId: {metricId}</div>
+        <div className="text-red-600 text-sm mt-1">Available metrics: revenue_per_day, transactions_per_day, customers_per_day</div>
+      </div>
+    );
+  }
+
+  // Transform raw store data to chart format
+  const transformedData = useMemo(() => {
+    if (!rawStoreData) return null;
+
+    const transformEntity = (entityData, entityType) => {
+      if (!entityData || !entityData.current) return [];
+
+      const currentData = entityData.current;
+      const previousData = entityData.previous || {};
+
+      // Debug the data structure first
+      console.log(`📊 Entity data structure for ${entityType}:`, {
+        hasEntityData: !!entityData,
+        hasCurrent: !!entityData.current,
+        hasPrevious: !!entityData.previous,
+        currentKeys: Object.keys(currentData),
+        previousKeys: Object.keys(previousData),
+        sampleCurrent: Object.entries(currentData)[0],
+        samplePrevious: Object.entries(previousData)[0]
+      });
+
+      return Object.entries(currentData).map(([date, value]) => {
+        const currentValue = parseFloat(value) || 0;
+        
+        // Map current year date to previous year date
+        // e.g., "2025-06-13" -> "2024-06-13"
+        const currentDate = new Date(date);
+        const previousYear = currentDate.getFullYear() - 1;
+        const previousDateKey = `${previousYear}-${date.substring(5)}`; // Keep month-day, change year
+        
+        const previousValue = parseFloat(previousData[previousDateKey]);
+        let yearOverYearChange = 0;
+        
+        console.log(`📊 Date mapping for ${date}:`, {
+          currentDate: date,
+          previousDateKey,
+          currentValue,
+          rawPrevious: previousData[previousDateKey],
+          previousValue,
+          hasMatch: previousData.hasOwnProperty(previousDateKey)
+        });
+        
+        if (previousValue !== undefined && !isNaN(previousValue) && previousValue > 0) {
+          yearOverYearChange = (((currentValue - previousValue) / previousValue) * 100);
+          console.log(`📊 YoY calculation: ((${currentValue} - ${previousValue}) / ${previousValue}) * 100 = ${yearOverYearChange.toFixed(1)}%`);
+        } else if (currentValue > 0 && (isNaN(previousValue) || previousValue === 0)) {
+          yearOverYearChange = 100;
+          console.log(`📊 No previous data or zero previous: 100%`);
+        } else if (currentValue === 0 && previousValue > 0) {
+          yearOverYearChange = -100;
+          console.log(`📊 Complete decrease: -100%`);
+        }
+
+        return {
+          date,
+          formattedDate: new Date(date).toLocaleDateString(),
+          value: currentValue,
+          yearOverYearChange: parseFloat(yearOverYearChange.toFixed(1))
+        };
+      }).sort((a, b) => new Date(a.date) - new Date(b.date));
+    };
+
+    return {
+      merchant: transformEntity(rawStoreData.merchant, 'merchant'),
+      competitor: showCompetitor ? transformEntity(rawStoreData.competitor, 'competitor') : []
+    };
+  }, [rawStoreData, showCompetitor]);
+
+  // Loading state
+  if (isLoading) {
     return (
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 animate-pulse">
         <div className="h-6 bg-gray-200 rounded mb-3"></div>
@@ -125,60 +145,17 @@ const TimeSeriesChart = ({
     );
   }
 
-  // Show error state if metricId provided but no store connection
-  if (metricId && !storeData) {
+  // Error state
+  if (error) {
     return (
       <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-        <div className="text-red-800">Error: Unable to connect to chart data store</div>
+        <div className="text-red-800">Error loading chart data: {error}</div>
       </div>
     );
   }
 
-  // Use store data only - no fallback to mock data
-  const rawData = storeData?.chartData;
-
-
-
-  // Process data based on timeline selection
-  let processedData = [];
-
-  if (rawData) {
-    console.log(`🔍 TimeSeriesChart DEBUG - rawData format:`, {
-      rawDataType: typeof rawData,
-      isArray: Array.isArray(rawData),
-      rawDataKeys: typeof rawData === 'object' ? Object.keys(rawData) : 'not object',
-      rawData: rawData
-    });
-
-    // The rawData from selector is in format: { merchant: [...], competitor: [...] }
-    // We need to transform this to unified array format for processTimelineData
-    
-    if (rawData.merchant || rawData.competitor) {
-      // Transform chart data to unified array format
-      const transformedData = transformApiDataToChartFormat(rawData, dataType);
-      
-      processedData = processTimelineData(
-        transformedData,
-        timeline,
-        filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
-        filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
-      );
-    } else if (Array.isArray(rawData)) {
-      // Fallback: Already in array format
-      processedData = processTimelineData(
-        rawData,
-        timeline,
-        filters?.dateRange?.start ? new Date(filters.dateRange.start) : null,
-        filters?.dateRange?.end ? new Date(filters.dateRange.end) : null
-      );
-    } else {
-      console.log(`⚠️ TimeSeriesChart: Unexpected rawData format:`, rawData);
-      processedData = [];
-    }
-  }
-
-  // Show no data state if no data available
-  if (!rawData || processedData.length === 0) {
+  // No data state
+  if (!transformedData || !transformedData.merchant || transformedData.merchant.length === 0) {
     return (
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <div className="text-gray-600 text-center">No data available for this metric</div>
@@ -186,95 +163,94 @@ const TimeSeriesChart = ({
     );
   }
 
-  // Data mapping based on type
-  const getDataMapping = () => {
-    switch (dataType) {
-      case 'revenue':
-        return {
-          merchantKey: 'merchantRevenue',
-          competitorKey: 'competitorRevenue',
-          merchantLabel: 'merchant',
-          competitorLabel: 'competitor',
-          defaultFormatter: formatCurrency,
-          isCurrency: true
-        };
-      case 'transactions':
-        return {
-          merchantKey: 'merchantTransactions',
-          competitorKey: 'competitorTransactions',
-          merchantLabel: 'merchant',
-          competitorLabel: 'competitor',
-          defaultFormatter: (value) => `${value}`,
-          isCurrency: false
-        };
-      case 'customers':
-        return {
-          merchantKey: 'merchantCustomers',
-          competitorKey: null, // No competitor data for customers
-          merchantLabel: 'customers',
-          competitorLabel: null,
-          defaultFormatter: (value) => `${value}`,
-          isCurrency: false
-        };
-      default:
-        return {
-          merchantKey: 'merchantRevenue',
-          competitorKey: 'competitorRevenue',
-          merchantLabel: 'merchant',
-          competitorLabel: 'competitor',
-          defaultFormatter: formatCurrency,
-          isCurrency: true
-        };
-    }
-  };
+  // Prepare current and previous year data separately for aggregation
+  const currentYearData = transformedData.merchant.map((item, index) => ({
+    date: item.date,
+    displayDate: item.formattedDate,
+    merchantRevenue: item.value,
+    competitorRevenue: showCompetitor && transformedData.competitor?.[index] ? transformedData.competitor[index].value : 0
+  }));
 
-  const dataMapping = getDataMapping();
-  
-  // Apply Y-axis mode transformation
-  const transformDataForYAxis = (data, mode) => {
-    if (mode === 'percentage_change') {
-      // Calculate percentage change from previous year for each data point
-      // For now, using mock percentage change data
-      // TODO: Implement real percentage change calculation when previous year API data is available
-      return data.map(item => ({
-        ...item,
-        [dataMapping.merchantKey]: ((Math.random() - 0.5) * 40).toFixed(1), // -20% to +20%
-        [dataMapping.competitorKey]: dataMapping.competitorKey ? 
-          ((Math.random() - 0.5) * 30).toFixed(1) : undefined // -15% to +15%
-      }));
-    }
-    return data; // Return absolute values unchanged
-  };
+  // Create previous year data by mapping dates back one year
+  const previousYearData = transformedData.merchant.map((item, index) => {
+    const currentDate = new Date(item.date);
+    const previousYear = currentDate.getFullYear() - 1;
+    const previousDateKey = `${previousYear}-${item.date.substring(5)}`;
+    
+    // Find the previous year values from our raw store data
+    const previousMerchantValue = rawStoreData.merchant?.previous?.[previousDateKey] || 0;
+    const previousCompetitorValue = showCompetitor && rawStoreData.competitor?.previous?.[previousDateKey] || 0;
 
-  // Apply Y-axis transformation
-  const yAxisTransformedData = transformDataForYAxis(processedData, yAxisMode);
-  
-  // Update formatter based on Y-axis mode
-  const formatter = valueFormatter || (yAxisMode === 'percentage_change' 
-    ? (value) => `${value}%` 
-    : dataMapping.defaultFormatter);
-
-  // Transform data for chart
-  const chartData = yAxisTransformedData.map(item => {
-    const result = {
-      date: item.displayDate,
-      [dataMapping.merchantLabel]: dataMapping.merchantKey ? 
-        (yAxisMode === 'percentage_change' ? 
-          parseFloat(item[dataMapping.merchantKey]) : 
-          Math.round(item[dataMapping.merchantKey])) : 0,
-      merchantChange: ((Math.random() - 0.5) * 20).toFixed(1)
+    return {
+      date: previousDateKey,
+      displayDate: new Date(previousDateKey).toLocaleDateString(),
+      merchantRevenue: previousMerchantValue,
+      competitorRevenue: previousCompetitorValue
     };
+  });
 
-    // Add competitor data if available
-    if (showComparison && dataMapping.competitorKey) {
-      result[dataMapping.competitorLabel] = yAxisMode === 'percentage_change' ? 
-        parseFloat(item[dataMapping.competitorKey]) : 
-        Math.round(item[dataMapping.competitorKey]);
-      result.competitorChange = ((Math.random() - 0.5) * 15).toFixed(1);
+  // Aggregate both current and previous year data
+  const aggregatedCurrent = processTimelineData(
+    currentYearData,
+    timeline,
+    dateRange?.start ? new Date(dateRange.start) : null,
+    dateRange?.end ? new Date(dateRange.end) : null
+  );
+
+  const aggregatedPrevious = processTimelineData(
+    previousYearData,
+    timeline,
+    // Map date range back one year for previous data
+    dateRange?.start ? new Date(new Date(dateRange.start).getFullYear() - 1, new Date(dateRange.start).getMonth(), new Date(dateRange.start).getDate()) : null,
+    dateRange?.end ? new Date(new Date(dateRange.end).getFullYear() - 1, new Date(dateRange.end).getMonth(), new Date(dateRange.end).getDate()) : null
+  );
+
+  // Calculate YoY percentages between aggregated timeframes
+  const processedData = aggregatedCurrent.map((currentItem, index) => {
+    const previousItem = aggregatedPrevious[index];
+    
+    let merchantYoY = 0;
+    let competitorYoY = 0;
+    
+    if (previousItem) {
+      if (previousItem.merchantRevenue > 0) {
+        merchantYoY = (((currentItem.merchantRevenue - previousItem.merchantRevenue) / previousItem.merchantRevenue) * 100);
+      }
+      if (showCompetitor && previousItem.competitorRevenue > 0) {
+        competitorYoY = (((currentItem.competitorRevenue - previousItem.competitorRevenue) / previousItem.competitorRevenue) * 100);
+      }
     }
 
-    return result;
+    return {
+      ...currentItem,
+      merchantChange: parseFloat(merchantYoY.toFixed(1)),
+      competitorChange: parseFloat(competitorYoY.toFixed(1))
+    };
   });
+
+  console.log('📊 Aggregated timeline comparison:', {
+    timeline,
+    currentLength: aggregatedCurrent.length,
+    previousLength: aggregatedPrevious.length,
+    sampleCurrent: aggregatedCurrent[0],
+    samplePrevious: aggregatedPrevious[0],
+    sampleWithYoY: processedData[0]
+  });
+
+  // Transform data for chart rendering
+  const chartData = processedData.map(item => ({
+    date: item.displayDate,
+    merchant: yAxisMode === 'percentage' ? (item.merchantChange || 0) : (item.merchantRevenue || 0),
+    competitor: showCompetitor ? 
+      (yAxisMode === 'percentage' ? (item.competitorChange || 0) : (item.competitorRevenue || 0)) : 0,
+    merchantChange: item.merchantChange || 0,
+    competitorChange: item.competitorChange || 0
+  }));
+
+  // Update formatter based on Y-axis mode
+  const valueFormatter = yAxisMode === 'percentage' 
+    ? (value) => `${value}%` 
+    : formatValue;
 
   // Table columns configuration
   const getTableColumns = () => {
@@ -285,12 +261,12 @@ const TimeSeriesChart = ({
         render: (value) => value
       },
       {
-        key: dataMapping.merchantLabel,
-        label: t('dashboard.merchant'),
+        key: 'merchant',
+        label: labels.merchant,
         render: (value, row) => (
           <div className="flex items-center justify-between">
-            <span>{formatter(value)}{unit}</span>
-            {row.merchantChange !== undefined && (
+            <span>{valueFormatter(value)}</span>
+            {yearOverYear && row.merchantChange !== undefined && (
               <ChangeIndicator 
                 value={row.merchantChange}
                 type="percentage"
@@ -304,14 +280,14 @@ const TimeSeriesChart = ({
     ];
 
     // Add competitor column if showing comparison
-    if (showComparison && dataMapping.competitorLabel) {
+    if (showCompetitor) {
       columns.push({
-        key: dataMapping.competitorLabel,
-        label: t('dashboard.competition'),
+        key: 'competitor',
+        label: labels.competitor,
         render: (value, row) => (
           <div className="flex items-center justify-between">
-            <span>{formatter(value)}{unit}</span>
-            {row.competitorChange !== undefined && (
+            <span>{valueFormatter(value)}</span>
+            {yearOverYear && row.competitorChange !== undefined && (
               <ChangeIndicator 
                 value={row.competitorChange}
                 type="percentage"
@@ -334,28 +310,78 @@ const TimeSeriesChart = ({
       margin: CHART_CONFIG.margins
     };
 
+    // Custom tooltip with year-over-year support
+    const CustomTooltip = ({ active, payload, label }) => {
+      if (!active || !payload || !payload.length) return null;
+
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
+          <p className="text-sm font-medium text-gray-900 mb-2">{label}</p>
+          {payload.map((entry, index) => {
+            const dataPoint = chartData.find(d => d.date === label);
+            const change = entry.dataKey === 'merchant' 
+              ? dataPoint?.merchantChange 
+              : dataPoint?.competitorChange;
+            
+            console.log('📊 Tooltip debug:', {
+              label,
+              entryDataKey: entry.dataKey,
+              dataPoint,
+              change,
+              yearOverYear,
+              chartDataSample: chartData[0]
+            });
+            
+            return (
+              <div key={index} className="flex items-center justify-between mb-1">
+                <div className="flex items-center">
+                  <div 
+                    className="w-3 h-3 rounded mr-2" 
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="text-sm text-gray-600">{entry.name}:</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-sm font-medium text-gray-900 mr-2">
+                    {valueFormatter(entry.value)}
+                  </span>
+                  {yearOverYear && change !== undefined && change !== 0 && (
+                    <ChangeIndicator 
+                      value={change}
+                      type="percentage"
+                      size="xs"
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    };
+
     if (chartType === 'line') {
       return (
         <LineChart {...commonProps}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
-          <YAxis tickFormatter={formatter} />
-          <Tooltip content={<ChartTooltip currency={dataMapping.isCurrency} showChange={true} />} />
+          <YAxis tickFormatter={valueFormatter} />
+          <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Line
             type="linear"
-            dataKey={dataMapping.merchantLabel}
-            stroke={COLORS.merchant}
+            dataKey="merchant"
+            stroke={colors.merchant}
             strokeWidth={2}
-            name={t('dashboard.merchant')}
+            name={labels.merchant}
           />
-          {showComparison && dataMapping.competitorLabel && (
+          {showCompetitor && (
             <Line
               type="linear"
-              dataKey={dataMapping.competitorLabel}
-              stroke={COLORS.competition}
+              dataKey="competitor"
+              stroke={colors.competitor}
               strokeWidth={2}
-              name={t('dashboard.competition')}
+              name={labels.competitor}
             />
           )}
         </LineChart>
@@ -366,44 +392,57 @@ const TimeSeriesChart = ({
       <BarChart {...commonProps}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
-        <YAxis tickFormatter={formatter} />
-        <Tooltip content={<ChartTooltip currency={dataMapping.isCurrency} showChange={true} />} />
+        <YAxis tickFormatter={valueFormatter} />
+        <Tooltip content={<CustomTooltip />} />
         <Legend />
         <Bar 
-          dataKey={dataMapping.merchantLabel} 
-          fill={COLORS.merchant} 
-          name={t('dashboard.merchant')} 
+          dataKey="merchant" 
+          fill={colors.merchant} 
+          name={labels.merchant} 
         />
-        {showComparison && dataMapping.competitorLabel && (
+        {showCompetitor && (
           <Bar 
-            dataKey={dataMapping.competitorLabel} 
-            fill={COLORS.competition} 
-            name={t('dashboard.competition')} 
+            dataKey="competitor" 
+            fill={colors.competitor} 
+            name={labels.competitor} 
           />
         )}
       </BarChart>
     );
   };
 
+  // Create chart type options for ChartSelector
+  const chartTypeOptions = allowedChartTypes
+    .filter(type => ['line', 'bar', 'table'].includes(type))
+    .map(type => ({
+      value: type,
+      label: type === 'line' ? 'Line Chart' : 
+             type === 'bar' ? 'Bar Chart' : 
+             'Table View'
+    }));
+
   return (
     <ChartContainer
       title={title}
       height={chartType === 'table' ? 'auto' : CHART_CONFIG.heights.default}
       controls={[
-        <ChartSelector 
-          key="chartType"
-          type="chartType"
-          value={chartType}
-          onChange={setChartType}
-        />,
+        chartTypeOptions.length > 1 && (
+          <ChartSelector 
+            key="chartType"
+            type="chartType"
+            value={chartType}
+            onChange={setChartType}
+            options={chartTypeOptions}
+          />
+        ),
         <ChartSelector 
           key="timeline"
           type="timeline"
           value={timeline}
           onChange={setTimeline}
-          dateRange={filters?.dateRange}
+          dateRange={dateRange}
         />
-      ]}
+      ].filter(Boolean)}
       contentClassName={chartType === 'table' ? 'max-h-80 overflow-y-auto' : ''}
       className={className}
     >
@@ -411,8 +450,7 @@ const TimeSeriesChart = ({
         <ChartTable 
           data={chartData}
           columns={getTableColumns()}
-          currency={dataMapping.isCurrency}
-          showChange={true}
+          showChange={yearOverYear}
         />
       ) : (
         <ResponsiveContainer width="100%" height="100%">

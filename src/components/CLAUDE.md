@@ -114,7 +114,7 @@ Revenue.jsx → useRevenueDataNormalized() → metricIDs → Redux Store → Cha
 
 ---
 
-### **TAB 2: REVENUE** 🟡 **PARTIALLY IMPLEMENTED**
+### **TAB 2: REVENUE** ✅ **FULLY IMPLEMENTED**
 
 #### **Metrics (Scalar Values)**
 | Metric | MetricID | Component Pattern | Status | Notes |
@@ -130,12 +130,15 @@ Revenue.jsx → useRevenueDataNormalized() → metricIDs → Redux Store → Cha
 #### **Charts**
 | Chart | MetricID | Component Pattern | Status | Notes |
 |-------|----------|-------------------|--------|--------|
-| Revenue Trend | `revenue_per_day` | TimeSeriesChart | 🔴 | **Needs API integration** |
-| Revenue Change | `revenue_per_day` | TimeSeriesChart | 🔴 | **Needs API integration** |
+| Revenue Trend | `revenue_per_day` | Bespoke → TimeSeriesChart | ✅ | **Full API integration with YoY comparison** |
+| Revenue Change | `revenue_per_day` | Bespoke → TimeSeriesChart | ✅ | **Full API integration with percentage change view** |
 | Revenue by Interests | `converted_customers_by_interest` | Bespoke → UniversalBarChart | ✅ | **FIXED: New pattern implemented** |
 | Revenue by Channel | `revenue_by_channel` | Bespoke → UniversalBreakdownChart | ✅ | **FIXED: New pattern implemented** |
 
-#### **Critical Improvements Made**
+#### **Complete Implementation Status**
+- **Metrics:** ✅ All 6 revenue metrics fully API integrated with YoY comparison
+- **Charts:** ✅ All 4 chart components follow established bespoke → universal pattern
+- **TimeSeriesChart Integration:** ✅ RevenueTimeSeriesChart and RevenueChangeChart use Redux store
 - **Pattern Alignment:** ✅ RevenueByChannelChart and RevenueByInterestsChart converted to bespoke pattern
 - **Store Integration:** ✅ Raw absolute values with component-level percentage calculation
 - **Universal Component Enhancement:** ✅ UniversalBarChart and UniversalBreakdownChart support metricId
@@ -252,17 +255,92 @@ metricId → createMetricSelector(metricId) → store.data.metrics[metricId] →
 
 ### **TimeSeriesChart**
 
-#### **Features**
-- **Multi-View:** Line, Bar, Table display options
-- **Aggregation:** Daily, Weekly, Monthly, Quarterly, Yearly based on date range
-- **Year-over-Year:** Hover tooltips show percentage change from previous year
-- **Responsive:** Mobile-optimized with proper touch targets
+#### **Architecture Pattern**
+- **Bespoke Component:** Configuration only (metricId, colors, formatters, labels)
+- **Universal Component:** All data processing, store integration, transformations
+- **Input Props:** 9 focused parameters (metricId, yAxisMode, showCompetitor, dateRange, yearOverYear, allowedChartTypes, colors, formatValue, labels)
 
-#### **Aggregation Logic**
-- **Weekly:** Available when ≥14 days selected
-- **Monthly:** Available when ≥30 days selected  
-- **Quarterly:** Available when ≥90 days selected
-- **Yearly:** Available when ≥365 days selected
+#### **Data Processing Flow**
+```
+1. Store Access: useSelector(state => state.data.metrics[metricId])
+2. Raw Data Transform: {date: value} objects → [{date, value, yearOverYearChange}] arrays
+3. Timeline Aggregation: Daily → Weekly/Monthly with parallel current/previous year processing
+4. YoY Calculation: Compare aggregated timeframes (not daily YoY)
+5. Chart Rendering: Different field mapping for absolute vs percentage modes
+```
+
+#### **Critical Implementation Details**
+
+**Date Mapping for YoY:**
+- Current: `2025-06-13` → Previous: `2024-06-13` (substring(5) technique)
+- Timeline aggregation handles both years separately, then compares aggregated values
+
+**Chart Data Structure:**
+```js
+chartData = [{
+  date: "13/06/2025",           // Display date for X-axis
+  merchant: 85326.35,           // Absolute value OR percentage based on yAxisMode
+  competitor: 62256.83,         // Competitor equivalent
+  merchantChange: -32.3,        // YoY percentage (always available)
+  competitorChange: -1.2        // Competitor YoY percentage
+}]
+```
+
+**Field Name Requirements:**
+- Timeline aggregation expects: `merchantRevenue`, `competitorRevenue`
+- Chart rendering uses: `merchant`, `competitor` (mapped from above)
+- X-axis dataKey: `"date"` (not `"displayDate"`)
+
+**Y-Axis Mode Handling:**
+- **Absolute Mode:** `merchant: item.merchantRevenue` (aggregated totals)
+- **Percentage Mode:** `merchant: item.merchantChange` (YoY percentages)
+
+#### **Tooltip Integration**
+- Custom tooltip with YoY indicators using `ChangeIndicator` component
+- Data matching: `chartData.find(d => d.date === label)`
+- Conditional display: Only show YoY when `yearOverYear={true}` and `change !== 0`
+
+#### **Timeline Aggregation Logic**
+- **Daily:** Raw data, limited to last 30 points
+- **Weekly:** Sum values by week (Monday start), compare same weeks year-over-year
+- **Monthly:** Sum values by month, compare same months year-over-year
+- **Quarterly/Yearly:** Available based on date range span
+
+#### **Store Data Requirements**
+```js
+state.data.metrics[metricId] = {
+  merchant: {
+    current: { "2025-06-13": 124656.33, ... },
+    previous: { "2024-06-13": 89234.67, ... }
+  },
+  competitor: {
+    current: { "2025-06-13": 106705.46, ... },
+    previous: { "2024-06-13": 96543.21, ... }
+  }
+}
+```
+
+#### **Common Issues & Solutions**
+
+**🚨 Empty Tooltip Labels:**
+- **Problem:** `label=""` in tooltip debug
+- **Cause:** X-axis `dataKey` mismatch with chart data structure
+- **Solution:** Ensure X-axis uses `dataKey="date"` (not `"displayDate"`)
+
+**🚨 Timeline Aggregation Returns Zeros:**
+- **Problem:** Weekly/monthly aggregation shows `merchantRevenue: 0`
+- **Cause:** Field name mismatch - aggregation expects specific field names
+- **Solution:** Always map to `merchantRevenue`/`competitorRevenue` before aggregation
+
+**🚨 YoY Percentages Always 100%:**
+- **Problem:** All percentages show 100% instead of actual values
+- **Cause:** Date key mismatch between current and previous year data
+- **Solution:** Use `${previousYear}-${date.substring(5)}` mapping technique
+
+**🚨 Percentage Mode Shows No Data:**
+- **Problem:** Revenue Change chart shows no values on timeline change
+- **Cause:** Percentage data lost during aggregation
+- **Solution:** Calculate YoY after aggregation, not before
 
 ---
 
