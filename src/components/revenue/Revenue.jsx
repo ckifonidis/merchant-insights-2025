@@ -10,16 +10,41 @@ import RevenueTimeSeriesChart from './charts/RevenueTimeSeriesChart.jsx';
 import RevenueChangeChart from './charts/RevenueChangeChart.jsx';
 import RevenueByInterestsChart from './charts/RevenueByInterestsChart.jsx';
 import RevenueByChannelChart from './charts/RevenueByChannelChart.jsx';
-import { useRevenueDataNormalized } from '../../hooks/useNormalizedData.js';
+import { useTabData, REVENUE_METRIC_IDS } from '../../hooks/useTabData.js';
+import { useEffect } from 'react';
 
 const Revenue = ({ filters }) => {
   const { t } = useTranslation();
   
-  // 1. Revenue triggers ONE batched API call for all revenue metrics
-  const { data, loading, error, isLoading } = useRevenueDataNormalized();
+  // Get data utilities from simplified hook
+  const { 
+    allMetricsData, 
+    getMetricsData, 
+    loading, 
+    error, 
+    filtersChanged,
+    fetchDataWithYearComparison,
+    markFiltersApplied
+  } = useTabData();
+  
+  // Get revenue-specific data
+  const revenueData = getMetricsData(REVENUE_METRIC_IDS);
+  
+  // Fetch revenue data on mount
+  useEffect(() => {
+    fetchDataWithYearComparison(REVENUE_METRIC_IDS);
+  }, [fetchDataWithYearComparison]);
+  
+  // Fetch data when filters change
+  useEffect(() => {
+    if (filtersChanged) {
+      fetchDataWithYearComparison(REVENUE_METRIC_IDS);
+      markFiltersApplied();
+    }
+  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
 
   // 2. Show loading state while data is being fetched
-  if (loading || isLoading) {
+  if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-center h-64">

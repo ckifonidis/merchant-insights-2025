@@ -57,16 +57,6 @@ const TimeSeriesChart = ({
   const isLoading = useSelector(state => state.data.loading.specificMetrics[metricId]);
   const error = useSelector(state => state.data.errors.specificMetrics[metricId]);
 
-  // Check if metric exists in store
-  if (!rawStoreData && metricId) {
-    return (
-      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-        <div className="text-red-800">Error: Unable to connect to metric data store for metricId: {metricId}</div>
-        <div className="text-red-600 text-sm mt-1">Available metrics: revenue_per_day, transactions_per_day, customers_per_day</div>
-      </div>
-    );
-  }
-
   // Transform raw store data to chart format
   const transformedData = useMemo(() => {
     if (!rawStoreData) return null;
@@ -78,15 +68,6 @@ const TimeSeriesChart = ({
       const previousData = entityData.previous || {};
 
       // Debug the data structure first
-      console.log(`📊 Entity data structure for ${entityType}:`, {
-        hasEntityData: !!entityData,
-        hasCurrent: !!entityData.current,
-        hasPrevious: !!entityData.previous,
-        currentKeys: Object.keys(currentData),
-        previousKeys: Object.keys(previousData),
-        sampleCurrent: Object.entries(currentData)[0],
-        samplePrevious: Object.entries(previousData)[0]
-      });
 
       return Object.entries(currentData).map(([date, value]) => {
         const currentValue = parseFloat(value) || 0;
@@ -100,24 +81,12 @@ const TimeSeriesChart = ({
         const previousValue = parseFloat(previousData[previousDateKey]);
         let yearOverYearChange = 0;
         
-        console.log(`📊 Date mapping for ${date}:`, {
-          currentDate: date,
-          previousDateKey,
-          currentValue,
-          rawPrevious: previousData[previousDateKey],
-          previousValue,
-          hasMatch: previousData.hasOwnProperty(previousDateKey)
-        });
-        
         if (previousValue !== undefined && !isNaN(previousValue) && previousValue > 0) {
           yearOverYearChange = (((currentValue - previousValue) / previousValue) * 100);
-          console.log(`📊 YoY calculation: ((${currentValue} - ${previousValue}) / ${previousValue}) * 100 = ${yearOverYearChange.toFixed(1)}%`);
         } else if (currentValue > 0 && (isNaN(previousValue) || previousValue === 0)) {
           yearOverYearChange = 100;
-          console.log(`📊 No previous data or zero previous: 100%`);
         } else if (currentValue === 0 && previousValue > 0) {
           yearOverYearChange = -100;
-          console.log(`📊 Complete decrease: -100%`);
         }
 
         return {
@@ -134,6 +103,16 @@ const TimeSeriesChart = ({
       competitor: showCompetitor ? transformEntity(rawStoreData.competitor, 'competitor') : []
     };
   }, [rawStoreData, showCompetitor]);
+
+  // Check if metric exists in store (after all hooks)
+  if (!rawStoreData && metricId) {
+    return (
+      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+        <div className="text-red-800">Error: Unable to connect to metric data store for metricId: {metricId}</div>
+        <div className="text-red-600 text-sm mt-1">Available metrics: revenue_per_day, transactions_per_day, customers_per_day</div>
+      </div>
+    );
+  }
 
   // Loading state
   if (isLoading) {
@@ -322,15 +301,6 @@ const TimeSeriesChart = ({
             const change = entry.dataKey === 'merchant' 
               ? dataPoint?.merchantChange 
               : dataPoint?.competitorChange;
-            
-            console.log('📊 Tooltip debug:', {
-              label,
-              entryDataKey: entry.dataKey,
-              dataPoint,
-              change,
-              yearOverYear,
-              chartDataSample: chartData[0]
-            });
             
             return (
               <div key={index} className="flex items-center justify-between mb-1">
