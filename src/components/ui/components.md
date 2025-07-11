@@ -41,7 +41,7 @@ The most complex chart component that handles revenue, transactions, and custome
   valueFormatter={(value) => `€${value}`} // Custom formatter
   unit="€" // Unit suffix
   className="additional-classes"
-  apiData={apiDataObject} // API data or null for mock fallback
+  apiData={apiDataObject} // API data or null for empty state
   yAxisMode="absolute" // 'absolute' | 'percentage_change'
   metricConfig={configObject} // Configuration from tabConfigs.json
 />
