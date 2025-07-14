@@ -53,16 +53,6 @@ const UniversalMetricCard = ({
   // Connect to store using metricId - get data in exact store format
   const storeData = useSelector(createMetricSelector(metricId));
   
-  // Log store data access for debugging
-  if (import.meta.env.DEV) {
-    console.log(`📊 UniversalMetricCard [${metricId}]:`, {
-      title,
-      variant,
-      storeData,
-      hasMerchantData: !!storeData?.merchant?.current,
-      hasCompetitorData: !!storeData?.competitor?.current
-    });
-  }
   
   // Calculate year-over-year percentage change
   const calculateYoYChange = (current, previous) => {

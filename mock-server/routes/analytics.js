@@ -14,7 +14,6 @@ const { buildSuccessResponse, buildErrorResponse } = require('../utils/responseB
 // POST /ANALYTICS/QUERY
 router.post('/QUERY', (req, res) => {
   try {
-    console.log(`📊 Analytics query received:`, JSON.stringify(req.body, null, 2));
     
     const { header, payload } = req.body;
     
@@ -31,13 +30,6 @@ router.post('/QUERY', (req, res) => {
       return res.status(400).json(
         buildErrorResponse('metricIDs is required and must be a non-empty array', 'INVALID_REQUEST')
       );
-    }
-
-    // Always generate both merchant and competition data (like production API)
-    console.log(`🔍 Processing ${metricIDs.length} metrics with ${filterValues?.length || 0} filters`);
-    
-    if (filterValues && filterValues.length > 0) {
-      console.log(`🎯 Active filters:`, filterValues.map(f => `${f.filterId}=${f.value}`));
     }
 
     // Generate metrics data with filter awareness
@@ -78,14 +70,11 @@ router.post('/QUERY', (req, res) => {
       }
     });
 
-    console.log(`✅ Generated ${allMetrics.length} metric responses`);
-
     // Build and send response
     const response = buildSuccessResponse(allMetrics);
     res.status(200).json(response);
     
   } catch (error) {
-    console.error('❌ Analytics query error:', error);
     res.status(500).json(
       buildErrorResponse('Failed to process analytics query', 'PROCESSING_ERROR')
     );
@@ -101,6 +90,7 @@ router.get('/STATUS', (req, res) => {
     supportedMetrics: [
       'total_revenue',
       'total_transactions', 
+      'total_customers',
       'avg_ticket_per_user',
       'rewarded_amount',
       'redeemed_amount',

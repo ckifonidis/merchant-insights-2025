@@ -32,15 +32,6 @@ const API_CONFIG = {
   DEBUG: import.meta.env.VITE_DEBUG_API === 'true' || import.meta.env.DEV
 };
 
-// Log configuration in development
-if (import.meta.env.DEV) {
-  console.log('🔧 API Configuration:', API_CONFIG);
-  console.log('🌍 Environment variables:', {
-    VITE_USE_MOCK_SERVER: import.meta.env.VITE_USE_MOCK_SERVER,
-    VITE_MOCK_SERVER_URL: import.meta.env.VITE_MOCK_SERVER_URL,
-    DEV: import.meta.env.DEV
-  });
-}
 
 class AnalyticsService {
   constructor() {
@@ -52,10 +43,6 @@ class AnalyticsService {
    * This is the main method used by Redux thunks
    */
   async fetchTabData(tabName, metricIDs, filters, options = {}) {
-    console.log(`🔄 AnalyticsService.fetchTabData called for ${tabName}`);
-    console.log(`📊 MetricIDs: ${metricIDs.join(', ')}`);
-    console.log(`🔍 Filters:`, filters);
-    console.log(`⚙️ Options:`, options);
 
     const { metricSpecificFilters = {}, autoInferContext = true } = options;
 
@@ -67,13 +54,6 @@ class AnalyticsService {
       context: autoInferContext ? tabName : null
     });
 
-    // Call the API
-    const rawResponse = await this.queryAnalytics(request);
-    console.log(`📥 Raw API response for ${tabName}:`, rawResponse);
-
-    // Return raw response - let components handle transformation
-    console.log(`📤 Returning raw API response for ${tabName} (components will transform)`);
-
     return rawResponse;
   }
 
@@ -82,9 +62,6 @@ class AnalyticsService {
    * Used for year-over-year comparisons
    */
   async fetchTabDataWithYearComparison(tabName, metricIDs, filters, options = {}) {
-    console.log(`🔄 AnalyticsService.fetchTabDataWithYearComparison called for ${tabName}`);
-    console.log(`📊 MetricIDs: ${metricIDs.join(', ')}`);
-    console.log(`🔍 Filters:`, filters);
 
     const { metricSpecificFilters = {}, autoInferContext = true } = options;
 
@@ -92,7 +69,6 @@ class AnalyticsService {
     const previousYearDates = getPreviousYearDateRange(filters.startDate, filters.endDate);
     
     if (!previousYearDates.startDate || !previousYearDates.endDate) {
-      console.warn('⚠️ Could not calculate previous year dates, fetching current year only');
       const currentData = await this.fetchTabData(tabName, metricIDs, filters, options);
       return {
         current: currentData,
@@ -117,18 +93,12 @@ class AnalyticsService {
       context: autoInferContext ? tabName : null
     });
 
-    console.log(`📅 Current year request: ${filters.startDate} to ${filters.endDate}`);
-    console.log(`📅 Previous year request: ${previousYearDates.startDate} to ${previousYearDates.endDate}`);
-
     try {
       // Execute both API calls in parallel
       const [currentResponse, previousResponse] = await Promise.all([
         this.queryAnalytics(currentRequest),
         this.queryAnalytics(previousRequest)
       ]);
-
-      console.log(`📥 Current year API response for ${tabName}:`, currentResponse);
-      console.log(`📥 Previous year API response for ${tabName}:`, previousResponse);
 
       // Return raw API responses - let API normalizer handle processing
       return {
@@ -141,7 +111,6 @@ class AnalyticsService {
       };
 
     } catch (error) {
-      console.error(`❌ Failed to load year-over-year data for ${tabName}:`, error);
       
       // Fallback: try to get at least current year data
       try {
@@ -262,9 +231,6 @@ class AnalyticsService {
    */
   async _callMockServer(request) {
     try {
-      if (API_CONFIG.DEBUG) {
-        console.log('📊 Calling mock server with request:', request);
-      }
 
       const response = await fetch(`${API_CONFIG.MOCK_SERVER_URL}${API_ENDPOINTS.ANALYTICS_QUERY}`, {
         method: 'POST',
@@ -280,10 +246,7 @@ class AnalyticsService {
       }
 
       const data = await response.json();
-      
-      if (API_CONFIG.DEBUG) {
-        console.log('📊 Mock server response:', data);
-      }
+    
 
       return data;
     } catch (error) {
@@ -299,9 +262,6 @@ class AnalyticsService {
    */
   async _callRealAPI(request) {
     try {
-      if (API_CONFIG.DEBUG) {
-        console.log('🌐 Calling real API with request:', request);
-      }
 
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.ANALYTICS_QUERY}`, {
         method: 'POST',
@@ -318,10 +278,6 @@ class AnalyticsService {
       }
 
       const data = await response.json();
-      
-      if (API_CONFIG.DEBUG) {
-        console.log('🌐 Real API response:', data);
-      }
 
       return data;
     } catch (error) {

@@ -78,6 +78,33 @@ const UniversalBreakdownChart = ({
       ];
     }
 
+    // Handle demographics metrics
+    if (metricId === 'converted_customers_by_gender') {
+      const merchantData = rawData.merchant;
+      const competitorData = rawData.competitor;
+      
+      // Calculate totals for percentage calculation
+      const merchantTotal = (merchantData.male || merchantData.m || 0) + (merchantData.female || merchantData.f || 0);
+      const competitorTotal = (competitorData.male || competitorData.m || 0) + (competitorData.female || competitorData.f || 0);
+      
+      return [
+        {
+          category: 'Male',
+          merchant: merchantTotal > 0 ? Number((((merchantData.male || merchantData.m || 0) / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number((((competitorData.male || competitorData.m || 0) / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute: merchantData.male || merchantData.m || 0,
+          competitorAbsolute: competitorData.male || competitorData.m || 0
+        },
+        {
+          category: 'Female', 
+          merchant: merchantTotal > 0 ? Number((((merchantData.female || merchantData.f || 0) / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number((((competitorData.female || competitorData.f || 0) / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute: merchantData.female || merchantData.f || 0,
+          competitorAbsolute: competitorData.female || competitorData.f || 0
+        }
+      ];
+    }
+
     // Add other metric types here as needed
     return [];
   }, [data, rawData, metricId]);

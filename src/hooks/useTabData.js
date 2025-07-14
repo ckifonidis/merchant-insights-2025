@@ -141,6 +141,7 @@ export const REVENUE_METRIC_IDS = Object.freeze([
 ]);
 
 export const DEMOGRAPHICS_METRIC_IDS = Object.freeze([
+  'total_customers',
   'converted_customers_by_gender',
   'converted_customers_by_age',
   'converted_customers_by_interest'

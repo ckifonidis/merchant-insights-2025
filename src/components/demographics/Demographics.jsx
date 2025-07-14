@@ -1,12 +1,75 @@
 import { useTranslation } from 'react-i18next';
-import { getTabConfig, getFilteredMetrics, getIcon, getColorClass, formatValue, formatValueDiff } from '../../utils/configHelpers.jsx';
-import { UniversalMetricCard, UniversalBreakdownChart, UniversalHorizontalBarChart, UniversalBarChart } from '../ui';
-import { METRIC_VARIANTS } from '../../utils/constants';
-import { demographicsData } from '../../data/mockData';
+import { useTabData, DEMOGRAPHICS_METRIC_IDS } from '../../hooks/useTabData.js';
+import { useEffect } from 'react';
 import CampaignButton from '../ui/CampaignButton';
+import TotalCustomersMetric from './metrics/TotalCustomersMetric.jsx';
+import CustomersByGenderChart from './charts/CustomersByGenderChart.jsx';
+import CustomersByAgeChart from './charts/CustomersByAgeChart.jsx';
+import CustomersByInterestsChart from './charts/CustomersByInterestsChart.jsx';
 
 const Demographics = ({ filters }) => {
   const { t } = useTranslation();
+  
+  // Get data utilities from simplified hook
+  const { 
+    allMetricsData, 
+    getMetricsData, 
+    loading, 
+    error, 
+    filtersChanged,
+    fetchDataWithYearComparison,
+    markFiltersApplied
+  } = useTabData();
+  
+  // Get demographics-specific data
+  const demographicsData = getMetricsData(DEMOGRAPHICS_METRIC_IDS);
+  
+  // Fetch demographics data on mount
+  useEffect(() => {
+    fetchDataWithYearComparison(DEMOGRAPHICS_METRIC_IDS, {
+      metricSpecificFilters: {
+        'converted_customers_by_interest': {
+          interest_type: 'customers'
+        }
+      }
+    });
+  }, [fetchDataWithYearComparison]);
+  
+  // Fetch data when filters change
+  useEffect(() => {
+    if (filtersChanged) {
+      fetchDataWithYearComparison(DEMOGRAPHICS_METRIC_IDS, {
+        metricSpecificFilters: {
+          'converted_customers_by_interest': {
+            interest_type: 'customers'
+          }
+        }
+      });
+      markFiltersApplied();
+    }
+  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
+
+  // Show loading state while data is being fetched
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading demographics metrics...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if API call failed
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-red-600">Error loading demographics data</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -20,156 +83,23 @@ const Demographics = ({ filters }) => {
         </p>
       </div>
 
-      {/* Key Metrics - Inlined */}
+      {/* Key Metrics */}
       <div className="mb-8">
-        {(() => {
-          const tabConfig = getTabConfig('demographics');
-          if (!tabConfig) return null;
-          
-          const filteredMetrics = getFilteredMetrics(tabConfig.metrics);
-          
-          const metricCards = filteredMetrics.map((metric) => {
-            const iconElement = (
-              <div className={getColorClass(metric.color)}>
-                {getIcon(metric.icon, "w-5 h-5")}
-              </div>
-            );
-
-            return (
-              <UniversalMetricCard
-                key={metric.id}
-                variant={METRIC_VARIANTS.single}
-                title={t(metric.name)}
-                subtitle={t('dashboard.merchant')}
-                icon={iconElement}
-                value={formatValue(metric.merchant.value, metric.valueType)}
-                change={formatValueDiff(metric.merchant.valueDiff, metric.merchant.valueDiffType)}
-                iconBackground="bg-gray-50"
-              />
-            );
-          });
-
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {metricCards}
-            </div>
-          );
-        })()}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TotalCustomersMetric title={t('demographics.totalCustomers')} />
+        </div>
       </div>
 
       {/* Charts Section */}
       <div className="space-y-8">
         {/* Gender Chart */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {t('demographics.customersByGender')}
-          </h3>
-          <UniversalBreakdownChart
-            data={[
-              {
-                category: t('genders.male'),
-                merchant: demographicsData.gender.merchant.male,
-                competitor: demographicsData.gender.competitor.male
-              },
-              {
-                category: t('genders.female'),
-                merchant: demographicsData.gender.merchant.female,
-                competitor: demographicsData.gender.competitor.female
-              }
-            ]}
-            colors={{
-              [t('genders.male')]: '#3B82F6',
-              [t('genders.female')]: '#F472B6'
-            }}
-            showAbsoluteValues={true}
-            totalValue={12456}
-            note={t('common.genderChartNote')}
-          />
-        </div>
+        <CustomersByGenderChart title={t('demographics.customersByGender')} />
 
         {/* Age Group Chart */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {t('demographics.customersByAge')}
-          </h3>
-          <UniversalHorizontalBarChart
-            data={Object.keys(demographicsData.ageGroups.merchant).map(ageGroup => ({
-              category: ageGroup,
-              merchant: demographicsData.ageGroups.merchant[ageGroup],
-              competitor: demographicsData.ageGroups.competitor[ageGroup]
-            }))}
-            title={t('demographics.customersByAge')}
-            totalValue={12456}
-            note="Horizontal bars show merchant percentages with competition reference lines"
-            filters={filters}
-          />
-        </div>
+        <CustomersByAgeChart title={t('demographics.customersByAge')} />
 
-        {/* Additional Charts in Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Shopping Frequency Chart */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t('demographics.customersByFrequency')}
-            </h3>
-            <UniversalBarChart
-              data={Object.keys(demographicsData.shoppingFrequency.merchant).map(frequency => ({
-                category: frequency,
-                merchant: demographicsData.shoppingFrequency.merchant[frequency],
-                competitor: demographicsData.shoppingFrequency.competitor[frequency]
-              }))}
-              title={t('demographics.customersByFrequency')}
-              showAbsoluteValues={true}
-              totalValue={12456}
-              filters={filters}
-            />
-          </div>
-
-          {/* Shopping Interests Chart */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t('demographics.customersByInterests')}
-            </h3>
-            <UniversalHorizontalBarChart
-              data={(() => {
-                const { interests } = demographicsData;
-                const processedData = [];
-                let otherMerchant = 0;
-                let otherCompetitor = 0;
-
-                Object.keys(interests.merchant).forEach(interest => {
-                  const merchantValue = interests.merchant[interest];
-                  const competitorValue = interests.competitor[interest];
-
-                  if (merchantValue >= 10 || competitorValue >= 10) {
-                    processedData.push({
-                      category: interest,
-                      merchant: merchantValue,
-                      competitor: competitorValue
-                    });
-                  } else {
-                    otherMerchant += merchantValue;
-                    otherCompetitor += competitorValue;
-                  }
-                });
-
-                if (otherMerchant > 0 || otherCompetitor > 0) {
-                  processedData.push({
-                    category: 'Other',
-                    merchant: otherMerchant,
-                    competitor: otherCompetitor
-                  });
-                }
-
-                return processedData.sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
-              })()}
-              title={t('demographics.customersByInterests')}
-              totalValue={12456}
-              note="Horizontal bars show merchant percentages with competition reference lines"
-              filters={filters}
-            />
-          </div>
-        </div>
+        {/* Shopping Interests Chart */}
+        <CustomersByInterestsChart title={t('demographics.customersByInterests')} />
       </div>
 
       {/* Campaign Button */}

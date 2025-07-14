@@ -69,24 +69,6 @@ const UniversalBarChart = ({
     metricId ? (state.data.errors?.metrics || state.data.errors?.specificMetrics?.[metricId]) : null
   );
 
-  // Debug logging for converted_customers_by_interest
-  const allMetrics = useSelector(state => state.data.metrics);
-  const allLoading = useSelector(state => state.data.loading);
-  const allErrors = useSelector(state => state.data.errors);
-  
-  if (metricId === 'converted_customers_by_interest') {
-    console.log('🔍 DEBUG converted_customers_by_interest:', {
-      metricId,
-      rawData,
-      loading,
-      error,
-      allMetricsKeys: Object.keys(allMetrics || {}),
-      hasMetric: !!allMetrics?.[metricId],
-      metricValue: allMetrics?.[metricId],
-      allLoading,
-      allErrors
-    });
-  }
 
   // Calculate breakdown data from raw metric data when metricId is provided
   const processedData = useMemo(() => {
@@ -129,6 +111,48 @@ const UniversalBarChart = ({
         ...item,
         category: item.category.length > 15 ? item.category.substring(0, 15) + '...' : item.category
       }));
+
+      return result;
+    }
+
+    // Handle converted_customers_by_age specifically
+    if (metricId === 'converted_customers_by_age') {
+      const merchantData = rawData.merchant;
+      const competitorData = rawData.competitor;
+      
+      // Calculate totals for percentage calculation
+      const merchantTotal = Object.values(merchantData).reduce((sum, val) => sum + (val || 0), 0);
+      const competitorTotal = Object.values(competitorData).reduce((sum, val) => sum + (val || 0), 0);
+      
+      // Age group labels mapping
+      const AGE_GROUP_LABELS = {
+        '18-24': 'Generation Z (18-24)',
+        '25-40': 'Millennials (25-40)', 
+        '41-56': 'Generation X (41-56)',
+        '57-75': 'Baby Boomers (57-75)',
+        '76-96': 'Silent Generation (76-96)'
+      };
+      
+      let result = Object.keys(merchantData).map(ageGroup => {
+        const merchantAbsolute = merchantData[ageGroup] || 0;
+        const competitorAbsolute = competitorData[ageGroup] || 0;
+        
+        return {
+          category: AGE_GROUP_LABELS[ageGroup] || ageGroup,
+          merchant: merchantTotal > 0 ? Number(((merchantAbsolute / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number(((competitorAbsolute / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute,
+          competitorAbsolute
+        };
+      });
+
+      // Sort by total percentage (merchant + competitor)
+      result = result
+        .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
+      
+      if (maxCategories) {
+        result = result.slice(0, maxCategories);
+      }
 
       return result;
     }

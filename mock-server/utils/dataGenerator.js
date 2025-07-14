@@ -46,6 +46,12 @@ function generateMetricResponse(metricID, options = {}) {
         scalarValue: generateScalarValue('transactions', isCompetition)
       };
       
+    case 'total_customers':
+      return {
+        ...baseMetric,
+        scalarValue: generateScalarValue('customers', isCompetition)
+      };
+      
     case 'avg_ticket_per_user':
       return {
         ...baseMetric,
@@ -254,6 +260,8 @@ function generateScalarValue(type, isCompetition = false) {
       return (Math.random() * 1500000 + 1000000 * competitionMultiplier).toFixed(2);
     case 'transactions':
       return Math.floor((Math.random() * 40000 + 25000) * competitionMultiplier).toString();
+    case 'customers':
+      return Math.floor((Math.random() * 15000 + 8000) * competitionMultiplier).toString();
     case 'avgTicket':
       return (Math.random() * 80 + 40 * competitionMultiplier).toFixed(2);
     case 'avgDailyRevenue':
@@ -317,7 +325,7 @@ function generateDemographicPoints(category, isCompetition = false) {
   
   switch (category) {
     case 'age':
-      const ageGroups = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+      const ageGroups = ['18-24', '25-40', '41-56', '57-75', '76-96'];
       ageGroups.forEach(group => {
         points.push({
           value1: Math.floor((Math.random() * 5000 + 1000) * competitionMultiplier).toString(),
