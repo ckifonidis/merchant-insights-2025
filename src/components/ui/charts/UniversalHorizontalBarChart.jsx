@@ -1,12 +1,38 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 import Select from 'react-select';
+
+// Shopping interest labels mapping
+const SHOPPING_INTEREST_LABELS = {
+  'SHOPINT1': 'Fashion & Apparel',
+  'SHOPINT2': 'Electronics & Tech',
+  'SHOPINT3': 'Home & Garden',
+  'SHOPINT4': 'Sports & Fitness',
+  'SHOPINT5': 'Books & Media',
+  'SHOPINT6': 'Beauty & Personal Care',
+  'SHOPINT7': 'Food & Beverages',
+  'SHOPINT8': 'Travel & Tourism',
+  'SHOPINT9': 'Automotive',
+  'SHOPINT10': 'Health & Wellness',
+  'SHOPINT11': 'Entertainment',
+  'SHOPINT12': 'Jewelry & Accessories',
+  'SHOPINT13': 'Toys & Games',
+  'SHOPINT14': 'Art & Crafts',
+  'SHOPINT15': 'Office & Business',
+  'other_category': 'Other'
+};
 
 const UniversalHorizontalBarChart = ({ 
   data, 
+  metricId,
   title,
   merchantColor = '#007B85',
-  competitorColor = '#000000',
+  competitorColor = '#73AA3C',
+  formatValue = (value) => `${value}%`,
+  formatTooltipValue = null,
+  maxCategories = null,
   totalValue = null,
   showTable = true,
   note = null,
@@ -14,6 +40,150 @@ const UniversalHorizontalBarChart = ({
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('bars');
+
+  // Memoized selector for raw metric data when metricId is provided
+  const selectRawMetricData = useMemo(() => {
+    if (!metricId) return null;
+    
+    return createSelector(
+      [state => state.data.metrics],
+      (metrics) => {
+        const metric = metrics?.[metricId];
+        if (!metric?.merchant?.current) return null;
+        
+        return {
+          merchant: metric.merchant.current,
+          competitor: metric.competitor?.current || {}
+        };
+      }
+    );
+  }, [metricId]);
+
+  const rawData = useSelector(selectRawMetricData || (() => null));
+  const loading = useSelector(state => 
+    metricId ? (state.data.loading?.metrics || state.data.loading?.specificMetrics?.[metricId]) : false
+  );
+  const error = useSelector(state => 
+    metricId ? (state.data.errors?.metrics || state.data.errors?.specificMetrics?.[metricId]) : null
+  );
+
+  // Calculate breakdown data from raw metric data when metricId is provided
+  const processedData = useMemo(() => {
+    if (data) return data; // Use provided data if available
+    if (!rawData || !metricId) return [];
+
+    // Handle converted_customers_by_interest specifically
+    if (metricId === 'converted_customers_by_interest') {
+      const merchantData = rawData.merchant;
+      const competitorData = rawData.competitor;
+      
+      // Calculate totals for percentage calculation
+      const merchantTotal = Object.values(merchantData).reduce((sum, val) => sum + (val || 0), 0);
+      const competitorTotal = Object.values(competitorData).reduce((sum, val) => sum + (val || 0), 0);
+      
+      let result = Object.keys(merchantData).map(interest => {
+        const merchantAbsolute = merchantData[interest] || 0;
+        const competitorAbsolute = competitorData[interest] || 0;
+        
+        return {
+          category: SHOPPING_INTEREST_LABELS[interest] || interest,
+          // Store both absolute and percentage values
+          merchant: merchantTotal > 0 ? Number(((merchantAbsolute / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number(((competitorAbsolute / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute,
+          competitorAbsolute
+        };
+      });
+
+      // Sort by total revenue (merchant + competitor) and limit if maxCategories is set
+      result = result
+        .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
+      
+      if (maxCategories) {
+        result = result.slice(0, maxCategories);
+      }
+
+      // Truncate long category names for horizontal display
+      result = result.map(item => ({
+        ...item,
+        category: item.category.length > 20 ? item.category.substring(0, 20) + '...' : item.category
+      }));
+
+      return result;
+    }
+
+    // Handle converted_customers_by_age specifically
+    if (metricId === 'converted_customers_by_age') {
+      const merchantData = rawData.merchant;
+      const competitorData = rawData.competitor;
+      
+      // Calculate totals for percentage calculation
+      const merchantTotal = Object.values(merchantData).reduce((sum, val) => sum + (val || 0), 0);
+      const competitorTotal = Object.values(competitorData).reduce((sum, val) => sum + (val || 0), 0);
+      
+      // Age group labels mapping
+      const AGE_GROUP_LABELS = {
+        '18-24': 'Generation Z (18-24)',
+        '25-40': 'Millennials (25-40)', 
+        '41-56': 'Generation X (41-56)',
+        '57-75': 'Baby Boomers (57-75)',
+        '76-96': 'Silent Generation (76-96)'
+      };
+      
+      let result = Object.keys(merchantData).map(ageGroup => {
+        const merchantAbsolute = merchantData[ageGroup] || 0;
+        const competitorAbsolute = competitorData[ageGroup] || 0;
+        
+        return {
+          category: AGE_GROUP_LABELS[ageGroup] || ageGroup,
+          merchant: merchantTotal > 0 ? Number(((merchantAbsolute / merchantTotal) * 100).toFixed(2)) : 0,
+          competitor: competitorTotal > 0 ? Number(((competitorAbsolute / competitorTotal) * 100).toFixed(2)) : 0,
+          merchantAbsolute,
+          competitorAbsolute
+        };
+      });
+
+      // Sort by total percentage (merchant + competitor)
+      result = result
+        .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
+      
+      if (maxCategories) {
+        result = result.slice(0, maxCategories);
+      }
+
+      return result;
+    }
+
+    // Add other metric types here as needed
+    return [];
+  }, [data, rawData, metricId, maxCategories]);
+
+  // Show loading state when using metricId
+  if (metricId && loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading data...</div>
+      </div>
+    );
+  }
+
+  // Show error state when using metricId
+  if (metricId && error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Error loading data: {error}</div>
+      </div>
+    );
+  }
+
+  // Show no data state
+  if (processedData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">No data available</div>
+      </div>
+    );
+  }
 
   // Chart type options
   const chartTypeOptions = [
@@ -44,8 +214,8 @@ const UniversalHorizontalBarChart = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((row, index) => {
-            const absoluteValue = totalValue ? Math.round(row.merchant * totalValue / 100) : null;
+          {processedData.map((row, index) => {
+            const absoluteValue = totalValue ? Math.round(row.merchant * totalValue / 100) : row.merchantAbsolute;
             
             return (
               <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -53,7 +223,12 @@ const UniversalHorizontalBarChart = ({
                   {row.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {row.merchant}%
+                  {formatValue(row.merchant)}
+                  {absoluteValue !== undefined && formatTooltipValue && (
+                    <span className="text-gray-400 ml-1">
+                      ({formatTooltipValue(absoluteValue)})
+                    </span>
+                  )}
                 </td>
                 {totalValue && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -61,7 +236,12 @@ const UniversalHorizontalBarChart = ({
                   </td>
                 )}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {row.competitor}%
+                  {formatValue(row.competitor)}
+                  {row.competitorAbsolute !== undefined && formatTooltipValue && (
+                    <span className="text-gray-400 ml-1">
+                      ({formatTooltipValue(row.competitorAbsolute)})
+                    </span>
+                  )}
                 </td>
               </tr>
             );
@@ -75,10 +255,16 @@ const UniversalHorizontalBarChart = ({
   const renderHorizontalBars = () => {
     return (
       <div className="space-y-4">
-        {data.map((item, index) => {
-          const absoluteValue = totalValue ? Math.round(item.merchant * totalValue / 100) : null;
+        {processedData.map((item, index) => {
+          const absoluteValue = totalValue ? Math.round(item.merchant * totalValue / 100) : item.merchantAbsolute;
           const difference = item.merchant - item.competitor;
           const isPositive = difference >= 0;
+          
+          // Create tooltip text
+          let tooltipText = formatValue(item.merchant);
+          if (absoluteValue !== undefined && formatTooltipValue) {
+            tooltipText += ` (${formatTooltipValue(absoluteValue)})`;
+          }
           
           return (
             <div key={index} className="flex items-center space-x-4">
@@ -89,7 +275,7 @@ const UniversalHorizontalBarChart = ({
                 <div className="h-8 bg-gray-200 rounded-lg overflow-hidden relative">
                   <div 
                     className="h-full transition-all duration-300" 
-                    title={`${item.merchant}%${absoluteValue ? ` (${absoluteValue.toLocaleString()} customers)` : ''}`}
+                    title={tooltipText}
                     style={{ 
                       width: `${item.merchant}%`, 
                       backgroundColor: merchantColor 
@@ -102,10 +288,13 @@ const UniversalHorizontalBarChart = ({
                 </div>
                 <div className="flex justify-between mt-1 text-xs">
                   <span className="font-medium" style={{ color: merchantColor }}>
-                    {item.merchant}%{absoluteValue ? ` (${absoluteValue.toLocaleString()})` : ''}
+                    {formatValue(item.merchant)}
+                    {absoluteValue !== undefined && formatTooltipValue && (
+                      <span> ({formatTooltipValue(absoluteValue)})</span>
+                    )}
                   </span>
                   <span className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                    ({item.competitor}%)
+                    ({formatValue(item.competitor)})
                   </span>
                 </div>
               </div>
