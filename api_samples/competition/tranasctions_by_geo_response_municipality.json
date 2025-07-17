@@ -1,0 +1,147 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [s
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "37.0",
+                                "value2": "ΛΑΥΡΕΩΤΙΚΗ"
+                            },
+                            {
+                                "value1": "71.0",
+                                "value2": "ΣΠΑΤΑ - ΑΡΤΕΜΙΔΑ"
+                            },
+                            {
+                                "value1": "64.0",
+                                "value2": "ΡΑΦΗΝΑ - ΠΙΚΕΡΜΙ"
+                            },
+                            {
+                                "value1": "62.0",
+                                "value2": "ΒΑΡΗ - ΒΟΥΛΑ - ΒΟΥΛΙΑΓΜΕΝΗ"
+                            },
+                            {
+                                "value1": "4.0",
+                                "value2": "ΘΡΑΚΟΜΑΚΕΔΟΝΕΣ"
+                            },
+                            {
+                                "value1": "38.0",
+                                "value2": "ΠΑΙΑΝΙΑ"
+                            },
+                            {
+                                "value1": "35.0",
+                                "value2": "ΔΙΟΝΥΣΟΣ"
+                            },
+                            {
+                                "value1": "26.0",
+                                "value2": "ΜΑΡΚΟΠΟΥΛΟ"
+                            },
+                            {
+                                "value1": "81.0",
+                                "value2": "ΚΟΡΩΠΙ"
+                            },
+                            {
+                                "value1": "29.0",
+                                "value2": "ΣΑΡΩΝΙΚΟΣ"
+                            },
+                            {
+                                "value1": "33.0",
+                                "value2": "ΜΑΡΑΘΩΝΑΣ"
+                            },
+                            {
+                                "value1": "64.0",
+                                "value2": "ΠΑΛΛΗΝΗ"
+                            },
+                            {
+                                "value1": "53.0",
+                                "value2": "ΩΡΩΠΟΣ"
+                            },
+                            {
+                                "value1": "105.0",
+                                "value2": "ΑΧΑΡΝΕΣ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "14.5",
+                                "value2": "ΛΑΥΡΕΩΤΙΚΗ"
+                            },
+                            {
+                                "value1": "11.363033175355449",
+                                "value2": "ΩΡΩΠΟΣ"
+                            },
+                            {
+                                "value1": "8.55950540958269",
+                                "value2": "ΡΑΦΗΝΑ - ΠΙΚΕΡΜΙ"
+                            },
+                            {
+                                "value1": "9.9",
+                                "value2": "ΣΑΡΩΝΙΚΟΣ"
+                            },
+                            {
+                                "value1": "37.0",
+                                "value2": "ΑΧΑΡΝΕΣ"
+                            },
+                            {
+                                "value1": "5.387323943661972",
+                                "value2": "ΣΠΑΤΑ - ΑΡΤΕΜΙΔΑ"
+                            },
+                            {
+                                "value1": "13.787539936102236",
+                                "value2": "ΜΑΡΑΘΩΝΑΣ"
+                            },
+                            {
+                                "value1": "11.876269621421976",
+                                "value2": "ΒΑΡΗ - ΒΟΥΛΑ - ΒΟΥΛΙΑΓΜΕΝΗ"
+                            },
+                            {
+                                "value1": "27.9748427672956",
+                                "value2": "ΠΑΛΛΗΝΗ"
+                            },
+                            {
+                                "value1": "1.7",
+                                "value2": "ΘΡΑΚΟΜΑΚΕΔΟΝΕΣ"
+                            },
+                            {
+                                "value1": "8.2",
+                                "value2": "ΠΑΙΑΝΙΑ"
+                            },
+                            {
+                                "value1": "17.132947976878615",
+                                "value2": "ΔΙΟΝΥΣΟΣ"
+                            },
+                            {
+                                "value1": "8.4",
+                                "value2": "ΚΟΡΩΠΙ"
+                            },
+                            {
+                                "value1": "9.2",
+                                "value2": "ΜΑΡΚΟΠΟΥΛΟ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0
+}

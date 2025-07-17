@@ -1,0 +1,139 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "902.0",
+                                "value2": "ΘΕΣΣΑΛΙΑ"
+                            },
+                            {
+                                "value1": "709.0",
+                                "value2": "ΠΕΛΟΠΟΝΝΗΣΟΣ"
+                            },
+                            {
+                                "value1": "724.0",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "951.0",
+                                "value2": "ΔΥΤΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "436.0",
+                                "value2": "ΔΥΤΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "6046.0",
+                                "value2": "ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "399.0",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ΚΑΙ ΘΡΑΚΗ"
+                            },
+                            {
+                                "value1": "234.0",
+                                "value2": "ΝΗΣΙΑ ΙΟΝΙΟΥ"
+                            },
+                            {
+                                "value1": "592.0",
+                                "value2": "ΚΡΗΤΗ"
+                            },
+                            {
+                                "value1": "1891.0",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "243.0",
+                                "value2": "ΒΟΡΕΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "340.0",
+                                "value2": "ΗΠΕΙΡΟΣ"
+                            },
+                            {
+                                "value1": "395.0",
+                                "value2": "ΝΟΤΙΟ ΑΙΓΑΙΟ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "895.2",
+                                "value2": "ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "167.7",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "134.6",
+                                "value2": "ΚΡΗΤΗ"
+                            },
+                            {
+                                "value1": "399.2",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "110.9",
+                                "value2": "ΗΠΕΙΡΟΣ"
+                            },
+                            {
+                                "value1": "277.9",
+                                "value2": "ΔΥΤΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "202.7",
+                                "value2": "ΘΕΣΣΑΛΙΑ"
+                            },
+                            {
+                                "value1": "74.9",
+                                "value2": "ΒΟΡΕΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "105.5",
+                                "value2": "ΝΟΤΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "176.7",
+                                "value2": "ΠΕΛΟΠΟΝΝΗΣΟΣ"
+                            },
+                            {
+                                "value1": "77.0",
+                                "value2": "ΝΗΣΙΑ ΙΟΝΙΟΥ"
+                            },
+                            {
+                                "value1": "76.2",
+                                "value2": "ΔΥΤΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "115.0",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ΚΑΙ ΘΡΑΚΗ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0
+}

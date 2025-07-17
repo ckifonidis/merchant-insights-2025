@@ -1,0 +1,99 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "810.0",
+                                "value2": "ΔΥΤΙΚΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "1623.0",
+                                "value2": "ΚΕΝΤΡΙΚΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "753.0",
+                                "value2": "ΠΕΙΡΑΙΑΣ"
+                            },
+                            {
+                                "value1": "1035.0",
+                                "value2": "ΒΟΡΕΙΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "702.0",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "753.0",
+                                "value2": "ΝΟΤΙΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "242.0",
+                                "value2": "ΔΥΤΙΚΗ ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "128.0",
+                                "value2": "ΝΗΣΙΑ ΑΤΤΙΚΗΣ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "SHELL MYRTEA"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "46.1",
+                                "value2": "ΔΥΤΙΚΗ ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "158.2",
+                                "value2": "ΒΟΡΕΙΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "229.9",
+                                "value2": "ΚΕΝΤΡΙΚΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "156.6",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "75.5",
+                                "value2": "ΠΕΙΡΑΙΑΣ"
+                            },
+                            {
+                                "value1": "132.2",
+                                "value2": "ΝΟΤΙΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "114.4",
+                                "value2": "ΔΥΤΙΚΟΣ ΤΟΜΕΑΣ ΑΘΗΝΩΝ"
+                            },
+                            {
+                                "value1": "15.442019099590722",
+                                "value2": "ΝΗΣΙΑ ΑΤΤΙΚΗΣ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0
+}
