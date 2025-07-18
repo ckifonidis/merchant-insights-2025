@@ -117,6 +117,25 @@
     "quarterly": "Quarterly",
     "yearly": "Yearly"
   },
+  "loading": {
+    "title": "NBG Business Insights",
+    "message": "Checking your access permissions..."
+  },
+  "error": {
+    "title": "Connection Error",
+    "message": "We're having trouble connecting to our services. Please check your internet connection and try again.",
+    "technicalDetails": "Technical Details",
+    "troubleshooting": "If this problem persists, please contact support for assistance.",
+    "retry": "Try Again",
+    "contactSupport": "Contact Support"
+  },
+  "noAccess": {
+    "title": "Access Required",
+    "message": "You don't currently have access to NBG Business Insights.",
+    "instructions": "In order to gain access, please go to your Internet Banking portal and enable Business Analytics services. For assistance, contact your relationship manager or NBG support.",
+    "contactSupport": "Contact Support",
+    "tryAgain": "Check Access Again"
+  },
   "common": {
     "loading": "Loading...",
     "noData": "No data available",

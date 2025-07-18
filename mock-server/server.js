@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/ANALYTICS', analyticsRoutes);
-app.use('/AUTHORIZATION', authRoutes);
+app.use('/authorization', authRoutes);
 app.use('/CONFIGURATION', configRoutes);
 
 // Health check
@@ -77,7 +77,7 @@ app.get('/health', (req, res) => {
     version: '1.0.0',
     endpoints: [
       '/ANALYTICS/QUERY',
-      '/AUTHORIZATION/CHECKUSERSTATUS',
+      '/authorization/checkUserStatus',
       '/CONFIGURATION/ADMIN/GET',
       '/CONFIGURATION/MERCHANT/GET'
     ]

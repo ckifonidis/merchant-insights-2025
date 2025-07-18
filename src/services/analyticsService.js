@@ -680,4 +680,45 @@ export const buildFilterValue = (filterId, value) => {
   };
 };
 
+// Generate a new GUID for request headers
+export const generateGUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
+// Check user status API function
+export const checkUserStatus = async (userID = 'XANDRH004400003') => {
+  const requestBody = {
+    header: {
+      ID: generateGUID(),
+      application: 'merchant-insights-ui'
+    },
+    payload: {
+      userID
+    }
+  };
+
+  try {
+    const response = await fetch(`${API_CONFIG.MOCK_SERVER_URL}${API_ENDPOINTS.AUTHORIZATION_CHECK}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (API_CONFIG.DEBUG) {
+      console.error('Check user status error:', error);
+    }
+    throw error;
+  }
+};
+
 export default analyticsService;

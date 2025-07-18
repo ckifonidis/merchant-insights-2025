@@ -11,6 +11,7 @@
 
 ### ✅ COMPLETED WORK
 - **Core Infrastructure** - Complete React + Vite setup with multi-language support
+- **User Authentication Flow** - Complete user status check system with loading/error states
 - **Dashboard Tab** - Full API integration with Redux and year-over-year comparison
 - **Filter System** - Complete Redux-based filtering with proper cache bypass
 - **Mobile Experience** - Responsive design across all devices
@@ -36,6 +37,14 @@
 - ✅ Merchant-only business logic (NBG loyalty program)
 - ✅ No competition data generated for `goformore_amount`, `rewarded_amount`, `redeemed_amount`
 
+**User Status Check System:**
+- ✅ **API Integration** - `/authorization/checkUserStatus` endpoint with GUID headers
+- ✅ **Three Status Flow** - `signedup` → Dashboard, `notsignedup` → FirstPage, `noaccess` → NoAccessPage
+- ✅ **Loading States** - NBG logo with loading indicator during status check
+- ✅ **Error Handling** - Comprehensive error page with retry functionality
+- ✅ **Hardcoded UserID** - Development setup with `XANDRH004400003`
+- ✅ **Internationalization** - Full English/Greek translations for all status pages
+
 **Critical Bug Fixes (July 2025):**
 - ✅ **Infinite Loop Prevention** - Stable object references and memoized selectors
 - ✅ **Cache Bypass Fix** - Fresh API calls when filters change
@@ -55,16 +64,20 @@
 ```
 src/
 ├── components/
-│   ├── dashboard/           # Dashboard tab components ✅
+│   ├── LoadingPage.jsx         # NBG logo with loading indicator ✅
+│   ├── ErrorPage.jsx           # Error handling with retry functionality ✅
+│   ├── NoAccessPage.jsx        # Access denied page for noaccess status ✅
+│   ├── FirstPage.jsx           # Landing page for unregistered users ✅
+│   ├── dashboard/              # Dashboard tab components ✅
 │   │   ├── Dashboard.jsx
 │   │   └── DashboardMetrics.jsx
-│   ├── revenue/            # Revenue tab components ✅
+│   ├── revenue/                # Revenue tab components ✅
 │   │   ├── Revenue.jsx
 │   │   ├── RevenueMetrics.jsx
 │   │   └── GoForMoreMetricCard.jsx
-│   ├── demographics/       # Demographics tab ✅
+│   ├── demographics/           # Demographics tab ✅
 │   │   └── Demographics.jsx
-│   ├── competition/        # Competition tab ✅
+│   ├── competition/            # Competition tab ✅
 │   │   ├── Competition.jsx
 │   │   └── CompetitionMetrics.jsx
 │   ├── charts/            # Reusable chart components
@@ -330,13 +343,13 @@ Select Filters → Store UI → Click Apply → Convert to API → Skip Cache �
 - `src/data/tabConfigs.json` - Metric configurations
 - `src/data/metricFilters.js` - ✅ Metric-specific filters configuration system
 - `src/data/mockData.js` - All mock data
-- `src/locales/en.json` & `gr.json` - Translations
+- `src/locales/en.json` & `gr.json` - Translations including user status pages
 - `src/utils/configHelpers.jsx` - Icons and utilities
 - `src/App.jsx` - Main routing with tab management
 - Revenue Tab components - Gold standard implementation examples
 - `src/store/slices/filtersSlice.js` - ✅ Complete filter state management with persistence
 - `src/services/filterMappingService.js` - ✅ Bidirectional filter transformations
-- `src/services/analyticsService.js` - ✅ Enhanced with metric-specific filter support
+- `src/services/analyticsService.js` - ✅ Enhanced with metric-specific filter support + user status check API
 - `src/components/layout/FilterSidebar.jsx` - ✅ Redux-connected filter UI
 - `src/hooks/useTabData.js` - ✅ Smart data refresh with filter integration + infinite loop fixes + year-over-year hooks
 - `src/utils/dateHelpers.js` - ✅ Date calculation utilities for year-over-year comparison

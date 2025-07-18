@@ -2,31 +2,28 @@ const express = require('express');
 const router = express.Router();
 const { buildSuccessResponse, buildErrorResponse } = require('../utils/responseBuilder');
 
-// POST /AUTHORIZATION/CHECKUSERSTATUS
-router.post('/CHECKUSERSTATUS', (req, res) => {
+// POST /authorization/checkUserStatus
+router.post('/checkUserStatus', (req, res) => {
   try {
     console.log('🔐 Authorization check received');
     
     const { header, payload } = req.body;
     
-    // Simulate user authorization check
-    const mockUserStatus = {
-      isAuthorized: true,
-      userId: payload?.userID || 'BANK\\E82629',
-      permissions: [
-        'ANALYTICS_READ',
-        'DASHBOARD_ACCESS',
-        'REPORTS_GENERATE'
-      ],
-      merchantAccess: [
-        '52ba3854-a5d4-47bd-9d1a-b789ae139803'
-      ],
-      sessionExpiry: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString() // 8 hours from now
+    // Mock user status - return one of: "signedup", "notsignedup", "noaccess"
+    const userStatus = "signedup"; // For development, hardcode to signedup
+    
+    const response = {
+      payload: {
+        status: userStatus
+      },
+      exception: null,
+      messages: null,
+      executionTime: Math.random() * 200 + 50 // 50-250ms
     };
 
-    console.log('✅ User authorized successfully');
+    console.log('✅ User status check:', userStatus);
     
-    res.status(200).json(buildSuccessResponse([mockUserStatus]));
+    res.status(200).json(response);
     
   } catch (error) {
     console.error('❌ Authorization error:', error);
