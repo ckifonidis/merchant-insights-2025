@@ -1,33 +1,71 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { createMetricSelector } from '../../../store/selectors/dataSelectors.js';
 
 const UniversalCalendarHeatmap = ({ 
-  data,
+  metricId,
   title,
-  initialMonth = new Date(2024, 4, 1), // May 2024 default
+  initialMonth = null, // Will be calculated from data
   valueLabel = 'Revenue',
   formatTooltip = (value) => value?.toLocaleString(),
-  filters 
+  filters,
+  showMerchantAndCompetition = true
 }) => {
   const { t } = useTranslation();
-  const [currentMonth, setCurrentMonth] = useState(initialMonth);
 
-  // Use provided data or generate mock data for demonstration
-  const heatmapData = data || (() => {
-    const mockData = {};
-    const startDate = new Date(2024, 0, 1); // January 1, 2024
-    const endDate = new Date(2024, 11, 31); // December 31, 2024
+  // ALWAYS require metricId - no fallback to mock data
+  if (!metricId) {
+    const errorMessage = `UniversalCalendarHeatmap: metricId is required. Component title: "${title || 'Unknown'}"`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
 
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateKey = d.toISOString().split('T')[0];
-      // Generate random revenue values
-      mockData[dateKey] = {
-        merchant: Math.random() * 10000 + 1000,
-        competition: Math.random() * 12000 + 1200
-      };
+  // Connect to store using metricId
+  const storeData = useSelector(createMetricSelector(metricId));
+
+  // Transform store data to heatmap format - MEMOIZED to prevent infinite loops
+  const heatmapData = useMemo(() => {
+    if (!storeData) return {};
+    
+    const transformedData = {};
+    
+    // Process merchant data
+    if (storeData.merchant?.current) {
+      Object.entries(storeData.merchant.current).forEach(([dateKey, value]) => {
+        if (!transformedData[dateKey]) transformedData[dateKey] = {};
+        transformedData[dateKey].merchant = value;
+      });
     }
-    return mockData;
-  })();
+    
+    // Process competitor data
+    if (storeData.competitor?.current) {
+      Object.entries(storeData.competitor.current).forEach(([dateKey, value]) => {
+        if (!transformedData[dateKey]) transformedData[dateKey] = {};
+        transformedData[dateKey].competition = value;
+      });
+    }
+    
+    return transformedData;
+  }, [storeData]);
+
+  // Initialize currentMonth state
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    if (initialMonth) return initialMonth;
+    // Default fallback - will be updated when data loads
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  // Update currentMonth when data becomes available
+  useEffect(() => {
+    if (!initialMonth && Object.keys(heatmapData).length > 0) {
+      const availableDates = Object.keys(heatmapData).sort();
+      const firstDate = new Date(availableDates[0]);
+      const dataMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+      setCurrentMonth(dataMonth);
+    }
+  }, [heatmapData, initialMonth]);
 
   // Get color class based on revenue value
   const getColorClass = (value, median) => {
@@ -47,11 +85,66 @@ const UniversalCalendarHeatmap = ({
     return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
   };
 
-  // Get all revenue values for median calculation
-  const allMerchantValues = Object.values(heatmapData).map(d => d.merchant);
-  const allCompetitionValues = Object.values(heatmapData).map(d => d.competition);
-  const merchantMedian = calculateMedian([...allMerchantValues]);
-  const competitionMedian = calculateMedian([...allCompetitionValues]);
+  // Show loading state if data is being fetched
+  if (storeData?.isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-64 bg-gray-200 rounded"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no store connection
+  if (!storeData) {
+    return (
+      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+        <div className="text-red-800">Error: Unable to connect to metric data store for metricId: {metricId}</div>
+      </div>
+    );
+  }
+
+  // Show message if no data available at all
+  if (Object.keys(heatmapData).length === 0) {
+    return (
+      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <div className="text-yellow-800">No data available for the selected period</div>
+      </div>
+    );
+  }
+
+  // Filter data to current month only
+  const monthlyHeatmapData = useMemo(() => {
+    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+    
+    const monthStartKey = monthStart.toISOString().split('T')[0];
+    const monthEndKey = monthEnd.toISOString().split('T')[0];
+    
+    return Object.fromEntries(
+      Object.entries(heatmapData).filter(([dateKey]) => 
+        dateKey >= monthStartKey && dateKey <= monthEndKey
+      )
+    );
+  }, [heatmapData, currentMonth]);
+
+  // Get all revenue values for median calculation (filter out null/undefined values)
+  // Use ALL data (not just current month) for consistent color scaling across months
+  const allMerchantValues = Object.values(heatmapData)
+    .map(d => d.merchant)
+    .filter(v => v != null && !isNaN(v));
+  const allCompetitionValues = Object.values(heatmapData)
+    .map(d => d.competition)
+    .filter(v => v != null && !isNaN(v));
+  
+  // Only calculate medians if we have valid data
+  const merchantMedian = allMerchantValues.length > 0 ? calculateMedian([...allMerchantValues]) : 0;
+  const competitionMedian = allCompetitionValues.length > 0 ? calculateMedian([...allCompetitionValues]) : 0;
 
   // Calendar component for merchant or competition
   const CalendarHeatmap = ({ title, dataType }) => {
@@ -79,7 +172,7 @@ const UniversalCalendarHeatmap = ({
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const dateKey = date.toISOString().split('T')[0];
-      const dayData = heatmapData[dateKey];
+      const dayData = monthlyHeatmapData[dateKey]; // Use filtered monthly data
       const value = dayData ? dayData[dataType] : null;
       const colorClass = getColorClass(value, median);
 
@@ -148,9 +241,18 @@ const UniversalCalendarHeatmap = ({
       </div>
 
       <div className="w-full overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid gap-6 ${
+          showMerchantAndCompetition && allCompetitionValues.length > 0 
+            ? 'grid-cols-1 lg:grid-cols-2' 
+            : 'grid-cols-1 justify-center'
+        }`}>
+          {/* Always show merchant calendar (will show empty/gray if no data for current month) */}
           <CalendarHeatmap title={t('dashboard.merchant')} dataType="merchant" />
-          <CalendarHeatmap title={t('dashboard.competition')} dataType="competition" />
+          
+          {/* Show competition calendar if requested and we have any competition data */}
+          {showMerchantAndCompetition && allCompetitionValues.length > 0 && (
+            <CalendarHeatmap title={t('dashboard.competition')} dataType="competition" />
+          )}
         </div>
       </div>
 

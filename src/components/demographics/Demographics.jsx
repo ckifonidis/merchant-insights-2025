@@ -85,9 +85,7 @@ const Demographics = ({ filters }) => {
 
       {/* Key Metrics */}
       <div className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <TotalCustomersMetric title={t('demographics.totalCustomers')} />
-        </div>
+        <TotalCustomersMetric title={t('demographics.totalCustomers')} />
       </div>
 
       {/* Charts Section */}

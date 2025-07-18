@@ -315,7 +315,8 @@ const TimeSeriesChart = ({
                   <span className="text-sm font-medium text-gray-900 mr-2">
                     {valueFormatter(entry.value)}
                   </span>
-                  {yearOverYear && change !== undefined && change !== 0 && (
+                  {/* Only show ChangeIndicator if NOT in percentage mode to avoid redundancy */}
+                  {yearOverYear && yAxisMode !== 'percentage' && change !== undefined && change !== 0 && (
                     <ChangeIndicator 
                       value={change}
                       type="percentage"
@@ -344,6 +345,7 @@ const TimeSeriesChart = ({
             stroke={colors.merchant}
             strokeWidth={2}
             name={labels.merchant}
+            isAnimationActive={false}
           />
           {showCompetitor && (
             <Line
@@ -352,6 +354,7 @@ const TimeSeriesChart = ({
               stroke={colors.competitor}
               strokeWidth={2}
               name={labels.competitor}
+              isAnimationActive={false}
             />
           )}
         </LineChart>
@@ -369,12 +372,14 @@ const TimeSeriesChart = ({
           dataKey="merchant" 
           fill={colors.merchant} 
           name={labels.merchant} 
+          isAnimationActive={false}
         />
         {showCompetitor && (
           <Bar 
             dataKey="competitor" 
             fill={colors.competitor} 
             name={labels.competitor} 
+            isAnimationActive={false}
           />
         )}
       </BarChart>

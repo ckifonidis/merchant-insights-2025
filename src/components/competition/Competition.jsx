@@ -1,42 +1,64 @@
 import { useTranslation } from 'react-i18next';
-import { competitionMetrics, weeklyTurnoverData } from '../../data/mockData.js';
-import { UniversalMetricCard, UniversalTimelineChart, UniversalCalendarHeatmap } from '../ui';
-import { METRIC_VARIANTS } from '../../utils/constants';
+import { useEffect } from 'react';
 import CampaignButton from '../ui/CampaignButton';
+import { useTabData, COMPETITION_METRIC_IDS } from '../../hooks/useTabData.js';
+import CompetitionRevenueMetric from './metrics/CompetitionRevenueMetric.jsx';
+import CompetitionTransactionsMetric from './metrics/CompetitionTransactionsMetric.jsx';
+import CompetitionAvgTransactionMetric from './metrics/CompetitionAvgTransactionMetric.jsx';
+import CompetitionWeeklyTimelineChart from './charts/CompetitionWeeklyTimelineChart.jsx';
+import CompetitionMonthlyHeatmapChart from './charts/CompetitionMonthlyHeatmapChart.jsx';
 
 const Competition = ({ filters }) => {
   const { t } = useTranslation();
 
-  // Get competition data from API with year-over-year comparison
+  // Get data utilities from standard reusable hook
   const { 
-    current: competitionApiData, 
-    previous: previousCompetitionData, 
-    dateRanges, 
+    allMetricsData, 
+    getMetricsData, 
     loading, 
-    error,
-    hasPreviousYearData 
-  } = useCompetitionDataWithYearComparison();
+    error, 
+    filtersChanged,
+    fetchDataWithYearComparison,
+    markFiltersApplied
+  } = useTabData();
+  
+  // Get competition-specific data
+  const competitionData = getMetricsData(COMPETITION_METRIC_IDS);
+  
+  // Fetch competition data on mount
+  useEffect(() => {
+    fetchDataWithYearComparison(COMPETITION_METRIC_IDS);
+  }, [fetchDataWithYearComparison]);
+  
+  // Fetch data when filters change
+  useEffect(() => {
+    if (filtersChanged) {
+      fetchDataWithYearComparison(COMPETITION_METRIC_IDS);
+      markFiltersApplied();
+    }
+  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
 
-  // Icons for metrics
-  const RevenueIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-      <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-    </svg>
-  );
+  // Show loading state while data is being fetched
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading competition metrics...</div>
+        </div>
+      </div>
+    );
+  }
 
-  const TransactionsIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-      <path d="M3 6h18"></path>
-      <path d="M16 10a4 4 0 0 1-8 0"></path>
-    </svg>
-  );
-
-  const AvgTransactionIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-      <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-    </svg>
-  );
+  // Show error state if API call failed
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="text-red-800">Error loading competition metrics: {error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -50,79 +72,24 @@ const Competition = ({ filters }) => {
         </p>
       </div>
 
-      {/* Competition Metrics - Using UniversalMetricCard */}
+      {/* Competition Metrics - THREE ROWS as per requirements */}
       <div className="space-y-4 mb-8">
-        {/* Revenue Metric */}
-        <UniversalMetricCard
-          variant={METRIC_VARIANTS.competition}
-          title={t('competition.revenue')}
-          icon={<RevenueIcon />}
-          merchantData={{
-            value: competitionMetrics.revenue.merchantChangeFromLastYear
-          }}
-          competitorData={{
-            value: competitionMetrics.revenue.merchantVsCompetition,
-            competitorChange: competitionMetrics.revenue.competitionChangeFromLastYear
-          }}
-          metricId="total_revenue"
-        />
-
-        {/* Transactions Metric */}
-        <UniversalMetricCard
-          variant={METRIC_VARIANTS.competition}
-          title={t('competition.transactions')}
-          icon={<TransactionsIcon />}
-          merchantData={{
-            value: competitionMetrics.transactions.merchantChangeFromLastYear
-          }}
-          competitorData={{
-            value: competitionMetrics.transactions.merchantVsCompetition,
-            competitorChange: competitionMetrics.transactions.competitionChangeFromLastYear
-          }}
-          metricId="total_transactions"
-        />
-
-        {/* Average Transaction Amount Metric */}
-        <UniversalMetricCard
-          variant={METRIC_VARIANTS.competition}
-          title={t('competition.avgTransactionAmount')}
-          icon={<AvgTransactionIcon />}
-          merchantData={{
-            value: competitionMetrics.avgTransactionAmount.merchantChangeFromLastYear
-          }}
-          competitorData={{
-            value: competitionMetrics.avgTransactionAmount.merchantVsCompetition,
-            competitorChange: competitionMetrics.avgTransactionAmount.competitionChangeFromLastYear
-          }}
-          metricId="avg_ticket_per_user"
-        />
+        <CompetitionRevenueMetric title={`${t('competition.revenue')} ${t('competition.merchantVsCompetition')}`} />
+        <CompetitionTransactionsMetric title={`${t('competition.transactions')} ${t('competition.merchantVsCompetition')}`} />
+        <CompetitionAvgTransactionMetric title={`${t('competition.avgTransactionAmount')} ${t('competition.merchantVsCompetition')}`} />
       </div>
 
-      {/* Competition Charts - Using Universal Components */}
+      {/* Competition Charts - Using Bespoke Components */}
       <div className="space-y-6">
-        {/* Weekly Turnover Chart - Full width container */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {t('competition.weeklyTurnover')}
-          </h3>
-          <UniversalTimelineChart 
-            data={weeklyTurnoverData}
-            title={t('competition.weeklyTurnover')}
-            filters={filters}
-          />
-        </div>
+        <CompetitionWeeklyTimelineChart
+          title={t('competition.weeklyTurnover')}
+          filters={filters}
+        />
 
-        {/* Monthly Turnover Heatmap - Full width container */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {t('competition.monthlyTurnover')}
-          </h3>
-          <UniversalCalendarHeatmap 
-            title={t('competition.monthlyTurnover')}
-            valueLabel="Turnover"
-            filters={filters}
-          />
-        </div>
+        <CompetitionMonthlyHeatmapChart
+          title={t('competition.monthlyTurnover')}
+          filters={filters}
+        />
       </div>
 
       {/* Campaign Button */}

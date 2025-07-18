@@ -147,6 +147,7 @@ const FirstPage = ({ onInterestClick }) => {
           </h3>
           <div className="bg-white p-6 rounded-lg border border-gray-200">
             <UniversalCalendarHeatmap 
+              metricId="revenue_per_day"
               title={t('competition.monthlyTurnover')}
               valueLabel="Turnover"
               filters={defaultFilters}
