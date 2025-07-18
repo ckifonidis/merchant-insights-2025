@@ -64,9 +64,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/ANALYTICS', analyticsRoutes);
-app.use('/authorization', authRoutes);
-app.use('/CONFIGURATION', configRoutes);
+app.use('/api/ANALYTICS', analyticsRoutes);
+app.use('/api/authorization', authRoutes);
+app.use('/api/CONFIGURATION', configRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -76,10 +76,10 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     version: '1.0.0',
     endpoints: [
-      '/ANALYTICS/QUERY',
-      '/authorization/checkUserStatus',
-      '/CONFIGURATION/ADMIN/GET',
-      '/CONFIGURATION/MERCHANT/GET'
+      '/api/ANALYTICS/QUERY',
+      '/api/authorization/checkUserStatus',
+      '/api/CONFIGURATION/ADMIN/GET',
+      '/api/CONFIGURATION/MERCHANT/GET'
     ]
   });
 });

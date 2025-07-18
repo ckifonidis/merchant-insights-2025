@@ -25,9 +25,13 @@ import { getPreviousYearDateRange } from '../utils/dateHelpers.js';
 
 // Configuration for different environments
 const API_CONFIG = {
-  USE_MOCK_SERVER: import.meta.env.VITE_USE_MOCK_SERVER === 'true' || import.meta.env.DEV, // Default to mock server in dev
-  MOCK_SERVER_URL: import.meta.env.VITE_MOCK_SERVER_URL || 'http://localhost:3001',
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://api.example.com',
+  // Environment-aware API base URL
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:3001' : 'http://localhost:5000'),
+  
+  // Legacy config for backward compatibility
+  USE_MOCK_SERVER: import.meta.env.VITE_USE_MOCK_SERVER === 'true' || import.meta.env.DEV,
+  MOCK_SERVER_URL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:3001' : 'http://localhost:5000'),
+  
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000,
   DEBUG: import.meta.env.VITE_DEBUG_API === 'true' || import.meta.env.DEV
 };
@@ -232,7 +236,7 @@ class AnalyticsService {
   async _callMockServer(request) {
     try {
 
-      const response = await fetch(`${API_CONFIG.MOCK_SERVER_URL}${API_ENDPOINTS.ANALYTICS_QUERY}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.ANALYTICS_QUERY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -242,7 +246,7 @@ class AnalyticsService {
       });
 
       if (!response.ok) {
-        throw new Error(`Mock server error: ${response.status} ${response.statusText}`);
+        throw new Error(`API server error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -250,7 +254,7 @@ class AnalyticsService {
 
       return data;
     } catch (error) {
-      console.error('Mock server call failed:', error);
+      console.error('API call failed:', error);
       // Fallback to inline mock if server is not available
       console.warn('Falling back to inline mock data generation');
       return this._fallbackMockResponse(request);
@@ -702,7 +706,7 @@ export const checkUserStatus = async (userID = 'XANDRH004400003') => {
   };
 
   try {
-    const response = await fetch(`${API_CONFIG.MOCK_SERVER_URL}${API_ENDPOINTS.AUTHORIZATION_CHECK}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTHORIZATION_CHECK}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
