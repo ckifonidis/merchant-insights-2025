@@ -12,7 +12,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "setup:mock-server": "cd mock-server && npm install",
-    "test:mock-server": "cd mock-server && npm test"
+    "test:mock-server": "cd mock-server && npm test",
+    "proxy": "npm run build && cd proxy-server && npm start",
+    "proxy:dev": "cd proxy-server && npm run dev",
+    "proxy:setup": "cd proxy-server && npm install && npm run generate-certs",
+    "proxy:test": "cd proxy-server && npm test"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
