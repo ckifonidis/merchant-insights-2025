@@ -9,52 +9,20 @@ import Dashboard from './components/dashboard/Dashboard';
 import Revenue from './components/revenue/Revenue';
 import Demographics from './components/demographics/Demographics';
 import Competition from './components/competition/Competition';
-import FirstPage from './components/FirstPage';
-import LoadingPage from './components/LoadingPage';
-import ErrorPage from './components/ErrorPage';
-import NoAccessPage from './components/NoAccessPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { useResponsive } from './hooks/useResponsive';
 import { selectUIFilters, setSelectedTab } from './store/slices/filtersSlice.js';
 import { useSelector, useDispatch } from 'react-redux';
-import { checkUserStatus } from './services/analyticsService.js';
+import { logout } from './utils/auth.js';
 import './i18n';
 import './styles/dashboard.css';
 
 function AppContent() {
-  const [showMainApp, setShowMainApp] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userStatus, setUserStatus] = useState(null); // 'signedup', 'notsignedup', 'noaccess'
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const filters = useSelector(selectUIFilters);
   const { isMobile } = useResponsive();
   const dispatch = useDispatch();
-  
-  // Check user status on application startup
-  useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await checkUserStatus();
-        
-        if (response && response.payload && response.payload.status) {
-          setUserStatus(response.payload.status);
-        } else {
-          throw new Error('Invalid response format');
-        }
-      } catch (err) {
-        console.error('User status check failed:', err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkStatus();
-  }, []);
 
   // Update Redux with active tab
   const handleTabChange = (newTab) => {
@@ -63,7 +31,7 @@ function AppContent() {
   };
 
   // Close sidebar on mobile by default
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMobile) {
       setSidebarOpen(false);
     } else {
@@ -75,28 +43,9 @@ function AppContent() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleInterestClick = () => {
-    setShowMainApp(true);
-  };
-
-  const handleRetry = async () => {
-    setError(null);
-    setLoading(true);
-    
-    try {
-      const response = await checkUserStatus();
-      
-      if (response && response.payload && response.payload.status) {
-        setUserStatus(response.payload.status);
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (err) {
-      console.error('User status check failed:', err);
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
+  // Handle logout action
+  const handleLogout = () => {
+    logout();
   };
 
   const renderTabContent = () => {
@@ -114,31 +63,10 @@ function AppContent() {
     }
   };
 
-  // Show loading page while checking user status
-  if (loading) {
-    return <LoadingPage />;
-  }
-
-  // Show error page if user status check failed
-  if (error) {
-    return <ErrorPage error={error} onRetry={handleRetry} />;
-  }
-
-  // Handle different user statuses
-  if (userStatus === 'noaccess') {
-    return <NoAccessPage />;
-  }
-
-  if (userStatus === 'notsignedup') {
-    return <FirstPage onInterestClick={handleInterestClick} />;
-  }
-
-  // userStatus === 'signedup' - show main dashboard app
-  // (Also handles the case where user clicks interest on FirstPage)
-
+  // Main authenticated application UI
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header onLogout={handleLogout} />
       <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
       <div className="flex flex-1">
@@ -211,11 +139,13 @@ function AppContent() {
   );
 }
 
-// Wrap the app with Redux Provider
+// Wrap the app with Redux Provider and OAuth Authentication
 function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <ProtectedRoute>
+        <AppContent />
+      </ProtectedRoute>
     </Provider>
   );
 }
