@@ -21,7 +21,7 @@ import {
   selectAllDataErrors
 } from '../store/selectors/dataSelectors.js';
 import { 
-  selectApiRequestParams,
+  selectAPIRequestParams,
   selectFiltersChanged,
   markFiltersApplied
 } from '../store/slices/filtersSlice.js';
@@ -36,7 +36,7 @@ import { METRIC_IDS } from '../data/apiSchema.js';
  */
 export const useMetricsData = (metricIDs, options = {}) => {
   const dispatch = useDispatch();
-  const apiRequestParams = useSelector(selectApiRequestParams);
+  const apiRequestParams = useSelector(selectAPIRequestParams);
   const filtersChanged = useSelector(selectFiltersChanged);
   const isLoading = useSelector(selectIsAnyDataLoading);
   const errors = useSelector(selectAllDataErrors);
@@ -358,7 +358,7 @@ export const useDataStatus = () => {
  */
 export const useDataRefresh = () => {
   const dispatch = useDispatch();
-  const apiRequestParams = useSelector(selectApiRequestParams);
+  const apiRequestParams = useSelector(selectAPIRequestParams);
   
   const refreshAllData = useCallback(() => {
     // Refresh all main metrics

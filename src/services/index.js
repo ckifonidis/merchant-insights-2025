@@ -3,7 +3,10 @@
  * Central export point for all services
  */
 
-export { analyticsService, buildAnalyticsRequest, buildFilterValue, checkUserStatus, generateGUID } from './analyticsService.js';
+export { analyticsService, buildAnalyticsRequest, buildFilterValue, generateGUID } from './analyticsService.js';
+
+// User service exports
+export { userService, checkUserStatus } from './userService.js';
 
 // Re-export API schema constants for convenience
 export {

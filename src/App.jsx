@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './store/index.js';
 import Header from './components/layout/Header';
@@ -11,7 +11,7 @@ import Demographics from './components/demographics/Demographics';
 import Competition from './components/competition/Competition';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useResponsive } from './hooks/useResponsive';
-import { selectUIFilters, setSelectedTab } from './store/slices/filtersSlice.js';
+import { selectFilters, setSelectedTab } from './store/slices/filtersSlice.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from './utils/auth.js';
 import './i18n';
@@ -20,7 +20,7 @@ import './styles/dashboard.css';
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const filters = useSelector(selectUIFilters);
+  const filters = useSelector(selectFilters);
   const { isMobile } = useResponsive();
   const dispatch = useDispatch();
 

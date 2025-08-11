@@ -1,7 +1,25 @@
 import { useTranslation } from 'react-i18next';
-import { competitionMetrics, generateTimeSeriesData } from '../data/mockData.js';
 import { UniversalMetricCard, TimeSeriesChart, UniversalCalendarHeatmap } from './ui';
 import { METRIC_VARIANTS } from '../utils/constants';
+
+// Static competition metrics for demo
+const competitionMetrics = {
+  revenue: {
+    merchantChangeFromLastYear: 15.3,
+    merchantVsCompetition: 8.7,
+    competitionChangeFromLastYear: 6.6
+  },
+  transactions: {
+    merchantChangeFromLastYear: 12.1,
+    merchantVsCompetition: 5.4,
+    competitionChangeFromLastYear: 6.7
+  },
+  avgTransactionAmount: {
+    merchantChangeFromLastYear: 2.8,
+    merchantVsCompetition: 3.2,
+    competitionChangeFromLastYear: -0.4
+  }
+};
 
 const FirstPage = ({ onInterestClick }) => {
   const { t } = useTranslation();

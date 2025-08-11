@@ -1,6 +1,11 @@
 import React from 'react';
 import { useAuthGate } from '../hooks/useAuth.js';
+import { useUserStatusGate } from '../hooks/useUserStatus.js';
 import { login } from '../utils/auth.js';
+import FirstPage from './FirstPage.jsx';
+import LoadingPage from './LoadingPage.jsx';
+import ErrorPage from './ErrorPage.jsx';
+import NoAccessPage from './NoAccessPage.jsx';
 
 /**
  * Protected Route Component
@@ -8,76 +13,35 @@ import { login } from '../utils/auth.js';
  */
 export function ProtectedRoute({ children }) {
   const {
-    shouldShowLoading,
-    shouldShowError,
+    shouldShowLoading: authLoading,
+    shouldShowError: authError,
     shouldRedirectToLogin,
-    shouldShowContent,
-    error
+    shouldShowContent: isAuthenticated,
+    error: authErrorDetails
   } = useAuthGate();
 
-  // Show loading state while verifying authentication
-  if (shouldShowLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center p-8">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Checking Authentication
-          </h2>
-          <p className="text-gray-600">
-            Please wait while we verify your login status...
-          </p>
-        </div>
-      </div>
-    );
+  const {
+    shouldShowLoading: userStatusLoading,
+    shouldShowError: userStatusError,
+    shouldShowFirstPage,
+    shouldShowNoAccess,
+    shouldShowDashboard,
+    error: userStatusErrorDetails
+  } = useUserStatusGate(isAuthenticated); // Only check user status if OAuth succeeded
+
+  // Step 1: OAuth Authentication Loading
+  if (authLoading) {
+    return <LoadingPage />;
   }
 
-  // Show error state if authentication verification failed
-  if (shouldShowError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center p-8 max-w-md">
-          <div className="text-red-500 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
-            Authentication Error
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Unable to verify your authentication status. This might be due to a network issue or server problem.
-          </p>
-          <div className="text-sm text-gray-500 mb-6 p-3 bg-gray-100 rounded">
-            Error: {error?.message || 'Unknown authentication error'}
-          </div>
-          <div className="space-y-3">
-            <button 
-              onClick={() => window.location.reload()} 
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-            >
-              Retry Authentication
-            </button>
-            <button 
-              onClick={() => login()} 
-              className="w-full px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+  // Step 2: OAuth Authentication Error
+  if (authError) {
+    return <ErrorPage error={authErrorDetails} onRetry={() => window.location.reload()} />;
   }
 
-  // Redirect to login if authentication is required
+  // Step 3: Redirect to OAuth Login if not authenticated
   if (shouldRedirectToLogin) {
-    // Show a brief message before redirect
-    setTimeout(() => {
-      login();
-    }, 1000);
-
+    setTimeout(() => login(), 1000);
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-8">
@@ -101,9 +65,35 @@ export function ProtectedRoute({ children }) {
     );
   }
 
-  // Show the protected content if authenticated
-  if (shouldShowContent) {
-    return children;
+  // Step 4: If OAuth authenticated, check user service enrollment
+  if (isAuthenticated) {
+    // User Status Loading (checking service enrollment)
+    if (userStatusLoading) {
+      return <LoadingPage />;
+    }
+
+    // User Status Error (service enrollment check failed)
+    if (userStatusError) {
+      return <ErrorPage error={userStatusErrorDetails} onRetry={() => window.location.reload()} />;
+    }
+
+    // User needs to sign up for the service
+    if (shouldShowFirstPage) {
+      return <FirstPage onInterestClick={() => {
+        // TODO: Implement signup flow or redirect to enrollment
+        console.log('User expressed interest in signing up');
+      }} />;
+    }
+
+    // User access is denied
+    if (shouldShowNoAccess) {
+      return <NoAccessPage />;
+    }
+
+    // User is enrolled - show dashboard
+    if (shouldShowDashboard) {
+      return children;
+    }
   }
 
   // Fallback state (should not normally reach here)

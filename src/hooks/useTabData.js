@@ -11,7 +11,7 @@ import {
   selectMetricsByIds
 } from '../store/selectors/dataSelectors.js';
 import { 
-  selectApiRequestParams, 
+  selectAPIRequestParams, 
   selectFiltersChanged, 
   selectSelectedTab, 
   markFiltersApplied 
@@ -28,7 +28,7 @@ export const useTabData = () => {
   const allMetricsData = useSelector(selectMetricsData);
   const loading = useSelector(selectMetricsLoading);
   const error = useSelector(selectMetricsError);
-  const filters = useSelector(selectApiRequestParams);
+  const filters = useSelector(selectAPIRequestParams);
   const filtersChanged = useSelector(selectFiltersChanged);
   
   // Fetch function that components can call with their specific metrics

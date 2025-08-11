@@ -9,8 +9,8 @@ router.post('/checkUserStatus', (req, res) => {
     
     const { header, payload } = req.body;
     
-    // Mock user status - return one of: "signedup", "notsignedup", "noaccess"
-    const userStatus = "signedup"; // For development, hardcode to signedup
+    // Mock user status - return 50-50 random between "signedup" and "notsignedup"
+    const userStatus = Math.random() < 0.5 ? "signedup" : "notsignedup";
     
     const response = {
       payload: {

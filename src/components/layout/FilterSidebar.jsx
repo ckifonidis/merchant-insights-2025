@@ -1,90 +1,63 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
 import { subDays, startOfYear } from 'date-fns';
-import { shoppingInterests, greekLocations, stores, merchantInfo } from '../../data/mockData';
 import { 
-  selectUIFilters, 
+  selectFilters,
+  selectChannelOptions,
+  selectGenderOptions,
+  selectAgeGroupOptions,
+  selectRegionOptions,
+  selectShoppingInterestOptions,
+  selectMunicipalityOptions,
+  selectGoForMoreAvailable,
   setCustomDateRange,
   setChannel,
   setGender,
   setAgeGroups,
   setRegions,
+  setMunicipalities,
   setGoForMore,
   setShoppingInterests,
   setStores,
-  applyFilters, 
-  resetFilters 
+  applyFilters,
+  resetFilters
 } from '../../store/slices/filtersSlice.js';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const uiFilters = useSelector(selectUIFilters);
+  
+  // Get filters from Redux (single source of truth)
+  const filters = useSelector(selectFilters);
+  
+  // Get static options (no async loading)
+  const channelOptions = useSelector(selectChannelOptions);
+  const genderOptions = useSelector(selectGenderOptions);
+  const ageGroupOptions = useSelector(selectAgeGroupOptions);
+  const regionOptions = useSelector(selectRegionOptions);
+  const shoppingInterestOptions = useSelector(selectShoppingInterestOptions);
+  
+  // Get dynamic options
+  const municipalityOptions = useSelector(selectMunicipalityOptions);
+  const goForMoreAvailable = useSelector(selectGoForMoreAvailable);
 
-  // Local state for date pickers (using controlled dates from Redux)
-  const [startDate, setStartDate] = useState(uiFilters?.dateRange?.start ? new Date(uiFilters.dateRange.start) : subDays(new Date(), 31));
-  const [endDate, setEndDate] = useState(uiFilters?.dateRange?.end ? new Date(uiFilters.dateRange.end) : subDays(new Date(), 1));
+  // Local state for date pickers only
+  const [startDate, setStartDate] = useState(
+    filters?.dateRange?.start ? new Date(filters.dateRange.start) : subDays(new Date(), 31)
+  );
+  const [endDate, setEndDate] = useState(
+    filters?.dateRange?.end ? new Date(filters.dateRange.end) : subDays(new Date(), 1)
+  );
 
-  // Options for dropdowns
-  const channelOptions = [
-    { value: 'all', label: t('channels.all') },
-    { value: 'physical', label: t('channels.physical') },
-    { value: 'ecommerce', label: t('channels.ecommerce') }
-  ];
-
-  const genderOptions = [
-    { value: 'all', label: t('genders.all') },
-    { value: 'male', label: t('genders.male') },
-    { value: 'female', label: t('genders.female') }
-  ];
-
-  const ageGroupOptions = [
-    { value: 'all', label: t('ageGroups.all') },
-    { value: 'genZ', label: t('ageGroups.genZ') },
-    { value: 'millennials', label: t('ageGroups.millennials') },
-    { value: 'genX', label: t('ageGroups.genX') },
-    { value: 'boomers', label: t('ageGroups.boomers') },
-    { value: 'silent', label: t('ageGroups.silent') }
-  ];
-
+  // Create Go For More options
   const goForMoreOptions = [
-    { value: 'yes', label: t('goForMoreOptions.yes') },
-    { value: 'no', label: t('goForMoreOptions.no') }
+    { value: true, label: t('goForMoreOptions.yes') },
+    { value: false, label: t('goForMoreOptions.no') }
   ];
-
-  const shoppingInterestOptions = shoppingInterests.map(interest => ({
-    value: interest,
-    label: interest
-  }));
-
-  const storeOptions = [
-    { value: 'all', label: t('filters.store') },
-    ...stores.map(store => ({ value: store, label: store }))
-  ];
-
-  // Create location options from Greek locations
-  const locationOptions = [];
-  Object.keys(greekLocations).forEach(region => {
-    locationOptions.push({ value: region, label: region, type: 'region' });
-    Object.keys(greekLocations[region]).forEach(unit => {
-      locationOptions.push({
-        value: `${region}/${unit}`,
-        label: `  ${unit}`,
-        type: 'unit'
-      });
-      greekLocations[region][unit].forEach(municipality => {
-        locationOptions.push({
-          value: `${region}/${unit}/${municipality}`,
-          label: `    ${municipality}`,
-          type: 'municipality'
-        });
-      });
-    });
-  });
 
   const handleFilterChange = (filterKey, value) => {
     switch (filterKey) {
@@ -97,8 +70,11 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
       case 'ageGroups':
         dispatch(setAgeGroups(value));
         break;
-      case 'customerLocation':
+      case 'regions':
         dispatch(setRegions(value));
+        break;
+      case 'municipalities':
+        dispatch(setMunicipalities(value));
         break;
       case 'goForMore':
         dispatch(setGoForMore(value));
@@ -221,7 +197,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
           </label>
           <Select
             options={channelOptions}
-            value={channelOptions.find(option => option.value === uiFilters?.channel?.selected)}
+            value={channelOptions.find(option => option.value === filters?.channel)}
             onChange={(option) => handleFilterChange('channel', option.value)}
             className="text-sm"
             styles={{
@@ -248,7 +224,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
             </label>
             <Select
               options={genderOptions}
-              value={genderOptions.find(option => option.value === uiFilters?.demographics?.gender?.selected)}
+              value={genderOptions.find(option => option.value === filters?.gender)}
               onChange={(option) => handleFilterChange('gender', option.value)}
               className="text-sm"
               styles={{
@@ -272,36 +248,52 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
             <Select
               isMulti
               options={ageGroupOptions}
-              value={ageGroupOptions.filter(option => uiFilters?.demographics?.ageGroups?.selected?.includes(option.value))}
+              value={ageGroupOptions.filter(option => filters?.ageGroups?.includes(option.value))}
               onChange={(options) => handleFilterChange('ageGroups', options ? options.map(opt => opt.value) : [])}
               className="text-sm"
             />
           </div>
 
-          {/* Customer Location */}
+          {/* Regions */}
           <div className="mb-4">
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              {t('filters.customerLocation')}
+              {t('filters.regions')}
             </label>
             <Select
               isMulti
-              options={locationOptions}
-              value={locationOptions.filter(option => uiFilters?.location?.regions?.selected?.includes(option.value))}
-              onChange={(options) => handleFilterChange('customerLocation', options ? options.map(opt => opt.value) : [])}
+              options={regionOptions}
+              value={regionOptions.filter(option => filters?.regions?.includes(option.value))}
+              onChange={(options) => handleFilterChange('regions', options ? options.map(opt => opt.value) : [])}
               className="text-sm"
             />
           </div>
+
+          {/* Municipalities */}
+          {municipalityOptions.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                {t('filters.municipalities')}
+              </label>
+              <Select
+                isMulti
+                options={municipalityOptions}
+                value={municipalityOptions.filter(option => filters?.municipalities?.includes(option.value))}
+                onChange={(options) => handleFilterChange('municipalities', options ? options.map(opt => opt.value) : [])}
+                className="text-sm"
+              />
+            </div>
+          )}
         </div>
 
         {/* Go For More (conditional) */}
-        {merchantInfo.isGoForMore && (
+        {goForMoreAvailable && (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t('filters.goForMore')}
             </label>
             <Select
               options={goForMoreOptions}
-              value={goForMoreOptions.find(option => option.value === uiFilters?.goForMore?.selected)}
+              value={goForMoreOptions.find(option => option.value === filters?.goForMore)}
               onChange={(option) => handleFilterChange('goForMore', option?.value)}
               isClearable
               className="text-sm"
@@ -317,22 +309,8 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
           <Select
             isMulti
             options={shoppingInterestOptions}
-            value={shoppingInterestOptions.filter(option => uiFilters?.shoppingInterests?.selected?.includes(option.value))}
+            value={shoppingInterestOptions.filter(option => filters?.shoppingInterests?.includes(option.value))}
             onChange={(options) => handleFilterChange('shoppingInterests', options ? options.map(opt => opt.value) : [])}
-            className="text-sm"
-          />
-        </div>
-
-        {/* Store */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('filters.store')}
-          </label>
-          <Select
-            isMulti
-            options={storeOptions}
-            value={storeOptions.filter(option => uiFilters?.stores?.selected?.includes(option.value))}
-            onChange={(options) => handleFilterChange('stores', options ? options.map(opt => opt.value) : [])}
             className="text-sm"
           />
         </div>

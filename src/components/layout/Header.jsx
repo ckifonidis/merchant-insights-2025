@@ -1,6 +1,10 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { merchantInfo } from '../../data/mockData';
+
+// Static merchant info
+const merchantInfo = {
+  name: 'ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ',
+  isGoForMore: true
+};
 
 const Header = () => {
   const { t, i18n } = useTranslation();

@@ -1,5 +1,10 @@
 import tabConfigs from '../data/tabConfigs.json';
-import { merchantInfo } from '../data/mockData';
+
+// Static merchant info
+const merchantInfo = {
+  name: 'ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ',
+  isGoForMore: true
+};
 
 // Icon components mapping
 export const getIcon = (iconName, className = "w-5 h-5") => {

@@ -301,51 +301,5 @@ export const generateGUID = () => {
   });
 };
 
-// Check user status API function with OAuth2 authentication
-export const checkUserStatus = async (userID = 'XANDRH004400003') => {
-  const requestBody = {
-    header: {
-      ID: generateGUID(),
-      application: 'merchant-insights-ui'
-    },
-    payload: {
-      userID
-    }
-  };
-  
-  try {
-    if (API_CONFIG.DEBUG) {
-      console.log('🔍 Checking user status for:', userID);
-    }
-
-    const response = await apiCallJson(`/api${API_ENDPOINTS.AUTHORIZATION_CHECK}`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody)
-    });
-
-    if (API_CONFIG.DEBUG) {
-      console.log('✅ User status response:', {
-        status: response?.payload?.status,
-        hasPayload: !!response?.payload
-      });
-    }
-
-    return response;
-  } catch (error) {
-    console.error('❌ Check user status error:', error);
-    
-    // Handle authentication errors
-    if (error.status === 401) {
-      handleAuthError(error);
-      return null;
-    }
-
-    if (API_CONFIG.DEBUG) {
-      console.error('Full error details:', error);
-    }
-    
-    throw error;
-  }
-};
 
 export default analyticsService;
