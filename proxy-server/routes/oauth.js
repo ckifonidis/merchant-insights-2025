@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const { generateSecureNonce, generateSecureState } = require('../utils/crypto');
-const { setAuthCookie, clearAuthCookie } = require('../middleware/auth');
+const { setAuthCookie, clearAuthCookie, requireAuth } = require('../middleware/auth');
 const { config } = require('../utils/config');
 
 const router = express.Router();
@@ -311,6 +311,95 @@ router.get('/auth/status', (req, res) => {
   } else {
     res.json({
       authenticated: false
+    });
+  }
+});
+
+/**
+ * GET /userinfo - OpenID Connect UserInfo endpoint
+ * Protected endpoint that returns user information from the access token
+ */
+router.get('/userinfo', requireAuth, async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.isAuthenticated || !req.tokenData?.access_token) {
+      return res.status(401).json({
+        error: 'unauthorized',
+        error_description: 'Access token is required'
+      });
+    }
+
+    console.log(`[${req.requestId}] UserInfo request from authenticated user`);
+
+    // If we have an ID token, decode it to get user info
+    if (req.tokenData.id_token) {
+      try {
+        // For development, we'll just decode the JWT payload without verification
+        // In production, you should verify the signature
+        const idTokenParts = req.tokenData.id_token.split('.');
+        if (idTokenParts.length === 3) {
+          const payload = JSON.parse(Buffer.from(idTokenParts[1], 'base64').toString());
+          
+          console.log(`[${req.requestId}] UserInfo extracted from ID token:`, {
+            sub: payload.sub,
+            name: payload.name,
+            email: payload.email,
+            hasPreferredUsername: !!payload.preferred_username
+          });
+
+          return res.json({
+            sub: payload.sub,
+            name: payload.name || payload.preferred_username || 'Unknown User',
+            preferred_username: payload.preferred_username,
+            email: payload.email,
+            email_verified: payload.email_verified || false,
+            iss: payload.iss,
+            aud: payload.aud,
+            iat: payload.iat,
+            exp: payload.exp
+          });
+        }
+      } catch (decodeError) {
+        console.error(`[${req.requestId}] Failed to decode ID token:`, decodeError);
+      }
+    }
+
+    // Fallback: If no ID token or decode failed, make a call to the OAuth provider's userinfo endpoint
+    try {
+      const userInfoResponse = await axios.get(config.OAUTH_USERINFO_URL || `${config.OAUTH_AUTH_URL.replace('/authorize', '/userinfo')}`, {
+        headers: {
+          'Authorization': `Bearer ${req.tokenData.access_token}`,
+          'Accept': 'application/json'
+        },
+        timeout: 5000
+      });
+
+      console.log(`[${req.requestId}] UserInfo fetched from OAuth provider:`, {
+        sub: userInfoResponse.data.sub,
+        name: userInfoResponse.data.name,
+        email: userInfoResponse.data.email
+      });
+
+      return res.json(userInfoResponse.data);
+
+    } catch (oauthError) {
+      console.error(`[${req.requestId}] Failed to fetch userinfo from OAuth provider:`, oauthError.message);
+      
+      // If OAuth userinfo call fails, return minimal user info
+      return res.json({
+        sub: 'unknown',
+        name: 'Unknown User',
+        preferred_username: 'user',
+        authenticated: true,
+        token_expires_at: req.tokenData.expires_at
+      });
+    }
+
+  } catch (error) {
+    console.error(`[${req.requestId}] UserInfo endpoint error:`, error);
+    res.status(500).json({
+      error: 'server_error',
+      error_description: 'Failed to retrieve user information'
     });
   }
 });

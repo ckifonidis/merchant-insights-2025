@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import filtersReducer from './slices/filtersSlice.js';
 import dataReducer from './slices/dataSlice.js';
+import userConfigReducer from './slices/userConfigSlice.js';
 
 // Configure the store with middleware
 export const store = configureStore({
   reducer: {
     // Core slices - simplified structure
     filters: filtersReducer,
-    data: dataReducer
+    data: dataReducer,
+    userConfig: userConfigReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

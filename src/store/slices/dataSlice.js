@@ -16,7 +16,19 @@ const createRequestKey = ({ metricIDs, filters, isYearComparison = false }) => {
 // Async thunk for fetching metrics data
 export const fetchMetricsData = createAsyncThunk(
   'data/fetchMetrics',
-  async ({ metricIDs, filters, options = {} }, { rejectWithValue, getState }) => {
+  async ({ metricIDs, filters, options = {}, userID }, { rejectWithValue, getState }) => {
+    // Get userID from state if not provided directly
+    if (!userID) {
+      const state = getState();
+      userID = state.userConfig?.userId;
+      
+      if (!userID) {
+        return rejectWithValue({
+          metricIDs,
+          error: 'User ID is required but not available. Please ensure user is authenticated.'
+        });
+      }
+    }
     const requestKey = createRequestKey({ metricIDs, filters });
     
     // Check if identical request is already pending
@@ -42,7 +54,7 @@ export const fetchMetricsData = createAsyncThunk(
       console.log(`🔄 Fetching metrics data:`, metricIDs);
       
       // Create and cache the promise
-      const requestPromise = analyticsService.fetchTabData('metrics', metricIDs, filters, options)
+      const requestPromise = analyticsService.fetchTabData('metrics', metricIDs, filters, { ...options, userID })
         .then(apiResponse => {
           console.log(`📥 Raw API response:`, apiResponse);
           
@@ -74,7 +86,19 @@ export const fetchMetricsData = createAsyncThunk(
 // Async thunk for fetching year-over-year metrics data
 export const fetchMetricsDataWithYearComparison = createAsyncThunk(
   'data/fetchMetricsYoY',
-  async ({ metricIDs, filters, options = {} }, { rejectWithValue, getState }) => {
+  async ({ metricIDs, filters, options = {}, userID }, { rejectWithValue, getState }) => {
+    // Get userID from state if not provided directly
+    if (!userID) {
+      const state = getState();
+      userID = state.userConfig?.userId;
+      
+      if (!userID) {
+        return rejectWithValue({
+          metricIDs,
+          error: 'User ID is required but not available. Please ensure user is authenticated.'
+        });
+      }
+    }
     console.log(`🔍 DEBUG Step 0 - Thunk Called:`, {
       metricIDsReceived: metricIDs,
       filtersReceived: filters,
@@ -111,7 +135,7 @@ export const fetchMetricsDataWithYearComparison = createAsyncThunk(
       console.log(`🔄 Fetching year-over-year metrics data:`, metricIDs);
       
       // Create and cache the promise
-      const requestPromise = analyticsService.fetchTabDataWithYearComparison('metrics', metricIDs, filters, options)
+      const requestPromise = analyticsService.fetchTabDataWithYearComparison('metrics', metricIDs, filters, { ...options, userID })
         .then(result => {
           console.log(`📥 Raw year-over-year API response:`, result);
           console.log(`🔍 DEBUG Step 1 - API Response Structure:`, {

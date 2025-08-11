@@ -1,0 +1,104 @@
+{
+    "payload": {
+        "userPreferences": {
+            "userId": "XANDRH004400003",
+            "merchantIds": [
+                "766dba61-1cd8-49b5-944e-bc537a0c6b9c"
+            ],
+            "analyticsMetricVisualizationPreferences": [
+                {
+                    "providerId": "753a0a2f-4163-4ecb-b376-17addf3db951",
+                    "metricVisualizationPreferencesList": []
+                },
+                {
+                    "providerId": "56f9cf99-3727-4f2f-bf1c-58dc532ebaf5",
+                    "metricVisualizationPreferencesList": [
+                        {
+                            "id": "rewarded_points",
+                            "displayName": null,
+                            "visualizationFormat": "Integer"
+                        },
+                        {
+                            "id": "rewarded_amount",
+                            "displayName": null,
+                            "visualizationFormat": "Currency"
+                        },
+                        {
+                            "id": "redeemed_points",
+                            "displayName": null,
+                            "visualizationFormat": "Integer"
+                        },
+                        {
+                            "id": "redeemed_amount",
+                            "displayName": null,
+                            "visualizationFormat": "Currency"
+                        },
+                        {
+                            "id": "total_transactions",
+                            "displayName": null,
+                            "visualizationFormat": "Integer"
+                        },
+                        {
+                            "id": "avg_ticket_per_user",
+                            "displayName": null,
+                            "visualizationFormat": "Currency"
+                        },
+                        {
+                            "id": "total_reach",
+                            "displayName": null,
+                            "visualizationFormat": "Integer"
+                        },
+                        {
+                            "id": "conversion_rate",
+                            "displayName": null,
+                            "visualizationFormat": "Percentage"
+                        },
+                        {
+                            "id": "converted_customers_by_activity",
+                            "displayName": null,
+                            "visualizationFormat": "PieChart"
+                        },
+                        {
+                            "id": "converted_customers_by_interest",
+                            "displayName": null,
+                            "visualizationFormat": "BarChart"
+                        },
+                        {
+                            "id": "converted_customers_by_age",
+                            "displayName": null,
+                            "visualizationFormat": "BarChart"
+                        },
+                        {
+                            "id": "converted_customers_by_gender",
+                            "displayName": null,
+                            "visualizationFormat": "Heatmap"
+                        },
+                        {
+                            "id": "revenue_per_day",
+                            "displayName": null,
+                            "visualizationFormat": "Heatmap"
+                        },
+                        {
+                            "id": "transactions_per_day",
+                            "displayName": null,
+                            "visualizationFormat": "Heatmap"
+                        },
+                        {
+                            "id": "customers_per_day",
+                            "displayName": null,
+                            "visualizationFormat": "LineChart"
+                        },
+                        {
+                            "id": "transactions_by_geo",
+                            "displayName": null,
+                            "visualizationFormat": "Geo_Heatmap"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}

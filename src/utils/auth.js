@@ -31,6 +31,46 @@ export async function checkAuthStatus() {
 }
 
 /**
+ * Fetch user information from the OpenID Connect userinfo endpoint
+ * This should be called after successful authentication to get user details
+ */
+export async function fetchUserInfo() {
+  try {
+    console.log('🔍 Fetching user information from userinfo endpoint...');
+    
+    const response = await fetch('/userinfo', {
+      credentials: 'include',
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const userInfo = await response.json();
+      console.log('✅ User information retrieved:', {
+        sub: userInfo.sub,
+        name: userInfo.name,
+        email: userInfo.email,
+        hasPreferredUsername: !!userInfo.preferred_username
+      });
+      return userInfo;
+    }
+    
+    if (response.status === 401) {
+      console.warn('🔐 User not authenticated for userinfo endpoint');
+      return null;
+    }
+    
+    console.error('❌ Failed to fetch user info:', response.status, response.statusText);
+    return null;
+  } catch (error) {
+    console.error('❌ User info fetch failed:', error);
+    return null;
+  }
+}
+
+/**
  * Universal fetch wrapper with automatic OAuth2 authentication handling
  * Use this for ALL API requests to ensure proper auth handling
  */

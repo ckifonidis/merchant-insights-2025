@@ -135,6 +135,7 @@ function startServer() {
       console.log('Available endpoints:');
       console.log(`  🏠 Application: ${config.PROXY_URL}/`);
       console.log(`  🔑 Login:       ${config.PROXY_URL}/login`);
+      console.log(`  👤 UserInfo:    ${config.PROXY_URL}/userinfo (protected)`);
       console.log(`  📊 Health:      ${config.PROXY_URL}/health`);
       console.log(`  🔌 API Proxy:   ${config.PROXY_URL}/api/*`);
       console.log('');

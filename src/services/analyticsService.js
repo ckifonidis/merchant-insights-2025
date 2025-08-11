@@ -32,11 +32,15 @@ class AnalyticsService {
    * This is the main method used by Redux thunks
    */
   async fetchTabData(tabName, metricIDs, filters, options = {}) {
+    const { metricSpecificFilters = {}, autoInferContext = true, userID } = options;
 
-    const { metricSpecificFilters = {}, autoInferContext = true } = options;
+    if (!userID) {
+      throw new Error('userID is required for analytics tab data fetch');
+    }
 
     // Build the analytics request with metric-specific filters
     const request = this.buildAnalyticsRequest({
+      userID,
       metricIDs,
       ...filters,
       metricSpecificFilters,
@@ -53,8 +57,11 @@ class AnalyticsService {
    * Used for year-over-year comparisons
    */
   async fetchTabDataWithYearComparison(tabName, metricIDs, filters, options = {}) {
+    const { metricSpecificFilters = {}, autoInferContext = true, userID } = options;
 
-    const { metricSpecificFilters = {}, autoInferContext = true } = options;
+    if (!userID) {
+      throw new Error('userID is required for analytics year comparison fetch');
+    }
 
     // Calculate previous year date range
     const previousYearDates = getPreviousYearDateRange(filters.startDate, filters.endDate);
@@ -69,6 +76,7 @@ class AnalyticsService {
 
     // Build requests for both current and previous year
     const currentRequest = this.buildAnalyticsRequest({
+      userID,
       metricIDs,
       ...filters,
       metricSpecificFilters,
@@ -76,6 +84,7 @@ class AnalyticsService {
     });
 
     const previousRequest = this.buildAnalyticsRequest({
+      userID,
       metricIDs,
       ...filters,
       startDate: previousYearDates.startDate,
@@ -121,7 +130,7 @@ class AnalyticsService {
    * Build analytics request in proper format
    */
   buildAnalyticsRequest({
-    userID = 'BANK\\test',
+    userID,
     startDate = '2025-01-01',
     endDate = '2025-01-31',
     merchantId = 'test-merchant',
@@ -131,6 +140,9 @@ class AnalyticsService {
     metricSpecificFilters = {},
     context = null
   }) {
+    if (!userID) {
+      throw new Error('userID is required for analytics requests');
+    }
     // Merge user filters with metric-specific filters
     const combinedFilters = [
       ...filterValues, // User filters from sidebar
@@ -140,7 +152,7 @@ class AnalyticsService {
     return {
       header: {
         ID: `analytics-${Date.now()}`,
-        application: 'merchant-insights-ui'
+        application: '76A9FF99-64F9-4F72-9629-305CBE047902'
       },
       payload: {
         userID,
@@ -258,7 +270,7 @@ export const analyticsService = new AnalyticsService();
 
 // Export helper functions for building requests
 export const buildAnalyticsRequest = ({
-  userID = 'BANK\\test',
+  userID,
   startDate = '2025-01-01',
   endDate = '2025-01-31',
   merchantId = 'test-merchant',
@@ -266,10 +278,14 @@ export const buildAnalyticsRequest = ({
   filterValues = [],
   metricParameters = {}
 }) => {
+  if (!userID) {
+    throw new Error('userID is required for analytics requests');
+  }
+  
   return {
     header: {
       ID: `analytics-${Date.now()}`,
-      application: 'merchant-insights-ui'
+      application: '76A9FF99-64F9-4F72-9629-305CBE047902'
     },
     payload: {
       userID,

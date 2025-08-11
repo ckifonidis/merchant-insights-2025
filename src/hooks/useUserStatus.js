@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { checkUserStatus } from '../services/userService.js';
+import { fetchUserConfig } from '../store/slices/userConfigSlice.js';
+import { setUserID } from '../store/slices/filtersSlice.js';
+import { useAuth } from './useAuth.js';
 
 /**
  * Custom hook for checking user service enrollment status
@@ -12,24 +16,44 @@ export function useUserStatus(enabled = true) {
   const [userStatus, setUserStatus] = useState(null); // null = loading
   const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const { userInfo } = useAuth();
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !userInfo?.preferred_username) {
       setIsLoading(false);
       return;
     }
+    
     const checkStatus = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
-        console.log('🔍 Checking user service enrollment status...');
-        const response = await checkUserStatus();
+        const userId = userInfo.preferred_username;
+        console.log('🔍 Checking user service enrollment status for:', userId);
+        
+        // Update filters context with the real userID
+        dispatch(setUserID(userId));
+        
+        const response = await checkUserStatus(userId);
         
         if (response && response.payload && response.payload.status) {
           const status = response.payload.status;
           console.log('✅ User status check result:', status);
           setUserStatus(status);
+          
+          // If user is signed up, fetch their configuration
+          if (status === 'signedup') {
+            console.log('🔍 User is signed up, fetching user configuration...');
+            try {
+              await dispatch(fetchUserConfig(userId)).unwrap();
+              console.log('✅ User configuration loaded successfully');
+            } catch (configError) {
+              console.error('❌ Failed to load user configuration:', configError);
+              // Don't fail the entire flow if config fails - user can still access the app
+            }
+          }
         } else {
           throw new Error('Invalid user status response format');
         }
@@ -44,25 +68,47 @@ export function useUserStatus(enabled = true) {
     };
 
     checkStatus();
-  }, [enabled]);
+  }, [enabled, dispatch, userInfo?.preferred_username]);
 
   /**
    * Manually refresh user status
    * Useful after user signs up for the service
    */
   const refreshUserStatus = async () => {
+    if (!userInfo?.preferred_username) {
+      throw new Error('No user ID available for status refresh');
+    }
+    
     console.log('🔄 Manually refreshing user status...');
     
     try {
       setError(null);
       setIsLoading(true);
       
-      const response = await checkUserStatus();
+      const userId = userInfo.preferred_username;
+      
+      // Update filters context with the real userID
+      dispatch(setUserID(userId));
+      
+      const response = await checkUserStatus(userId);
       
       if (response && response.payload && response.payload.status) {
         const status = response.payload.status;
         console.log('✅ User status refresh complete:', status);
         setUserStatus(status);
+        
+        // If user is signed up, fetch their configuration
+        if (status === 'signedup') {
+          console.log('🔍 User is signed up, fetching user configuration...');
+          try {
+            await dispatch(fetchUserConfig(userId)).unwrap();
+            console.log('✅ User configuration loaded successfully');
+          } catch (configError) {
+            console.error('❌ Failed to load user configuration:', configError);
+            // Don't fail the entire flow if config fails
+          }
+        }
+        
         return status;
       } else {
         throw new Error('Invalid user status response format');

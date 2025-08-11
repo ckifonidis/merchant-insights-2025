@@ -23,7 +23,9 @@ router.post('/QUERY', (req, res) => {
       );
     }
     
-    const { metricIDs, filterValues, startDate, endDate, merchantId } = payload;
+    const { metricIDs, filterValues, startDate, endDate, merchantId, userID } = payload;
+    
+    console.log('🔍 Analytics request for userID:', userID);
 
     // Validate request
     if (!metricIDs || !Array.isArray(metricIDs) || metricIDs.length === 0) {

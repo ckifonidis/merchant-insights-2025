@@ -110,7 +110,7 @@ const getInitialState = () => {
     context: {
       merchantId: "52ba3854-a5d4-47bd-9d1a-b789ae139803",
       providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
-      userID: "BANK\\E82629",
+      userID: null, // Will be set when user info is available
       showCompetition: true,
       selectedTab: 'dashboard'
     }
@@ -254,6 +254,10 @@ const filtersSlice = createSlice({
     
     setSelectedTab: (state, action) => {
       state.context.selectedTab = action.payload;
+    },
+    
+    setUserID: (state, action) => {
+      state.context.userID = action.payload;
     },
     
     // Reset filters

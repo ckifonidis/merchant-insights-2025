@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { checkAuthStatus, isOAuthCallback } from '../utils/auth.js';
+import { checkAuthStatus, fetchUserInfo, isOAuthCallback } from '../utils/auth.js';
 
 /**
  * Custom hook for managing authentication state
@@ -10,6 +10,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [authData, setAuthData] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -37,9 +38,25 @@ export function useAuth() {
         setAuthData(authResult);
         
         if (authResult.authenticated) {
-          console.log('🎉 User is authenticated');
+          console.log('🎉 User is authenticated, fetching user info...');
+          
+          // Fetch user information after successful authentication
+          try {
+            const userInfoData = await fetchUserInfo();
+            setUserInfo(userInfoData);
+            
+            if (userInfoData) {
+              console.log('✅ User info fetched successfully');
+            } else {
+              console.warn('⚠️ User info could not be fetched');
+            }
+          } catch (userInfoError) {
+            console.error('❌ Failed to fetch user info:', userInfoError);
+            // Don't fail the entire auth flow if userinfo fails
+          }
         } else {
           console.log('🔐 User is not authenticated');
+          setUserInfo(null);
         }
         
       } catch (err) {
@@ -69,6 +86,19 @@ export function useAuth() {
       setIsAuthenticated(authResult.authenticated);
       setAuthData(authResult);
       
+      if (authResult.authenticated) {
+        // Fetch user information after successful authentication
+        try {
+          const userInfoData = await fetchUserInfo();
+          setUserInfo(userInfoData);
+        } catch (userInfoError) {
+          console.error('❌ Failed to refresh user info:', userInfoError);
+          // Don't fail the entire refresh if userinfo fails
+        }
+      } else {
+        setUserInfo(null);
+      }
+      
       console.log('✅ Auth refresh complete:', {
         authenticated: authResult.authenticated
       });
@@ -79,6 +109,7 @@ export function useAuth() {
       setError(err);
       setIsAuthenticated(false);
       setAuthData(null);
+      setUserInfo(null);
       throw err;
     }
   };
@@ -117,6 +148,7 @@ export function useAuth() {
     isLoading,
     error,
     authData,
+    userInfo,
     
     // Session information
     isSessionExpired: isSessionExpired(),
