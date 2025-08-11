@@ -7,7 +7,9 @@
   },
   "header": {
     "title": "NBG Business Insights",
-    "language": "Γλώσσα"
+    "language": "Γλώσσα",
+    "loading_merchant": "Φόρτωση...",
+    "no_merchant": "Κανένας Έμπορος"
   },
   "filters": {
     "title": "Φίλτρα",

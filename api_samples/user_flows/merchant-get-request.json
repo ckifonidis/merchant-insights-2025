@@ -1,0 +1,10 @@
+{
+     "header": {
+        "ID": "{{$guid}}",
+        "application": "{{application}}"
+    },
+	"payload": {
+        "userId": "{{submitterId}}",
+        "id": "766dba61-1cd8-49b5-944e-bc537a0c6b9c"
+	}
+}

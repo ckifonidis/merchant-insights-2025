@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { checkUserStatus } from '../services/userService.js';
-import { fetchUserConfig } from '../store/slices/userConfigSlice.js';
+import { fetchUserConfig, fetchAllMerchantDetails } from '../store/slices/userConfigSlice.js';
 import { setUserID } from '../store/slices/filtersSlice.js';
 import { useAuth } from './useAuth.js';
 
@@ -43,12 +43,29 @@ export function useUserStatus(enabled = true) {
           console.log('✅ User status check result:', status);
           setUserStatus(status);
           
-          // If user is signed up, fetch their configuration
+          // If user is signed up, fetch their configuration and merchant details
           if (status === 'signedup') {
             console.log('🔍 User is signed up, fetching user configuration...');
             try {
-              await dispatch(fetchUserConfig(userId)).unwrap();
+              const userConfig = await dispatch(fetchUserConfig(userId)).unwrap();
               console.log('✅ User configuration loaded successfully');
+              
+              // If user has merchant IDs, fetch merchant details
+              if (userConfig?.merchantIds?.length > 0) {
+                console.log(`🔍 Fetching details for ${userConfig.merchantIds.length} merchants...`);
+                try {
+                  await dispatch(fetchAllMerchantDetails({ 
+                    userID: userId, 
+                    merchantIds: userConfig.merchantIds 
+                  })).unwrap();
+                  console.log('✅ Merchant details loaded successfully');
+                } catch (merchantError) {
+                  console.error('❌ Failed to load merchant details:', merchantError);
+                  // Don't fail the entire flow if merchant details fail
+                }
+              } else {
+                console.log('ℹ️ No merchant IDs found in user configuration');
+              }
             } catch (configError) {
               console.error('❌ Failed to load user configuration:', configError);
               // Don't fail the entire flow if config fails - user can still access the app
@@ -97,12 +114,29 @@ export function useUserStatus(enabled = true) {
         console.log('✅ User status refresh complete:', status);
         setUserStatus(status);
         
-        // If user is signed up, fetch their configuration
+        // If user is signed up, fetch their configuration and merchant details
         if (status === 'signedup') {
           console.log('🔍 User is signed up, fetching user configuration...');
           try {
-            await dispatch(fetchUserConfig(userId)).unwrap();
+            const userConfig = await dispatch(fetchUserConfig(userId)).unwrap();
             console.log('✅ User configuration loaded successfully');
+            
+            // If user has merchant IDs, fetch merchant details
+            if (userConfig?.merchantIds?.length > 0) {
+              console.log(`🔍 Fetching details for ${userConfig.merchantIds.length} merchants...`);
+              try {
+                await dispatch(fetchAllMerchantDetails({ 
+                  userID: userId, 
+                  merchantIds: userConfig.merchantIds 
+                })).unwrap();
+                console.log('✅ Merchant details loaded successfully');
+              } catch (merchantError) {
+                console.error('❌ Failed to load merchant details:', merchantError);
+                // Don't fail the entire flow if merchant details fail
+              }
+            } else {
+              console.log('ℹ️ No merchant IDs found in user configuration');
+            }
           } catch (configError) {
             console.error('❌ Failed to load user configuration:', configError);
             // Don't fail the entire flow if config fails

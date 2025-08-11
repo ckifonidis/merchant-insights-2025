@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchUserConfiguration } from '../../services/userService.js';
+import { fetchUserConfiguration, fetchMerchantDetails } from '../../services/userService.js';
 
 /**
  * Redux slice for user configuration management
@@ -24,6 +24,50 @@ export const fetchUserConfig = createAsyncThunk(
   }
 );
 
+// Async thunk for fetching merchant details for all user's merchants
+export const fetchAllMerchantDetails = createAsyncThunk(
+  'userConfig/fetchAllMerchantDetails',
+  async ({ userID, merchantIds }, { rejectWithValue }) => {
+    if (!userID) {
+      return rejectWithValue('userID is required for merchant details fetch');
+    }
+    if (!Array.isArray(merchantIds) || merchantIds.length === 0) {
+      return [];
+    }
+    
+    try {
+      // Fetch all merchant details in parallel
+      const merchantPromises = merchantIds.map(merchantId => 
+        fetchMerchantDetails(userID, merchantId)
+      );
+      
+      const responses = await Promise.allSettled(merchantPromises);
+      
+      // Process results and handle individual failures
+      const merchants = [];
+      const errors = [];
+      
+      responses.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const merchantData = result.value.payload?.merchant;
+          if (merchantData) {
+            merchants.push(merchantData);
+          }
+        } else {
+          console.error(`Failed to fetch merchant ${merchantIds[index]}:`, result.reason);
+          errors.push({ merchantId: merchantIds[index], error: result.reason.message });
+        }
+      });
+      
+      return { merchants, errors };
+      
+    } catch (error) {
+      console.error('Failed to fetch merchant details:', error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const initialState = {
   // Loading states
   isLoading: false,
@@ -37,9 +81,16 @@ const initialState = {
   // Analytics visualization preferences by provider
   analyticsMetricVisualizationPreferences: [],
   
+  // Merchant details
+  merchants: [], // Array of merchant objects with id, name, logo, customerCode
+  merchantsLoading: false,
+  merchantsError: null,
+  merchantsFetchErrors: [], // Array of failed merchant fetches
+  
   // Convenience flags
   isLoaded: false,
-  hasValidConfig: false
+  hasValidConfig: false,
+  merchantsLoaded: false
 };
 
 const userConfigSlice = createSlice({
@@ -52,8 +103,13 @@ const userConfigSlice = createSlice({
       state.userId = null;
       state.merchantIds = [];
       state.analyticsMetricVisualizationPreferences = [];
+      state.merchants = [];
+      state.merchantsLoading = false;
+      state.merchantsError = null;
+      state.merchantsFetchErrors = [];
       state.isLoaded = false;
       state.hasValidConfig = false;
+      state.merchantsLoaded = false;
       state.error = null;
     },
     
@@ -91,6 +147,30 @@ const userConfigSlice = createSlice({
         state.error = action.payload;
         state.isLoaded = true;
         state.hasValidConfig = false;
+      })
+      // Fetch merchant details
+      .addCase(fetchAllMerchantDetails.pending, (state) => {
+        state.merchantsLoading = true;
+        state.merchantsError = null;
+        state.merchantsFetchErrors = [];
+      })
+      .addCase(fetchAllMerchantDetails.fulfilled, (state, action) => {
+        state.merchantsLoading = false;
+        state.merchants = action.payload.merchants || [];
+        state.merchantsFetchErrors = action.payload.errors || [];
+        state.merchantsLoaded = true;
+        
+        // Set error if some merchants failed but still got some data
+        if (action.payload.errors?.length > 0) {
+          state.merchantsError = `Failed to fetch ${action.payload.errors.length} merchant(s)`;
+        }
+      })
+      .addCase(fetchAllMerchantDetails.rejected, (state, action) => {
+        state.merchantsLoading = false;
+        state.merchantsError = action.payload;
+        state.merchantsLoaded = true;
+        state.merchants = [];
+        state.merchantsFetchErrors = [];
       });
   }
 });
@@ -108,6 +188,24 @@ export const selectUserConfigLoading = (state) => state.userConfig.isLoading;
 export const selectUserConfigError = (state) => state.userConfig.error;
 export const selectHasValidConfig = (state) => state.userConfig.hasValidConfig;
 export const selectIsConfigLoaded = (state) => state.userConfig.isLoaded;
+
+// Merchant selectors
+export const selectMerchants = (state) => state.userConfig.merchants;
+export const selectMerchantsLoading = (state) => state.userConfig.merchantsLoading;
+export const selectMerchantsError = (state) => state.userConfig.merchantsError;
+export const selectMerchantsLoaded = (state) => state.userConfig.merchantsLoaded;
+export const selectMerchantsFetchErrors = (state) => state.userConfig.merchantsFetchErrors;
+
+// Get merchant by ID
+export const selectMerchantById = (state) => (merchantId) => {
+  return state.userConfig.merchants.find(merchant => merchant.id === merchantId) || null;
+};
+
+// Primary merchant selector (first merchant in the list)
+export const selectPrimaryMerchant = (state) => {
+  const merchants = state.userConfig.merchants;
+  return merchants && merchants.length > 0 ? merchants[0] : null;
+};
 
 // Primary merchant ID selector (first in the list)
 export const selectPrimaryMerchantId = (state) => {

@@ -117,6 +117,60 @@ export const fetchUserConfiguration = async (userID) => {
 };
 
 /**
+ * Fetch merchant details for a specific merchant ID
+ * Called after user configuration to get merchant information
+ */
+export const fetchMerchantDetails = async (userID, merchantId) => {
+  if (!userID) {
+    throw new Error('userID is required for merchant details fetch');
+  }
+  if (!merchantId) {
+    throw new Error('merchantId is required for merchant details fetch');
+  }
+  
+  const requestBody = {
+    header: {
+      ID: generateGUID(),
+      application: '76A9FF99-64F9-4F72-9629-305CBE047902'
+    },
+    payload: {
+      userId: userID,
+      id: merchantId
+    }
+  };
+  
+  try {
+    console.log('🔍 Fetching merchant details for:', { userID, merchantId });
+    
+    const response = await apiCall('/api/merchant/get', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response) {
+      throw new Error('No response received from merchant details fetch');
+    }
+
+    const data = await response.json();
+    
+    console.log('✅ Merchant details response:', {
+      merchantId: data.payload?.merchant?.id,
+      merchantName: data.payload?.merchant?.name,
+      requestId: requestBody.header.ID
+    });
+
+    return data;
+    
+  } catch (error) {
+    console.error('❌ Merchant details fetch failed:', error);
+    throw error;
+  }
+};
+
+/**
  * User Service class for managing user enrollment operations
  */
 class UserService {
@@ -193,6 +247,71 @@ class UserService {
     } catch (error) {
       console.error('Failed to get user preferences:', error);
       return null;
+    }
+  }
+
+  /**
+   * Fetch merchant details for a specific merchant ID
+   */
+  async fetchMerchantDetails(userID, merchantId) {
+    if (!userID) {
+      throw new Error('userID is required for merchant details fetch');
+    }
+    if (!merchantId) {
+      throw new Error('merchantId is required for merchant details fetch');
+    }
+    return fetchMerchantDetails(userID, merchantId);
+  }
+
+  /**
+   * Fetch all merchant details for user's merchant IDs
+   */
+  async fetchAllMerchantDetails(userID, merchantIds) {
+    if (!userID) {
+      throw new Error('userID is required for merchant details fetch');
+    }
+    if (!Array.isArray(merchantIds) || merchantIds.length === 0) {
+      console.log('No merchant IDs to fetch');
+      return [];
+    }
+
+    try {
+      console.log(`🔍 Fetching details for ${merchantIds.length} merchants`);
+      
+      // Fetch all merchant details in parallel
+      const merchantPromises = merchantIds.map(merchantId => 
+        this.fetchMerchantDetails(userID, merchantId)
+      );
+      
+      const responses = await Promise.allSettled(merchantPromises);
+      
+      // Process results and handle individual failures
+      const merchants = [];
+      const errors = [];
+      
+      responses.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const merchantData = result.value.payload?.merchant;
+          if (merchantData) {
+            merchants.push(merchantData);
+          }
+        } else {
+          console.error(`Failed to fetch merchant ${merchantIds[index]}:`, result.reason);
+          errors.push({ merchantId: merchantIds[index], error: result.reason.message });
+        }
+      });
+      
+      console.log(`✅ Successfully fetched ${merchants.length}/${merchantIds.length} merchants`);
+      
+      if (errors.length > 0) {
+        console.warn(`⚠️ Failed to fetch ${errors.length} merchants:`, errors);
+      }
+      
+      return merchants;
+      
+    } catch (error) {
+      console.error('Failed to fetch merchant details:', error);
+      throw error;
     }
   }
 }

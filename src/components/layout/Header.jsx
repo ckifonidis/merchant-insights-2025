@@ -1,18 +1,51 @@
 import { useTranslation } from 'react-i18next';
-
-// Static merchant info
-const merchantInfo = {
-  name: 'ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ',
-  isGoForMore: true
-};
+import { useSelector } from 'react-redux';
+import { useAuth } from '../../hooks/useAuth.js';
+import { 
+  selectPrimaryMerchant, 
+  selectMerchantsLoading, 
+  selectUserId 
+} from '../../store/slices/userConfigSlice.js';
 
 const Header = () => {
   const { t, i18n } = useTranslation();
+  const { userInfo } = useAuth();
+  
+  // Get user configuration data from Redux
+  const primaryMerchant = useSelector(selectPrimaryMerchant);
+  const merchantsLoading = useSelector(selectMerchantsLoading);
+  const userId = useSelector(selectUserId);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'gr' : 'en';
     i18n.changeLanguage(newLang);
   };
+
+  // Get display values with fallbacks
+  const displayUserId = userInfo?.preferred_username || userId || 'User';
+  const displayMerchantName = (() => {
+    if (merchantsLoading) return t('header.loading_merchant', 'Loading...');
+    if (primaryMerchant?.name) return primaryMerchant.name;
+    return t('header.no_merchant', 'No Merchant');
+  })();
+  
+  // Generate avatar initials from merchant name
+  const getAvatarInitials = (name) => {
+    if (!name || name.includes('Loading') || name.includes('No Merchant')) {
+      return 'U'; // Default to 'U' for User
+    }
+    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  // Handle loading state for avatar
+  const avatarClass = merchantsLoading 
+    ? "w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-medium animate-pulse"
+    : "w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-medium";
+  
+  // Handle loading state for text
+  const merchantNameClass = merchantsLoading
+    ? "text-sm font-medium text-gray-500"
+    : "text-sm font-medium text-gray-700";
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -49,10 +82,13 @@ const Header = () => {
             </button>
 
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-medium">
-                {merchantInfo.name.split(' ').map(word => word[0]).join('')}
+              <div className={avatarClass}>
+                {getAvatarInitials(displayMerchantName)}
               </div>
-              <span className="ml-2 text-sm font-medium text-gray-700">{merchantInfo.name}</span>
+              <div className="ml-2 flex flex-col">
+                <span className="text-xs text-gray-500">{displayUserId}</span>
+                <span className={merchantNameClass}>{displayMerchantName}</span>
+              </div>
             </div>
           </div>
         </div>

@@ -7,7 +7,9 @@
   },
   "header": {
     "title": "NBG Business Insights",
-    "language": "Language"
+    "language": "Language",
+    "loading_merchant": "Loading...",
+    "no_merchant": "No Merchant"
   },
   "filters": {
     "title": "Filters",

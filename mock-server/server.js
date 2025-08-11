@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const analyticsRoutes = require('./routes/analytics');
 const authRoutes = require('./routes/authorization');
 const configRoutes = require('./routes/configuration');
+const merchantRoutes = require('./routes/merchant');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -67,6 +68,7 @@ app.use((req, res, next) => {
 app.use('/api/ANALYTICS', analyticsRoutes);
 app.use('/api/authorization', authRoutes);
 app.use('/api/CONFIGURATION', configRoutes);
+app.use('/api/merchant', merchantRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -79,7 +81,9 @@ app.get('/health', (req, res) => {
       '/api/ANALYTICS/QUERY',
       '/api/authorization/checkUserStatus',
       '/api/CONFIGURATION/ADMIN/GET',
-      '/api/CONFIGURATION/MERCHANT/GET'
+      '/api/CONFIGURATION/MERCHANT/GET',
+      '/api/configuration/user/get',
+      '/api/merchant/get'
     ]
   });
 });

@@ -151,7 +151,7 @@ class AnalyticsService {
 
     return {
       header: {
-        ID: `analytics-${Date.now()}`,
+        ID: generateGUID(),
         application: '76A9FF99-64F9-4F72-9629-305CBE047902'
       },
       payload: {
@@ -284,7 +284,7 @@ export const buildAnalyticsRequest = ({
   
   return {
     header: {
-      ID: `analytics-${Date.now()}`,
+      ID: generateGUID(),
       application: '76A9FF99-64F9-4F72-9629-305CBE047902'
     },
     payload: {
