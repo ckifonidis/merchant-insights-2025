@@ -10,7 +10,7 @@ import { useAuth } from './useAuth.js';
  * Determines if authenticated user has access to Business Insights service
  * 
  * @param {boolean} enabled - Whether to check user status (default: true)
- * Returns user status: "signedup", "notsignedup", or "noaccess"
+ * Returns user status: "signedup", "notsigned", or "noaccess"
  */
 export function useUserStatus(enabled = true) {
   const [userStatus, setUserStatus] = useState(null); // null = loading
@@ -169,7 +169,7 @@ export function useUserStatus(enabled = true) {
    * Check if user needs to sign up
    */
   const needsSignup = () => {
-    return userStatus === 'notsignedup';
+    return userStatus === 'notsigned';
   };
 
   /**

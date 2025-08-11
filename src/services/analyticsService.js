@@ -17,7 +17,7 @@ import { apiCallJson, handleAuthError } from '../utils/auth.js';
 
 // API Configuration
 const API_CONFIG = {
-  TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000,
+  TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 120000, // 2 minutes default timeout
   DEBUG: import.meta.env.VITE_DEBUG_API === 'true' || import.meta.env.DEV
 };
 
@@ -143,11 +143,26 @@ class AnalyticsService {
     if (!userID) {
       throw new Error('userID is required for analytics requests');
     }
-    // Merge user filters with metric-specific filters
+    // Always include required data_origin filter
+    const requiredFilters = [
+      {
+        providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+        filterId: "data_origin",
+        value: "own_data"
+      }
+    ];
+
+    // Merge required filters with user filters and metric-specific filters
     const combinedFilters = [
+      ...requiredFilters, // Always required filters
       ...filterValues, // User filters from sidebar
       ...this._buildMetricSpecificFilters(metricIDs, context, metricSpecificFilters)
     ];
+
+    if (API_CONFIG.DEBUG) {
+      console.log('🔒 Required filters applied:', requiredFilters);
+      console.log('📊 Total filters in request:', combinedFilters.length);
+    }
 
     return {
       header: {
@@ -232,7 +247,8 @@ class AnalyticsService {
 
       const response = await apiCallJson(`${API_ENDPOINTS.ANALYTICS_QUERY}`, {
         method: 'POST',
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
+        timeout: API_CONFIG.TIMEOUT
       });
 
       if (API_CONFIG.DEBUG) {
@@ -282,6 +298,21 @@ export const buildAnalyticsRequest = ({
     throw new Error('userID is required for analytics requests');
   }
   
+  // Always include required data_origin filter
+  const requiredFilters = [
+    {
+      providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+      filterId: "data_origin",
+      value: "own_data"
+    }
+  ];
+
+  // Merge required filters with provided filters
+  const combinedFilters = [
+    ...requiredFilters,
+    ...filterValues
+  ];
+  
   return {
     header: {
       ID: generateGUID(),
@@ -293,7 +324,7 @@ export const buildAnalyticsRequest = ({
       endDate,
       providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
       metricIDs,
-      filterValues,
+      filterValues: combinedFilters,
       metricParameters,
       merchantId
     }

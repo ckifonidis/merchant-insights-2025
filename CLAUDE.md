@@ -39,7 +39,7 @@
 
 **User Status Check System:**
 - ✅ **API Integration** - `/authorization/checkUserStatus` endpoint with GUID headers
-- ✅ **Three Status Flow** - `signedup` → Dashboard, `notsignedup` → FirstPage, `noaccess` → NoAccessPage
+- ✅ **Three Status Flow** - `signedup` → Dashboard, `notsigned` → FirstPage, `noaccess` → NoAccessPage
 - ✅ **Loading States** - NBG logo with loading indicator during status check
 - ✅ **Error Handling** - Comprehensive error page with retry functionality
 - ✅ **Hardcoded UserID** - Development setup with `XANDRH004400003`

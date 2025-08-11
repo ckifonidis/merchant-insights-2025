@@ -75,6 +75,9 @@ export async function fetchUserInfo() {
  * Use this for ALL API requests to ensure proper auth handling
  */
 export async function fetchWithAuth(url, options = {}) {
+  // Default timeout to 2 minutes (120000ms)
+  const timeout = options.timeout || 120000;
+  
   const requestOptions = {
     ...options,
     credentials: 'include', // Always send cookies with requests
@@ -84,8 +87,14 @@ export async function fetchWithAuth(url, options = {}) {
     }
   };
 
+  // Create abort controller for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  requestOptions.signal = controller.signal;
+
   try {
     const response = await fetch(url, requestOptions);
+    clearTimeout(timeoutId); // Clear timeout on successful response
 
     // Handle 401 Unauthorized responses (authentication required)
     if (response.status === 401) {
@@ -135,6 +144,17 @@ export async function fetchWithAuth(url, options = {}) {
 
     return response;
   } catch (error) {
+    clearTimeout(timeoutId); // Clear timeout on error
+    
+    // Handle timeout errors
+    if (error.name === 'AbortError') {
+      console.error('⏱️ Request timeout after', timeout, 'ms:', url);
+      const timeoutError = new Error(`Request timeout after ${timeout/1000} seconds`);
+      timeoutError.name = 'TimeoutError';
+      timeoutError.originalError = error;
+      throw timeoutError;
+    }
+    
     // Network or other fetch errors
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       console.error('🌐 Network error during API request:', error);

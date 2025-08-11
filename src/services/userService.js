@@ -20,7 +20,7 @@ const generateGUID = () => {
 /**
  * Check if authenticated user is enrolled in Business Insights service
  * @param {string} userID - The user ID from NBG identity system (REQUIRED)
- * @returns {Promise<Object>} Response with user status: "signedup", "notsignedup", or "noaccess"
+ * @returns {Promise<Object>} Response with user status: "signedup", "notsigned", or "noaccess"
  */
 export const checkUserStatus = async (userID) => {
   if (!userID) {
@@ -213,7 +213,7 @@ class UserService {
    */
   async needsSignup(userID) {
     const status = await this.getStatus(userID);
-    return status === 'notsignedup';
+    return status === 'notsigned';
   }
 
   /**

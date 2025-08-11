@@ -9,8 +9,13 @@ function createApiProxy() {
     target: config.BACKEND_API_URL,
     changeOrigin: true,
     secure: false, // Set to true in production with valid certs
-    timeout: 30000,
-    proxyTimeout: 30000,
+    timeout: 120000,  // 2 minutes for backend response
+    proxyTimeout: 120000,  // 2 minutes for proxy operations
+    
+    // Remove /api prefix when forwarding to backend
+    pathRewrite: {
+      '^/api': '', // Remove /api prefix
+    },
     
     // Inject Authorization header for authenticated requests
     onProxyReq: (proxyReq, req, res) => {
