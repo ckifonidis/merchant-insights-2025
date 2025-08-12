@@ -1,14 +1,24 @@
 import { format, startOfWeek, startOfMonth, startOfQuarter, startOfYear, endOfWeek, endOfMonth, endOfQuarter, endOfYear, isWithinInterval } from 'date-fns';
 
+// TypeScript types
+export type TimelineType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+export interface TimeSeriesDataPoint {
+  date: string;
+  displayDate: string;
+  merchantRevenue: number;
+  competitorRevenue: number;
+}
+
 /**
  * Process time series data based on timeline selection
- * @param {Array} data - Raw time series data with date field
- * @param {string} timeline - Timeline type: 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
- * @param {Date} startDate - Start date of the filter range
- * @param {Date} endDate - End date of the filter range
- * @returns {Array} Processed data with proper labels and aggregated values
  */
-export const processTimelineData = (data, timeline, startDate = null, endDate = null) => {
+export const processTimelineData = (
+  data: TimeSeriesDataPoint[], 
+  timeline: TimelineType, 
+  startDate: Date | null = null, 
+  endDate: Date | null = null
+): TimeSeriesDataPoint[] => {
   if (!data || data.length === 0) return [];
 
   // Filter data by date range if provided
@@ -36,7 +46,7 @@ export const processTimelineData = (data, timeline, startDate = null, endDate = 
   }
 };
 
-const processDailyData = (data) => {
+const processDailyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
   // For daily, just return the data as is but limit to reasonable amount
   return data.slice(-30).map(item => ({
     ...item,
@@ -44,7 +54,7 @@ const processDailyData = (data) => {
   }));
 };
 
-const processWeeklyData = (data) => {
+const processWeeklyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
   const weeklyGroups = {};
 
   data.forEach(item => {
@@ -91,7 +101,7 @@ const processWeeklyData = (data) => {
     });
 };
 
-const processMonthlyData = (data) => {
+const processMonthlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
   const monthlyGroups = {};
 
   data.forEach(item => {
@@ -137,7 +147,7 @@ const processMonthlyData = (data) => {
     });
 };
 
-const processQuarterlyData = (data) => {
+const processQuarterlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
   const quarterlyGroups = {};
 
   data.forEach(item => {
@@ -186,7 +196,7 @@ const processQuarterlyData = (data) => {
     });
 };
 
-const processYearlyData = (data) => {
+const processYearlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
   const yearlyGroups = {};
 
   data.forEach(item => {
