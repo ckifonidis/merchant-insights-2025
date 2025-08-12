@@ -5,7 +5,7 @@ This service provides an abstraction layer for the merchant analytics API. It ca
 ## Quick Start
 
 ```javascript
-import { analyticsService, buildAnalyticsRequest, buildFilterValue, METRIC_IDS, FILTER_IDS, FILTER_VALUES } from '../services';
+import { analyticsService, buildFilterValue, METRIC_IDS, FILTER_IDS, FILTER_VALUES } from '../services';
 
 // Example: Fetch analytics data for the last 30 days
 const useAnalyticsData = () => {
@@ -16,24 +16,21 @@ const useAnalyticsData = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const request = buildAnalyticsRequest({
-          userID: 'BANK\\E82629',
-          startDate: '2025-05-06',
-          endDate: '2025-06-05',
-          merchantId: '4065a7c9-f189-4834-af6b-dfa272affed3',
-          metricIDs: [
-            METRIC_IDS.TOTAL_TRANSACTIONS,
-            METRIC_IDS.REVENUE_PER_DAY,
-            METRIC_IDS.CONVERTED_CUSTOMERS_BY_AGE
-          ],
-          filterValues: [
-            buildFilterValue(FILTER_IDS.DATA_ORIGIN, FILTER_VALUES.DATA_ORIGIN.OWN_DATA),
-            buildFilterValue(FILTER_IDS.INTEREST_TYPE, FILTER_VALUES.INTEREST_TYPE.CUSTOMERS)
-          ]
-        });
+        // Use the service method for full feature support
+        const data = await analyticsService.fetchTabData('dashboard', 
+          ['total_revenue', 'total_transactions'], 
+          {
+            userID: 'BANK\\E82629',
+            startDate: '2025-05-06',
+            endDate: '2025-06-05',
+            merchantId: '4065a7c9-f189-4834-af6b-dfa272affed3',
+            filterValues: [
+              buildFilterValue('interest_type', 'customers')
+            ]
+          }
+        );
         
-        const response = await analyticsService.queryAnalytics(request);
-        setData(response.payload.metrics);
+        setData(data);
       } catch (error) {
         console.error('Failed to fetch analytics:', error);
       } finally {

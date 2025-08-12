@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
 import CampaignButton from '../ui/CampaignButton';
-import { useTabData, COMPETITION_METRIC_IDS } from '../../hooks/useTabData.js';
+import { useMetricData } from '../../hooks/useNormalizedData.js';
 import CompetitionRevenueMetric from './metrics/CompetitionRevenueMetric.jsx';
 import CompetitionTransactionsMetric from './metrics/CompetitionTransactionsMetric.jsx';
 import CompetitionAvgTransactionMetric from './metrics/CompetitionAvgTransactionMetric.jsx';
@@ -11,32 +10,19 @@ import CompetitionMonthlyHeatmapChart from './charts/CompetitionMonthlyHeatmapCh
 const Competition = ({ filters }) => {
   const { t } = useTranslation();
 
-  // Get data utilities from standard reusable hook
-  const { 
-    allMetricsData, 
-    getMetricsData, 
-    loading, 
-    error, 
-    filtersChanged,
-    fetchDataWithYearComparison,
-    markFiltersApplied
-  } = useTabData();
-  
-  // Get competition-specific data
-  const competitionData = getMetricsData(COMPETITION_METRIC_IDS);
-  
-  // Fetch competition data on mount
-  useEffect(() => {
-    fetchDataWithYearComparison(COMPETITION_METRIC_IDS);
-  }, [fetchDataWithYearComparison]);
-  
-  // Fetch data when filters change
-  useEffect(() => {
-    if (filtersChanged) {
-      fetchDataWithYearComparison(COMPETITION_METRIC_IDS);
-      markFiltersApplied();
-    }
-  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
+  // Competition metrics
+  const competitionMetrics = [
+    'total_revenue',
+    'total_transactions',
+    'avg_ticket_per_user',
+    'revenue_per_day'
+  ];
+
+  // Get competition data with automatic fetching and year-over-year comparison
+  const { data: competitionData, isLoading: loading, error } = useMetricData(competitionMetrics, { 
+    autoFetch: true, 
+    yearOverYear: true 
+  });
 
   // Show loading state while data is being fetched
   if (loading) {

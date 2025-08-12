@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useTabData, DEMOGRAPHICS_METRIC_IDS } from '../../hooks/useTabData.js';
-import { useEffect } from 'react';
+import { useDemographicsData } from '../../hooks/useNormalizedData.js';
 import CampaignButton from '../ui/CampaignButton';
 import TotalCustomersMetric from './metrics/TotalCustomersMetric.jsx';
 import CustomersByGenderChart from './charts/CustomersByGenderChart.jsx';
@@ -10,44 +9,8 @@ import CustomersByInterestsChart from './charts/CustomersByInterestsChart.jsx';
 const Demographics = ({ filters }) => {
   const { t } = useTranslation();
   
-  // Get data utilities from simplified hook
-  const { 
-    allMetricsData, 
-    getMetricsData, 
-    loading, 
-    error, 
-    filtersChanged,
-    fetchDataWithYearComparison,
-    markFiltersApplied
-  } = useTabData();
-  
-  // Get demographics-specific data
-  const demographicsData = getMetricsData(DEMOGRAPHICS_METRIC_IDS);
-  
-  // Fetch demographics data on mount
-  useEffect(() => {
-    fetchDataWithYearComparison(DEMOGRAPHICS_METRIC_IDS, {
-      metricSpecificFilters: {
-        'converted_customers_by_interest': {
-          interest_type: 'customers'
-        }
-      }
-    });
-  }, [fetchDataWithYearComparison]);
-  
-  // Fetch data when filters change
-  useEffect(() => {
-    if (filtersChanged) {
-      fetchDataWithYearComparison(DEMOGRAPHICS_METRIC_IDS, {
-        metricSpecificFilters: {
-          'converted_customers_by_interest': {
-            interest_type: 'customers'
-          }
-        }
-      });
-      markFiltersApplied();
-    }
-  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
+  // Get demographics data with automatic fetching and year-over-year comparison
+  const { data: demographicsData, isLoading: loading, error } = useDemographicsData();
 
   // Show loading state while data is being fetched
   if (loading) {

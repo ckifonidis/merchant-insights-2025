@@ -6,38 +6,13 @@ import AvgTransactionMetric from './metrics/AvgTransactionMetric.jsx';
 import RevenueTimeSeriesChart from './charts/RevenueTimeSeriesChart.jsx';
 import TransactionsTimeSeriesChart from './charts/TransactionsTimeSeriesChart.jsx';
 import CustomersTimeSeriesChart from './charts/CustomersTimeSeriesChart.jsx';
-import { useTabData, DASHBOARD_METRIC_IDS } from '../../hooks/useTabData.js';
-import { useEffect } from 'react';
+import { useDashboardData } from '../../hooks/useNormalizedData.js';
 
 const Dashboard = ({ filters }) => {
   const { t } = useTranslation();
   
-  // Get data utilities from simplified hook
-  const { 
-    allMetricsData, 
-    getMetricsData, 
-    loading, 
-    error, 
-    filtersChanged,
-    fetchDataWithYearComparison,
-    markFiltersApplied
-  } = useTabData();
-  
-  // Get dashboard-specific data
-  const dashboardData = getMetricsData(DASHBOARD_METRIC_IDS);
-  
-  // Fetch dashboard data on mount
-  useEffect(() => {
-    fetchDataWithYearComparison(DASHBOARD_METRIC_IDS);
-  }, [fetchDataWithYearComparison]);
-  
-  // Fetch data when filters change
-  useEffect(() => {
-    if (filtersChanged) {
-      fetchDataWithYearComparison(DASHBOARD_METRIC_IDS);
-      markFiltersApplied();
-    }
-  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
+  // Get dashboard data with automatic fetching and year-over-year comparison
+  const { data: dashboardData, isLoading: loading, error } = useDashboardData();
 
   // 2. Show loading state while data is being fetched
   if (loading) {

@@ -2,7 +2,33 @@
   "permissions": {
     "allow": [
       "Bash(git add -A)",
-      "Bash(git push origin main)"
+      "Bash(git push origin main)",
+      "Bash(rm /home/ckifonidis/ai/merchant-insights-2025/src/hooks/useUserStatus.js)",
+      "Bash(rm /home/ckifonidis/ai/merchant-insights-2025/src/hooks/useTabData.js)",
+      "Bash(npm install -D typescript @types/node)",
+      "Bash(mv vite.config.js vite.config.ts)",
+      "Bash(mv src/store/index.js src/store/index.ts)",
+      "Bash(mv src/store/slices/authSlice.js src/store/slices/authSlice.ts)",
+      "Bash(mv src/store/slices/filtersSlice.js src/store/slices/filtersSlice.ts)",
+      "Bash(mv src/store/slices/dataSlice.js src/store/slices/dataSlice.ts)",
+      "Bash(mv src/utils/constants.js src/utils/constants.ts)",
+      "Bash(mv src/utils/formatters.js src/utils/formatters.ts)",
+      "Bash(mv src/utils/dateHelpers.js src/utils/dateHelpers.ts)",
+      "Bash(mv src/hooks/useResponsive.js src/hooks/useResponsive.ts)",
+      "Bash(mv src/services/normalization/scalarNormalizer.js src/services/normalization/scalarNormalizer.ts)",
+      "Bash(mv src/services/normalization/categoricalNormalizer.js src/services/normalization/categoricalNormalizer.ts)",
+      "Bash(mv src/services/normalization/timeSeriesNormalizer.js src/services/normalization/timeSeriesNormalizer.ts)",
+      "Bash(mv src/services/normalization/apiNormalizer.js src/services/normalization/apiNormalizer.ts)",
+      "Bash(npm run build)",
+      "Bash(mv src/hooks/useAuthState.js src/hooks/useAuthState.ts)",
+      "Bash(mv src/hooks/useAuth.js src/hooks/useAuth.ts)",
+      "Bash(mv src/services/analyticsService.js src/services/analyticsService.ts)",
+      "Bash(mv src/services/userService.js src/services/userService.ts)",
+      "Bash(mv src/store/slices/userConfigSlice.js src/store/slices/userConfigSlice.ts)",
+      "Bash(mv src/store/selectors/dataSelectors.js src/store/selectors/dataSelectors.ts)",
+      "Bash(mv src/data/apiSchema.js src/data/apiSchema.ts)",
+      "Bash(mv src/utils/auth.js src/utils/auth.ts)",
+      "Bash(mv src/services/filterService.js src/services/filterService.ts)"
     ],
     "deny": []
   }

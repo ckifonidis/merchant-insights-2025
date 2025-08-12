@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useAuth } from '../../hooks/useAuth.js';
+import { useUserInfo } from '../../hooks/useAuthState.js';
 import { 
   selectPrimaryMerchant, 
   selectMerchantsLoading, 
@@ -9,7 +9,7 @@ import {
 
 const Header = () => {
   const { t, i18n } = useTranslation();
-  const { userInfo } = useAuth();
+  const userInfo = useUserInfo();
   
   // Get user configuration data from Redux
   const primaryMerchant = useSelector(selectPrimaryMerchant);

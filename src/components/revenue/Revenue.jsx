@@ -10,38 +10,13 @@ import RevenueTimeSeriesChart from './charts/RevenueTimeSeriesChart.jsx';
 import RevenueChangeChart from './charts/RevenueChangeChart.jsx';
 import RevenueByInterestsChart from './charts/RevenueByInterestsChart.jsx';
 import RevenueByChannelChart from './charts/RevenueByChannelChart.jsx';
-import { useTabData, REVENUE_METRIC_IDS } from '../../hooks/useTabData.js';
-import { useEffect } from 'react';
+import { useRevenueData } from '../../hooks/useNormalizedData.js';
 
 const Revenue = ({ filters }) => {
   const { t } = useTranslation();
   
-  // Get data utilities from simplified hook
-  const { 
-    allMetricsData, 
-    getMetricsData, 
-    loading, 
-    error, 
-    filtersChanged,
-    fetchDataWithYearComparison,
-    markFiltersApplied
-  } = useTabData();
-  
-  // Get revenue-specific data
-  const revenueData = getMetricsData(REVENUE_METRIC_IDS);
-  
-  // Fetch revenue data on mount
-  useEffect(() => {
-    fetchDataWithYearComparison(REVENUE_METRIC_IDS);
-  }, [fetchDataWithYearComparison]);
-  
-  // Fetch data when filters change
-  useEffect(() => {
-    if (filtersChanged) {
-      fetchDataWithYearComparison(REVENUE_METRIC_IDS);
-      markFiltersApplied();
-    }
-  }, [filtersChanged, fetchDataWithYearComparison, markFiltersApplied]);
+  // Get revenue data with automatic fetching and year-over-year comparison
+  const { data: revenueData, isLoading: loading, error } = useRevenueData();
 
   // 2. Show loading state while data is being fetched
   if (loading) {
