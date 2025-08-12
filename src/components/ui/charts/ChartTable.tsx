@@ -3,11 +3,26 @@ import { useTranslation } from 'react-i18next';
 import ChangeIndicator from '../metrics/ChangeIndicator';
 import { formatValue } from '../../../utils/formatters';
 
+interface TableColumn {
+  key: string;
+  label: string;
+  render: (value: any, row?: any) => React.ReactNode;
+}
+
+interface ChartTableProps {
+  data?: any[];
+  columns?: TableColumn[];
+  maxRows?: number;
+  showChange?: boolean;
+  className?: string;
+  currency?: boolean;
+}
+
 /**
  * Reusable table component for chart data display
  * Consolidates the repeated table structure across chart components
  */
-const ChartTable = ({
+const ChartTable: React.FC<ChartTableProps> = ({
   data = [],
   columns = [],
   maxRows = 10,

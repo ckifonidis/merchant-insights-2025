@@ -4,21 +4,44 @@ import Select from 'react-select';
 import { CHART_CONFIG } from '../../../utils/constants';
 import { getAvailableTimelines } from '../../../utils/timelineHelpers';
 
+interface DateRange {
+  start: Date;
+  end: Date;
+}
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface ChartSelectorProps {
+  type?: 'chartType' | 'timeline';
+  value?: string;
+  onChange: (value: string | undefined) => void;
+  options?: SelectOption[];
+  className?: string;
+  placeholder?: string;
+  isDisabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  availableOptions?: string[] | null;
+  dateRange?: DateRange | null;
+}
+
 /**
  * Reusable chart selector component for chart type and timeline selection
  * Consolidates the repeated Select component patterns
  */
-const ChartSelector = ({
-  type = 'chartType', // 'chartType' or 'timeline'
+const ChartSelector: React.FC<ChartSelectorProps> = ({
+  type = 'chartType',
   value,
   onChange,
-  options, // Custom options override
+  options,
   className = '',
   placeholder,
   isDisabled = false,
-  size = 'sm', // 'sm', 'md', 'lg'
-  availableOptions = null, // NEW: Filter available options (for timeline filtering)
-  dateRange = null // NEW: Date range for timeline availability calculation
+  size = 'sm',
+  availableOptions = null,
+  dateRange = null
 }) => {
   const { t } = useTranslation();
 
@@ -70,7 +93,7 @@ const ChartSelector = ({
 
   // Custom styles for react-select
   const customStyles = {
-    control: (provided, state) => ({
+    control: (provided: any, state: any) => ({
       ...provided,
       minHeight: size === 'sm' ? '32px' : size === 'lg' ? '44px' : '36px',
       fontSize: size === 'sm' ? '14px' : size === 'lg' ? '16px' : '15px',
@@ -80,7 +103,7 @@ const ChartSelector = ({
         borderColor: '#007B85'
       }
     }),
-    option: (provided, state) => ({
+    option: (provided: any, state: any) => ({
       ...provided,
       backgroundColor: state.isSelected 
         ? '#007B85' 
@@ -90,7 +113,7 @@ const ChartSelector = ({
       color: state.isSelected ? 'white' : provided.color,
       fontSize: size === 'sm' ? '14px' : size === 'lg' ? '16px' : '15px'
     }),
-    singleValue: (provided) => ({
+    singleValue: (provided: any) => ({
       ...provided,
       fontSize: size === 'sm' ? '14px' : size === 'lg' ? '16px' : '15px'
     })

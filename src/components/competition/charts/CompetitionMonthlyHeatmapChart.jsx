@@ -1,19 +1,20 @@
 import React from 'react';
-import { UniversalCalendarHeatmap } from '../../ui';
+import GenericCalendarHeatmapContainer from '../../containers/GenericCalendarHeatmapContainer';
 
 /**
  * Competition Monthly Heatmap chart component
- * Bespoke component that passes configuration to universal component
+ * Bespoke component that passes configuration to generic container
  * Shows monthly revenue data in calendar heatmap format
+ * Now uses smart/presentational pattern with GenericCalendarHeatmapContainer
  */
 const CompetitionMonthlyHeatmapChart = ({ title, filters }) => {
   return (
-    <UniversalCalendarHeatmap 
-      metricId="revenue_per_day"
+    <GenericCalendarHeatmapContainer
       title={title}
+      metricId="revenue_per_day"
       valueLabel="Revenue"
-      filters={filters}
       showMerchantAndCompetition={true}
+      dateRange={filters?.dateRange}
     />
   );
 };

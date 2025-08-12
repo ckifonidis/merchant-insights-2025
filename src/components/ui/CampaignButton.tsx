@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CampaignButton = () => {
+const CampaignButton: React.FC = () => {
   return (
     <div className="mt-8 text-center">
       <button className="bg-gradient-to-r from-teal-500 to-blue-500 text-white py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center mx-auto">

@@ -238,7 +238,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   };
 
   // Render chart based on type
-  const renderChart = () => {
+  const renderChart = (): React.ReactElement | null => {
     const commonProps = {
       data: chartData,
       margin: CHART_CONFIG.margins
@@ -313,12 +313,16 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   };
 
   // Type-safe event handlers
-  const handleChartTypeChange = (value: string) => {
-    setChartType(value as ChartType);
+  const handleChartTypeChange = (value: string | undefined) => {
+    if (value) {
+      setChartType(value as ChartType);
+    }
   };
 
-  const handleTimelineChange = (value: string) => {
-    onTimelineChange(value as TimelineType);
+  const handleTimelineChange = (value: string | undefined) => {
+    if (value) {
+      onTimelineChange(value as TimelineType);
+    }
   };
 
   // Create controls for title row
@@ -347,7 +351,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
       {chartType !== 'table' ? (
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            {renderChart()}
+            {renderChart() || <div />}
           </ResponsiveContainer>
         </div>
       ) : (

@@ -1,11 +1,22 @@
 import React from 'react';
 import { CSS_CLASSES, CHART_CONFIG } from '../../../utils/constants';
 
+interface ChartContainerProps {
+  title?: string;
+  children: React.ReactNode;
+  controls?: React.ReactNode;
+  className?: string;
+  height?: number | string;
+  showHeader?: boolean;
+  headerClassName?: string;
+  contentClassName?: string;
+}
+
 /**
  * Standard chart container with consistent layout and styling
  * Consolidates the repeated chart wrapper pattern
  */
-const ChartContainer = ({
+const ChartContainer: React.FC<ChartContainerProps> = ({
   title,
   children,
   controls,
