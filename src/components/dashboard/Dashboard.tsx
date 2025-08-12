@@ -1,14 +1,29 @@
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import CampaignButton from '../ui/CampaignButton';
-import TotalRevenueMetric from './metrics/TotalRevenueMetric.jsx';
-import TotalTransactionsMetric from './metrics/TotalTransactionsMetric.jsx';
-import AvgTransactionMetric from './metrics/AvgTransactionMetric.jsx';
-import RevenueTimeSeriesChart from './charts/RevenueTimeSeriesChart.jsx';
-import TransactionsTimeSeriesChart from './charts/TransactionsTimeSeriesChart.jsx';
-import CustomersTimeSeriesChart from './charts/CustomersTimeSeriesChart.jsx';
-import { useDashboardData } from '../../hooks/useNormalizedData.js';
+import TotalRevenueMetric from './metrics/TotalRevenueMetric';
+import TotalTransactionsMetric from './metrics/TotalTransactionsMetric';
+import AvgTransactionMetric from './metrics/AvgTransactionMetric';
+import RevenueTimeSeriesChart from './charts/RevenueTimeSeriesChart';
+import TransactionsTimeSeriesChart from './charts/TransactionsTimeSeriesChart';
+import CustomersTimeSeriesChart from './charts/CustomersTimeSeriesChart';
+import { useDashboardData } from '../../hooks/useNormalizedData';
 
-const Dashboard = ({ filters }) => {
+// TypeScript interfaces
+interface DateRange {
+  start?: string;
+  end?: string;
+}
+
+interface Filters {
+  dateRange?: DateRange;
+}
+
+interface DashboardProps {
+  filters?: Filters;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
   const { t } = useTranslation();
   
   // Get dashboard data with automatic fetching and year-over-year comparison

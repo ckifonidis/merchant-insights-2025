@@ -28,7 +28,19 @@
       "Bash(mv src/store/selectors/dataSelectors.js src/store/selectors/dataSelectors.ts)",
       "Bash(mv src/data/apiSchema.js src/data/apiSchema.ts)",
       "Bash(mv src/utils/auth.js src/utils/auth.ts)",
-      "Bash(mv src/services/filterService.js src/services/filterService.ts)"
+      "Bash(mv src/services/filterService.js src/services/filterService.ts)",
+      "Bash(rm /home/ckifonidis/ai/merchant-insights-2025/src/components/ui/charts/PresentationalTimeSeriesChart.jsx)",
+      "Bash(rm /home/ckifonidis/ai/merchant-insights-2025/src/components/ui/metrics/ChangeIndicator.jsx)",
+      "Bash(rm /home/ckifonidis/ai/merchant-insights-2025/src/components/ui/metrics/PresentationalMetricCard.jsx)",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/metrics/TotalRevenueMetric.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/metrics/TotalRevenueMetric.tsx)",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/metrics/TotalTransactionsMetric.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/metrics/TotalTransactionsMetric.tsx)",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/metrics/AvgTransactionMetric.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/metrics/AvgTransactionMetric.tsx)",
+      "mv :*",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/RevenueTimeSeriesChart.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/RevenueTimeSeriesChart.tsx)",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/TransactionsTimeSeriesChart.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/TransactionsTimeSeriesChart.tsx)",
+      "Bash(mv :*)",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/CustomersTimeSeriesChart.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/CustomersTimeSeriesChart.tsx)",
+      "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/Dashboard.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/Dashboard.tsx)"
     ],
     "deny": []
   }
