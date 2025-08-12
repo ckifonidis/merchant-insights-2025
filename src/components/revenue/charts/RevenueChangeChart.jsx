@@ -1,13 +1,15 @@
 import React from 'react';
-import { TimeSeriesChart } from '../../ui';
+import GenericTimeSeriesChartContainer from '../../containers/GenericTimeSeriesChartContainer';
 
 /**
  * Revenue Change chart component for Revenue Tab
  * Shows percentage changes from previous year, not absolute values
+ * Now uses smart/presentational pattern with GenericTimeSeriesChartContainer
  */
 const RevenueChangeChart = ({ title, filters }) => {
   return (
-    <TimeSeriesChart
+    <GenericTimeSeriesChartContainer
+      title={title}
       metricId="revenue_per_day"
       yAxisMode="percentage"
       showCompetitor={true}
@@ -17,7 +19,6 @@ const RevenueChangeChart = ({ title, filters }) => {
       colors={{ merchant: '#007B85', competitor: '#73AA3C' }}
       formatValue={(value) => `${value}%`}
       labels={{ merchant: 'Revenue Change', competitor: 'Competition Change' }}
-      title={title}
     />
   );
 };

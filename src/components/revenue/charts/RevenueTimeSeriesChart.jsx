@@ -1,14 +1,15 @@
 import React from 'react';
-import { TimeSeriesChart } from '../../ui';
+import GenericTimeSeriesChartContainer from '../../containers/GenericTimeSeriesChartContainer';
 import { formatCurrency } from '../../../utils/formatters';
 
 /**
  * Revenue TimeSeries chart component for Revenue Tab
- * Bespoke component that passes configuration to universal component
+ * Now uses smart/presentational pattern with GenericTimeSeriesChartContainer
  */
 const RevenueTimeSeriesChart = ({ title, filters }) => {
   return (
-    <TimeSeriesChart
+    <GenericTimeSeriesChartContainer
+      title={title}
       metricId="revenue_per_day"
       yAxisMode="absolute"
       showCompetitor={true}
@@ -18,7 +19,6 @@ const RevenueTimeSeriesChart = ({ title, filters }) => {
       colors={{ merchant: '#007B85', competitor: '#73AA3C' }}
       formatValue={formatCurrency}
       labels={{ merchant: 'Merchant', competitor: 'Competition' }}
-      title={title}
     />
   );
 };
