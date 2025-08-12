@@ -10,7 +10,13 @@ const createRequestKey = ({ metricIDs, filters, isYearComparison = false }) => {
   const filterKey = JSON.stringify(filters, Object.keys(filters).sort());
   const metricsKey = metricIDs.slice().sort().join(',');
   const suffix = isYearComparison ? '_yoy' : '';
-  return `${metricsKey}:${filterKey}${suffix}`;
+  const key = `${metricsKey}:${filterKey}${suffix}`;
+  
+  if (isYearComparison) {
+    console.log('🔑 YoY Request Key:', key);
+  }
+  
+  return key;
 };
 
 // Async thunk for fetching metrics data
@@ -110,6 +116,7 @@ export const fetchMetricsDataWithYearComparison = createAsyncThunk(
     // Check if identical request is already pending
     if (pendingRequests.has(requestKey)) {
       console.log(`🔄 Deduplicating year-over-year metrics request (already pending)`);
+      console.log(`🔍 DEBUG: YoY Request Key:`, requestKey);
       return await pendingRequests.get(requestKey);
     }
     

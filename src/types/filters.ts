@@ -19,20 +19,17 @@ export interface DateRangeFilter {
   endDate: string;
 }
 
-// Channel filter options
+// Date range with preset (for UI state)
+export interface UIDateRange {
+  start: string;
+  end: string;
+  preset?: string;
+}
+
+// Use API values directly in state - display labels are handled in UI layer
 export type ChannelOption = 'all' | 'physical' | 'ecommerce';
-
-// Gender filter options
-export type GenderOption = 'all' | 'male' | 'female';
-
-// Age group options
-export type AgeGroupOption = 
-  | 'all'
-  | 'gen_z'      // 18-24
-  | 'millennials' // 25-40
-  | 'gen_x'      // 41-56
-  | 'boomers'    // 57-75
-  | 'silent';    // 76-96
+export type GenderOption = 'a' | 'm' | 'f'; // API values: all, male, female
+export type AgeGroupOption = 'generation_z' | 'millennials' | 'generation_x' | 'baby_boomers' | 'silent_generation';
 
 // Location filter structure
 export interface LocationFilter {
@@ -47,33 +44,20 @@ export type ShoppingInterest =
   | 'SHOPINT6'  | 'SHOPINT7'  | 'SHOPINT8'  | 'SHOPINT9'  | 'SHOPINT10'
   | 'SHOPINT11' | 'SHOPINT12' | 'SHOPINT13' | 'SHOPINT14' | 'SHOPINT15';
 
-// UI filter state (user-friendly values)
+// UI filter state - stores API values, display labels handled in UI components
 export interface UIFilters {
-  dateRange: DateRangeFilter;
+  dateRange: UIDateRange;
   channel: ChannelOption;
-  gender: GenderOption;
+  gender: GenderOption; 
   ageGroups: AgeGroupOption[];
-  location: LocationFilter[];
+  regions: string[];
+  municipalities: string[];
   goForMore: boolean | null;
-  interests: ShoppingInterest[];
+  shoppingInterests: string[]; // API values: SHOPINT1, SHOPINT2, etc.
   stores: string[];
 }
 
-// API filter format (backend-compatible)
-export interface APIFilters {
-  startDate: string;
-  endDate: string;
-  channel?: string;
-  gender?: string;
-  ageGroups?: string[];
-  location?: {
-    type: string;
-    values: string[];
-  };
-  goForMore?: boolean;
-  interests?: string[];
-  merchantIds?: string[];
-}
+// APIFilters interface no longer needed - UIFilters stores API values directly
 
 // Filter configuration for specific metrics
 export interface MetricFilterConfig {

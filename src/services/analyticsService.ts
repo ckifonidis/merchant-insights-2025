@@ -110,7 +110,9 @@ class AnalyticsService {
     }
 
     // Calculate previous year date range
+    console.log('🔍 DEBUG: Filters received in fetchTabDataWithYearComparison:', filters);
     const previousYearDates = getPreviousYearDateRange(filters.startDate, filters.endDate);
+    console.log('🔍 DEBUG: Previous year dates calculated:', previousYearDates);
     
     if (!previousYearDates.startDate || !previousYearDates.endDate) {
       const currentData = await this.fetchTabData(tabName, metricIDs, filters, options);
@@ -127,6 +129,15 @@ class AnalyticsService {
       ...filters,
       metricSpecificFilters,
       context: autoInferContext ? tabName : null
+    });
+    
+    console.log('🔍 DEBUG: Current request startDate/endDate:', {
+      startDate: filters.startDate,
+      endDate: filters.endDate
+    });
+    console.log('🔍 DEBUG: Previous request startDate/endDate:', {
+      startDate: previousYearDates.startDate,
+      endDate: previousYearDates.endDate
     });
 
     const previousRequest = this.buildAnalyticsRequest({

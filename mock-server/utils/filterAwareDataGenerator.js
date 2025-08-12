@@ -148,15 +148,12 @@ function applyFiltersToData(metricID, data, parsedFilters) {
 }
 
 function applyGenderFilter(data, parsedFilters) {
-  if (!parsedFilters.gender) return data;
+  // Gender breakdown metrics should NEVER be filtered by gender
+  // The gender filter applies to other metrics, but the gender breakdown
+  // itself should show ALL genders regardless of current gender filter
   
-  // Filter gender data to only include selected genders
-  if (data.seriesValues && data.seriesValues[0] && data.seriesValues[0].seriesPoints) {
-    data.seriesValues[0].seriesPoints = data.seriesValues[0].seriesPoints.filter(point => 
-      parsedFilters.gender.includes(point.value2)
-    );
-  }
-  
+  // For converted_customers_by_gender, always return all gender data
+  console.log('🚫 Skipping gender filter for gender breakdown metric');
   return data;
 }
 

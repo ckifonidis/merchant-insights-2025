@@ -24,7 +24,7 @@ export const store = configureStore({
         ignoredPaths: ['data.meta.lastUpdated']
       }
     }),
-  devTools: process.env.NODE_ENV !== 'production'
+  devTools: true // Enable Redux DevTools in both development and production
 });
 
 // TypeScript types for Redux

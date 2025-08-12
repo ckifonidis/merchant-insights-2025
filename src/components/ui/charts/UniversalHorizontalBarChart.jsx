@@ -52,8 +52,8 @@ const UniversalHorizontalBarChart = ({
         if (!metric?.merchant?.current) return null;
         
         return {
-          merchant: metric.merchant.current,
-          competitor: metric.competitor?.current || {}
+          merchant: metric.merchant,
+          competitor: metric.competitor || {}
         };
       }
     );
@@ -74,8 +74,8 @@ const UniversalHorizontalBarChart = ({
 
     // Handle converted_customers_by_interest specifically
     if (metricId === 'converted_customers_by_interest') {
-      const merchantData = rawData.merchant;
-      const competitorData = rawData.competitor;
+      const merchantData = rawData.merchant?.current || {};
+      const competitorData = rawData.competitor?.current || {};
       
       // Calculate totals for percentage calculation
       const merchantTotal = Object.values(merchantData).reduce((sum, val) => sum + (val || 0), 0);
