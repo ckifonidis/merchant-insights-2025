@@ -1,18 +1,22 @@
-import { UniversalHorizontalBarChart } from '../../ui';
+import GenericBarChartContainer from '../../containers/GenericBarChartContainer';
 
+/**
+ * Customers by Shopping Interests bespoke chart component for Demographics Tab
+ * Now uses smart/presentational pattern with GenericBarChartContainer
+ */
 const CustomersByInterestsChart = ({ title }) => {
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        {title}
-      </h3>
-      <UniversalHorizontalBarChart
-        metricId="converted_customers_by_interest"
-        formatValue={(value) => `${value}%`}
-        formatTooltipValue={(absoluteValue) => `${absoluteValue} customers`}
-        maxCategories={8}
-      />
-    </div>
+    <GenericBarChartContainer
+      title={title}
+      metricId="converted_customers_by_interest"
+      merchantColor="#3B82F6"
+      competitorColor="#73AA3C"
+      yAxisLabel="%"
+      formatValue={(value) => `${value}%`}
+      formatTooltipValue={(absoluteValue) => `${absoluteValue} customers`}
+      showAbsoluteValues={true}
+      maxCategories={8}
+    />
   );
 };
 

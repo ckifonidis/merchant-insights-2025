@@ -1,18 +1,22 @@
-import { UniversalHorizontalBarChart } from '../../ui';
+import GenericBarChartContainer from '../../containers/GenericBarChartContainer';
 
+/**
+ * Customers by Age Groups bespoke chart component for Demographics Tab
+ * Now uses smart/presentational pattern with GenericBarChartContainer
+ */
 const CustomersByAgeChart = ({ title }) => {
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        {title}
-      </h3>
-      <UniversalHorizontalBarChart
-        metricId="converted_customers_by_age"
-        formatValue={(value) => `${value}%`}
-        formatTooltipValue={(absoluteValue) => `${absoluteValue} customers`}
-        maxCategories={5}
-      />
-    </div>
+    <GenericBarChartContainer
+      title={title}
+      metricId="converted_customers_by_age"
+      merchantColor="#3B82F6"
+      competitorColor="#73AA3C"
+      yAxisLabel="%"
+      formatValue={(value) => `${value}%`}
+      formatTooltipValue={(absoluteValue) => `${absoluteValue} customers`}
+      showAbsoluteValues={true}
+      maxCategories={5}
+    />
   );
 };
 

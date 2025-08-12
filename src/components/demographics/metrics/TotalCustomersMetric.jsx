@@ -1,19 +1,23 @@
 import React from 'react';
-import { UniversalMetricCard } from '../../ui';
+import GenericMetricContainer from '../../containers/GenericMetricContainer';
 import { Users } from 'lucide-react';
 
+/**
+ * Total Customers bespoke metric component for Demographics Tab
+ * Now uses smart/presentational pattern with GenericMetricContainer
+ */
 const TotalCustomersMetric = ({ title }) => {
   return (
-    <UniversalMetricCard
-      metricId="total_customers"
-      variant="detailed"
+    <GenericMetricContainer
       title={title}
+      metricId="total_customers"
+      valueType="number"
       icon={
         <div className="text-purple-600">
           <Users className="w-5 h-5" />
         </div>
       }
-      iconBackground="bg-purple-50"
+      variant="detailed"
     />
   );
 };

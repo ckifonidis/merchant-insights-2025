@@ -1,14 +1,15 @@
 import React from 'react';
-import { TimeSeriesChart } from '../../ui';
+import GenericTimeSeriesChartContainer from '../../containers/GenericTimeSeriesChartContainer';
 
 /**
- * Competition Weekly Timeline chart component
- * Bespoke component that passes configuration to universal component
+ * Competition Weekly Timeline bespoke chart component for Competition Tab
  * Shows week-over-week percentage changes for merchant vs competition
+ * Now uses smart/presentational pattern with GenericTimeSeriesChartContainer
  */
 const CompetitionWeeklyTimelineChart = ({ title, filters }) => {
   return (
-    <TimeSeriesChart
+    <GenericTimeSeriesChartContainer
+      title={title}
       metricId="revenue_per_day"
       yAxisMode="percentage"
       showCompetitor={true}
@@ -18,7 +19,6 @@ const CompetitionWeeklyTimelineChart = ({ title, filters }) => {
       colors={{ merchant: '#007B85', competitor: '#73AA3C' }}
       formatValue={(value) => `${value.toFixed(1)}%`}
       labels={{ merchant: 'Merchant', competitor: 'Competition' }}
-      title={title}
     />
   );
 };
