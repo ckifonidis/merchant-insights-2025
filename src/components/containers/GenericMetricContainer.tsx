@@ -31,7 +31,7 @@ const GenericMetricContainer: React.FC<GenericMetricContainerProps> = ({
   metricId,
   valueType,
   icon,
-  variant = METRIC_VARIANTS.detailed
+  variant = METRIC_VARIANTS.detailed as MetricVariant
 }) => {
   // Connect to store using the provided metricId
   const metricData = useSelector(createMetricSelector(metricId));
@@ -47,13 +47,13 @@ const GenericMetricContainer: React.FC<GenericMetricContainerProps> = ({
   // Process merchant data
   const merchantData = {
     value: metricData?.merchant?.current || null,
-    change: merchantYoYChange
+    change: (typeof merchantYoYChange === 'number') ? merchantYoYChange : null
   };
 
   // Process competitor data
   const competitorData = {
     value: metricData?.competitor?.current || null,
-    change: competitorYoYChange
+    change: (typeof competitorYoYChange === 'number') ? competitorYoYChange : null
   };
 
   return (
