@@ -3,45 +3,19 @@ import { analyticsService } from '../../services/index.js';
 import { apiNormalizer } from '../../services/normalization/apiNormalizer.js';
 import type { RootState } from '../index';
 
-// TypeScript interfaces for the data slice
-interface EntityData {
-  current: number | Record<string, number> | null;
-  previous?: number | Record<string, number> | null;
-}
-
-interface MetricData {
-  merchant?: EntityData;
-  competitor?: EntityData;
-}
-
-interface DateRange {
-  startDate: string;
-  endDate: string;
-}
-
-interface DataValidation {
-  hasValidCurrentData: boolean;
-  hasValidPreviousData: boolean;
-  missingMetrics: string[];
-  incompletePeriods: string[];
-}
-
-interface DataMeta {
-  lastUpdated: Record<string, string>;
-  freshness: Record<string, 'fresh' | 'stale' | 'error'>;
-  sources: Record<string, string>;
-  dateRanges: {
-    current: DateRange | null;
-    previous: DateRange | null;
-  };
-  validation: DataValidation;
-  globalLastUpdated: string | null;
-  lastYoYUpdate: string | null;
-}
+// Import unified metric types - single source of truth
+import type { 
+  EntityData, 
+  MetricData, 
+  MetricsState, 
+  DataMeta, 
+  DateRange, 
+  DataValidation 
+} from '../../types/metrics';
 
 interface DataState {
-  metrics: Record<string, MetricData>;
-  previousMetrics: Record<string, MetricData>;
+  metrics: MetricsState;
+  previousMetrics: MetricsState;
   meta: DataMeta;
   loading: {
     metrics: boolean;

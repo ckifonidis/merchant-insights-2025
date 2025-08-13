@@ -50,26 +50,10 @@ export const FILTER_OPTIONS = {
     value: region,
     label: region
   })),
-  shoppingInterests: SHOPPING_INTERESTS.map(interest => {
-    const labels: Record<string, string> = {
-      'SHOPINT1': 'Shopping & Fashion',
-      'SHOPINT2': 'Electronics & Technology',
-      'SHOPINT3': 'Food & Dining',
-      'SHOPINT4': 'Health & Beauty',
-      'SHOPINT5': 'Home & Garden',
-      'SHOPINT6': 'Sports & Fitness',
-      'SHOPINT7': 'Books & Education',
-      'SHOPINT8': 'Travel & Tourism',
-      'SHOPINT9': 'Entertainment',
-      'SHOPINT10': 'Automotive',
-      'SHOPINT11': 'Financial Services',
-      'SHOPINT12': 'Real Estate',
-      'SHOPINT13': 'Professional Services',
-      'SHOPINT14': 'Insurance',
-      'SHOPINT15': 'Other'
-    };
-    return { value: interest, label: labels[interest] || interest };
-  }),
+  shoppingInterests: Object.entries(SHOPPING_INTERESTS).map(([id, label]) => ({
+    value: id,
+    label: label
+  })),
   // Municipality data (static for demo - could be API-loaded if needed)
   municipalities: {
     'ΑΤΤΙΚΗ': ['ΑΘΗΝΑ', 'ΠΕΙΡΑΙΑΣ', 'ΠΕΡΙΣΤΕΡΙ', 'ΚΑΛΛΙΘΕΑ', 'ΝΙΚΑΙΑ', 'ΓΛΥΦΑΔΑ'],

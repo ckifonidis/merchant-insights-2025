@@ -5,6 +5,7 @@ import {
   selectDataLoading,
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
+import { SHOPPING_INTERESTS } from '../../data/apiSchema';
 
 // Import the presentational component
 import PresentationalBreakdownChart from '../ui/charts/PresentationalBreakdownChart';
@@ -203,24 +204,8 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
       const merchantTotal = sortedByValue.reduce((sum, key) => sum + (merchantData[key] || 0), 0);
       const competitorTotal = sortedByValue.reduce((sum, key) => sum + (competitorData[key] || 0), 0);
       
-      // Map SHOPINT codes to display names
-      const interestLabels: Record<string, string> = {
-        'SHOPINT1': 'Shopping & Fashion',
-        'SHOPINT2': 'Electronics & Technology', 
-        'SHOPINT3': 'Food & Dining',
-        'SHOPINT4': 'Health & Beauty',
-        'SHOPINT5': 'Home & Garden',
-        'SHOPINT6': 'Sports & Fitness',
-        'SHOPINT7': 'Books & Education',
-        'SHOPINT8': 'Travel & Tourism',
-        'SHOPINT9': 'Entertainment',
-        'SHOPINT10': 'Automotive',
-        'SHOPINT11': 'Financial Services',
-        'SHOPINT12': 'Real Estate',
-        'SHOPINT13': 'Professional Services',
-        'SHOPINT14': 'Insurance',
-        'SHOPINT15': 'Other'
-      };
+      // Map SHOPINT codes to display names - use our single source of truth
+      const interestLabels: Record<string, string> = SHOPPING_INTERESTS;
       
       return sortedByValue.map(shopintKey => {
         const merchantValue = merchantData[shopintKey] || 0;

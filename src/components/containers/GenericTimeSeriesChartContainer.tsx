@@ -28,6 +28,7 @@ interface GenericTimeSeriesChartContainerProps {
   merchantLabel: string;
   hasCompetitorData: boolean;
   filters?: Filters | undefined;
+  yAxisMode?: 'absolute' | 'percentage';
 }
 
 /**
@@ -45,7 +46,8 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
   showCompetitor,
   merchantLabel,
   hasCompetitorData,
-  filters
+  filters,
+  yAxisMode = 'absolute'
 }) => {
   const [timeline, setTimeline] = useState<TimelineType>('daily');
   
@@ -157,20 +159,21 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
 
       return {
         date: currentItem.displayDate,
-        merchant: parseFloat(merchantYoY.toFixed(1)),
-        competitor: hasCompetitorData ? parseFloat(competitorYoY.toFixed(1)) : 0,
+        merchant: yAxisMode === 'percentage' ? parseFloat(merchantYoY.toFixed(1)) : currentItem.merchantRevenue,
+        competitor: hasCompetitorData ? 
+          (yAxisMode === 'percentage' ? parseFloat(competitorYoY.toFixed(1)) : currentItem.competitorRevenue) : 0,
         merchantChange: parseFloat(merchantYoY.toFixed(1)),
         competitorChange: hasCompetitorData ? parseFloat(competitorYoY.toFixed(1)) : 0
       };
     });
 
     return processedData;
-  }, [rawStoreData, timeline, filters?.dateRange, hasCompetitorData]);
+  }, [rawStoreData, timeline, filters?.dateRange, hasCompetitorData, yAxisMode]);
 
   return (
     <PresentationalTimeSeriesChart
       chartData={chartData}
-      yAxisMode="absolute"
+      yAxisMode={yAxisMode}
       showCompetitor={showCompetitor}
       yearOverYear={true}
       allowedChartTypes={['line', 'bar', 'table']}

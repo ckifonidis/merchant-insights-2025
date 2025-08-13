@@ -1,7 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const ErrorPage = ({ error, onRetry }) => {
+interface ErrorPageProps {
+  error?: Error | string;
+  onRetry?: () => void;
+}
+
+const ErrorPage: React.FC<ErrorPageProps> = ({ error, onRetry }) => {
   const { t } = useTranslation();
 
   return (
@@ -46,7 +51,7 @@ const ErrorPage = ({ error, onRetry }) => {
                       {t('error.technicalDetails')}:
                     </p>
                     <p className="text-xs text-gray-700 font-mono">
-                      {error.message || error.toString()}
+                      {error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Unknown error')}
                     </p>
                   </div>
                 </div>
@@ -75,7 +80,7 @@ const ErrorPage = ({ error, onRetry }) => {
                 <button
                   type="button"
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  onClick={onRetry || (() => window.location.reload())}
+                  onClick={(): void => onRetry ? onRetry() : window.location.reload()}
                 >
                   {t('error.retry')}
                 </button>

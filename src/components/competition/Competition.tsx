@@ -132,6 +132,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
           merchantLabel="Merchant"
           hasCompetitorData={true}
           filters={filters}
+          yAxisMode='percentage'
         />
 
         <GenericCalendarHeatmapContainer

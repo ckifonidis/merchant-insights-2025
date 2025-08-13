@@ -149,11 +149,23 @@ export const METRIC_CATEGORIES = {
   }
 } as const;
 
-export const SHOPPING_INTERESTS = [
-  'SHOPINT1', 'SHOPINT2', 'SHOPINT3', 'SHOPINT4', 'SHOPINT5',
-  'SHOPINT6', 'SHOPINT7', 'SHOPINT8', 'SHOPINT9', 'SHOPINT10',
-  'SHOPINT11', 'SHOPINT12', 'SHOPINT13', 'SHOPINT14', 'SHOPINT15'
-];
+export const SHOPPING_INTERESTS = {
+  SHOPINT1: 'Αυτοκίνητο & Καύσιμα',
+  SHOPINT2: 'Εκπαίδευση',
+  SHOPINT3: 'Ένδυση, Ομορφιά & Κόσμημα',
+  SHOPINT4: 'Ηλεκτρονικά & Οικιακές Συσκευές',
+  SHOPINT5: 'Κατοικίδια',
+  SHOPINT6: 'Παιχνίδια',
+  SHOPINT7: 'Προσωπική Φροντίδα',
+  SHOPINT8: 'Σπίτι & Κήπος',
+  SHOPINT9: 'Ταξίδι & Μεταφορικά Μέσα',
+  SHOPINT10: 'Τηλεπικοινωνίες',
+  SHOPINT11: 'Τουρισμός',
+  SHOPINT12: 'Τρόφιμα, Ποτά & Supermarket',
+  SHOPINT13: 'Υπηρεσίες Εστίασης',
+  SHOPINT14: 'Υπηρεσίες Υγείας',
+  SHOPINT15: 'Ψυχαγωγία & Hobbies'
+} as const;
 
 export const GREEK_REGIONS = [
   'ΑΤΤΙΚΗ', 'ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ', 'ΘΕΣΣΑΛΙΑ', 'ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ',

@@ -64,7 +64,6 @@ export default [
       // Custom TypeScript rules
       '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-implicit-any-catch': 'error',
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',

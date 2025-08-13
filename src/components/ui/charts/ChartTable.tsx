@@ -87,9 +87,9 @@ const ChartTable: React.FC<ChartTableProps> = ({
   }
 
   return (
-    <div className={`overflow-x-auto ${className}`}>
+    <div className={`overflow-auto max-h-64 ${className}`}>
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 sticky top-0 z-10">
           <tr>
             {tableColumns.map((column, index) => (
               <th
@@ -128,7 +128,7 @@ const ChartTable: React.FC<ChartTableProps> = ({
       </table>
       
       {data.length > maxRows && (
-        <div className="px-6 py-3 bg-gray-50 text-center text-sm text-gray-500">
+        <div className="px-6 py-3 bg-gray-50 text-center text-sm text-gray-500 sticky bottom-0">
           {t('common.showingXOfY', { showing: maxRows, total: data.length })}
         </div>
       )}

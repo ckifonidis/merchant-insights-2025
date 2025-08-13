@@ -5,6 +5,7 @@ import {
   selectDataLoading,
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
+import { SHOPPING_INTERESTS } from '../../data/apiSchema';
 
 // Import the presentational component
 import PresentationalHorizontalBarChart from '../ui/charts/PresentationalHorizontalBarChart';
@@ -85,23 +86,9 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
       const merchantTotal = Object.values(merchantData).reduce((sum: number, val: any) => sum + (val || 0), 0);
       const competitorTotal = Object.values(competitorData).reduce((sum: number, val: any) => sum + (val || 0), 0);
       
-      // Shopping interest labels mapping
+      // Shopping interest labels mapping - use our single source of truth
       const SHOPPING_INTEREST_LABELS: Record<string, string> = {
-        'SHOPINT1': 'Fashion & Apparel',
-        'SHOPINT2': 'Electronics & Tech',
-        'SHOPINT3': 'Home & Garden',
-        'SHOPINT4': 'Sports & Fitness',
-        'SHOPINT5': 'Books & Media',
-        'SHOPINT6': 'Beauty & Personal Care',
-        'SHOPINT7': 'Food & Beverages',
-        'SHOPINT8': 'Travel & Tourism',
-        'SHOPINT9': 'Automotive',
-        'SHOPINT10': 'Health & Wellness',
-        'SHOPINT11': 'Entertainment',
-        'SHOPINT12': 'Jewelry & Accessories',
-        'SHOPINT13': 'Toys & Games',
-        'SHOPINT14': 'Art & Crafts',
-        'SHOPINT15': 'Office & Business',
+        ...SHOPPING_INTERESTS,
         'other_category': 'Other'
       };
       

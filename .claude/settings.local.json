@@ -41,7 +41,8 @@
       "Bash(mv :*)",
       "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/CustomersTimeSeriesChart.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/charts/CustomersTimeSeriesChart.tsx)",
       "Bash(mv /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/Dashboard.jsx /home/ckifonidis/ai/merchant-insights-2025/src/components/dashboard/Dashboard.tsx)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run lint src/)"
     ],
     "deny": []
   }

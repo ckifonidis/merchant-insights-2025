@@ -187,6 +187,7 @@ const Revenue: React.FC<RevenueProps> = ({ filters }) => {
           merchantLabel="Revenue Change"
           hasCompetitorData={true}
           filters={filters}
+          yAxisMode="percentage"
         />
 
         {/* Additional Charts in Grid Layout */}

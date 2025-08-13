@@ -19,7 +19,7 @@ export type MetricId = typeof METRIC_IDS[keyof typeof METRIC_IDS];
 export type FilterId = typeof FILTER_IDS[keyof typeof FILTER_IDS];
 export type EndpointPath = typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS];
 export type ProviderId = typeof ANALYTICS_PROVIDER_IDS[keyof typeof ANALYTICS_PROVIDER_IDS];
-export type ShoppingInterest = typeof SHOPPING_INTERESTS[number];
+export type ShoppingInterest = keyof typeof SHOPPING_INTERESTS;
 export type AgeGroup = typeof AGE_GROUPS[number];
 export type GreekRegion = typeof GREEK_REGIONS[number];
 
@@ -98,16 +98,17 @@ export interface AnalyticsAPIResponse extends BaseAPIResponse {
   executionTime?: number;
 }
 
+// Import unified metric types - single source of truth
+import type { EntityData, MetricData } from './metrics';
+
 // Normalized metric data structure (post-processing)
 export interface NormalizedMetricData {
   merchant?: EntityData;
   competitor?: EntityData;
 }
 
-export interface EntityData {
-  current: any;
-  previous?: any;
-}
+// Re-export for backwards compatibility
+export type { EntityData, MetricData } from './metrics';
 
 // Common API request parameters
 export interface APIRequestParams {

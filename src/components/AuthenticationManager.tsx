@@ -33,7 +33,7 @@ interface AuthenticationManagerProps {
   children: React.ReactNode;
 }
 
-export function AuthenticationManager({ children }: AuthenticationManagerProps): JSX.Element {
+export function AuthenticationManager({ children }: AuthenticationManagerProps) {
   const dispatch = useDispatch<AppDispatch>();
   const authInitialized = useRef<boolean>(false);
 
@@ -169,8 +169,13 @@ export function AuthenticationManager({ children }: AuthenticationManagerProps):
       }
     };
 
-    initializeAuth();
-  }, []); // Empty dependency array - runs exactly once
+    initializeAuth().catch((error) => {
+      console.error('🚨 Authentication initialization failed:', error);
+      dispatch(setAuthError('Failed to initialize authentication'));
+      dispatch(setAuthLoading(false));
+      dispatch(setAuthenticating(false));
+    });
+  }, [dispatch]); // Complete dependency tracking
 
   // This component doesn't render any UI
   // It just manages authentication state and passes children through
