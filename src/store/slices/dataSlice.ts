@@ -1,12 +1,94 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { analyticsService } from '../../services/index.js';
 import { apiNormalizer } from '../../services/normalization/apiNormalizer.js';
+import type { RootState } from '../index';
+
+// TypeScript interfaces for the data slice
+interface EntityData {
+  current: number | Record<string, number> | null;
+  previous?: number | Record<string, number> | null;
+}
+
+interface MetricData {
+  merchant?: EntityData;
+  competitor?: EntityData;
+}
+
+interface DateRange {
+  startDate: string;
+  endDate: string;
+}
+
+interface DataValidation {
+  hasValidCurrentData: boolean;
+  hasValidPreviousData: boolean;
+  missingMetrics: string[];
+  incompletePeriods: string[];
+}
+
+interface DataMeta {
+  lastUpdated: Record<string, string>;
+  freshness: Record<string, 'fresh' | 'stale' | 'error'>;
+  sources: Record<string, string>;
+  dateRanges: {
+    current: DateRange | null;
+    previous: DateRange | null;
+  };
+  validation: DataValidation;
+  globalLastUpdated: string | null;
+  lastYoYUpdate: string | null;
+}
+
+interface DataState {
+  metrics: Record<string, MetricData>;
+  previousMetrics: Record<string, MetricData>;
+  meta: DataMeta;
+  loading: {
+    metrics: boolean;
+    yearOverYear: boolean;
+    specificMetrics: Record<string, boolean>;
+  };
+  errors: {
+    metrics: string | null;
+    yearOverYear: string | null;
+    specificMetrics: Record<string, string>;
+  };
+}
+
+interface FetchMetricsPayload {
+  metricIDs: string[];
+  filters: Record<string, any>;
+  options?: Record<string, any>;
+  userID?: string | null;
+}
+
+interface RequestKeyParams {
+  metricIDs: string[];
+  filters: Record<string, any>;
+  isYearComparison?: boolean;
+}
+
+interface SetMetricDataPayload {
+  metricId: string;
+  merchantData?: EntityData;
+  competitorData?: EntityData;
+  timestamp?: string;
+}
+
+interface SetMetricErrorPayload {
+  metricId: string;
+  error: string;
+}
+
+interface ClearMetricPayload {
+  metricId: string;
+}
 
 // Request deduplication cache
-const pendingRequests = new Map();
+const pendingRequests = new Map<string, Promise<any>>();
 
 // Create request key for deduplication
-const createRequestKey = ({ metricIDs, filters, isYearComparison = false }) => {
+const createRequestKey = ({ metricIDs, filters, isYearComparison = false }: RequestKeyParams): string => {
   const filterKey = JSON.stringify(filters, Object.keys(filters).sort());
   const metricsKey = metricIDs.slice().sort().join(',');
   const suffix = isYearComparison ? '_yoy' : '';
@@ -22,13 +104,14 @@ const createRequestKey = ({ metricIDs, filters, isYearComparison = false }) => {
 // Async thunk for fetching metrics data
 export const fetchMetricsData = createAsyncThunk(
   'data/fetchMetrics',
-  async ({ metricIDs, filters, options = {}, userID }, { rejectWithValue, getState }) => {
+  async ({ metricIDs, filters, options = {}, userID }: FetchMetricsPayload, { rejectWithValue, getState }) => {
     // Get userID from state if not provided directly
-    if (!userID) {
-      const state = getState();
-      userID = state.userConfig?.userId;
+    let resolvedUserID = userID;
+    if (!resolvedUserID) {
+      const state = getState() as RootState;
+      resolvedUserID = state.userConfig?.userId;
       
-      if (!userID) {
+      if (!resolvedUserID) {
         return rejectWithValue({
           metricIDs,
           error: 'User ID is required but not available. Please ensure user is authenticated.'
@@ -65,7 +148,7 @@ export const fetchMetricsData = createAsyncThunk(
           console.log(`📥 Raw API response:`, apiResponse);
           
           // Normalize the API response
-          const normalizedData = apiNormalizer.normalizeResponse(apiResponse, metricIDs);
+          const normalizedData = apiNormalizer.normalizeApiResponse(apiResponse, metricIDs);
           console.log(`✅ Normalized metrics data:`, normalizedData);
           
           return { metricIDs, data: normalizedData };
@@ -78,12 +161,12 @@ export const fetchMetricsData = createAsyncThunk(
       pendingRequests.set(requestKey, requestPromise);
       return await requestPromise;
       
-    } catch (error) {
+    } catch (error: unknown) {
       pendingRequests.delete(requestKey);
       console.error(`❌ Failed to load metrics data:`, error);
       return rejectWithValue({
         metricIDs,
-        error: error.message || 'Failed to load data'
+        error: error instanceof Error ? error.message : 'Failed to load data'
       });
     }
   }
@@ -92,13 +175,14 @@ export const fetchMetricsData = createAsyncThunk(
 // Async thunk for fetching year-over-year metrics data
 export const fetchMetricsDataWithYearComparison = createAsyncThunk(
   'data/fetchMetricsYoY',
-  async ({ metricIDs, filters, options = {}, userID }, { rejectWithValue, getState }) => {
+  async ({ metricIDs, filters, options = {}, userID }: FetchMetricsPayload, { rejectWithValue, getState }) => {
     // Get userID from state if not provided directly
-    if (!userID) {
-      const state = getState();
-      userID = state.userConfig?.userId;
+    let resolvedUserID = userID;
+    if (!resolvedUserID) {
+      const state = getState() as RootState;
+      resolvedUserID = state.userConfig?.userId;
       
-      if (!userID) {
+      if (!resolvedUserID) {
         return rejectWithValue({
           metricIDs,
           error: 'User ID is required but not available. Please ensure user is authenticated.'
@@ -199,18 +283,18 @@ export const fetchMetricsDataWithYearComparison = createAsyncThunk(
       pendingRequests.set(requestKey, requestPromise);
       return await requestPromise;
       
-    } catch (error) {
+    } catch (error: unknown) {
       pendingRequests.delete(requestKey);
       console.error(`❌ Failed to load year-over-year metrics data:`, error);
       return rejectWithValue({
         metricIDs,
-        error: error.message || 'Failed to load data'
+        error: error instanceof Error ? error.message : 'Failed to load data'
       });
     }
   }
 );
 
-const initialState = {
+const initialState: DataState = {
   // Normalized metrics data structure
   metrics: {
     // Example structure:
@@ -305,7 +389,7 @@ const dataSlice = createSlice({
     },
     
     // Set previous year data for a metric
-    setPreviousMetricData: (state, action) => {
+    setPreviousMetricData: (state, action: { payload: SetMetricDataPayload }) => {
       const { metricId, merchantData, competitorData } = action.payload;
       
       if (!state.previousMetrics[metricId]) {
@@ -322,7 +406,7 @@ const dataSlice = createSlice({
     },
     
     // Bulk update metrics data
-    setMultipleMetrics: (state, action) => {
+    setMultipleMetrics: (state, action: { payload: { metrics: Record<string, MetricData>; timestamp?: string } }) => {
       const { metrics, timestamp } = action.payload;
       
       Object.keys(metrics).forEach(metricId => {

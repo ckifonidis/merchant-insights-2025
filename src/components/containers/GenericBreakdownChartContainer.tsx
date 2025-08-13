@@ -100,8 +100,8 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
 
     // Handle revenue_by_channel specifically
     if (metricId === 'revenue_by_channel') {
-      const merchantData = rawData.merchant;
-      const competitorData = rawData.competitor;
+      const merchantData = rawData.merchant?.current || {};
+      const competitorData = rawData.competitor?.current || {};
       
       // Calculate totals for percentage calculation
       const merchantTotal = (merchantData.physical || 0) + (merchantData.ecommerce || 0);

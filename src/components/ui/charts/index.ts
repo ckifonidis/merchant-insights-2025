@@ -8,4 +8,3 @@ export { default as UniversalBreakdownChart } from './UniversalBreakdownChart';
 export { default as UniversalTimelineChart } from './UniversalTimelineChart';
 export { default as UniversalCalendarHeatmap } from './UniversalCalendarHeatmap';
 export { default as UniversalHorizontalBarChart } from './UniversalHorizontalBarChart';
-export { default as UniversalBarChart } from './UniversalBarChart';

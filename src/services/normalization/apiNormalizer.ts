@@ -55,6 +55,19 @@ class ApiNormalizer {
   /**
    * Main normalization method - routes API response to appropriate normalizers
    */
+  /**
+   * Create context-aware metric key for metrics with filters
+   */
+  createMetricKey(metricID: string, context: string | null = null): string {
+    // For converted_customers_by_interest, create different keys based on context
+    if (metricID === 'converted_customers_by_interest' && context) {
+      return `${metricID}_${context}`;
+    }
+    
+    // For other metrics, use the original metricID
+    return metricID;
+  }
+
   normalizeApiResponse(apiResponse: ApiResponse, requestMetricIds: string[] = []): NormalizationResult {
     console.log('🔄 Normalizing API response:', apiResponse);
     

@@ -77,10 +77,28 @@ export const selectMetricsError = (state: RootState): string | null => state.dat
 // Individual Metric Selectors
 // =============================================================================
 
+// Context-aware metric key resolver
+const resolveMetricKey = (metricId: string, context?: string): string => {
+  // For converted_customers_by_interest, use context-specific key if context provided
+  if (metricId === 'converted_customers_by_interest' && context) {
+    return `${metricId}_${context}`;
+  }
+  return metricId;
+};
+
 // Generic metric selector factory
 export const createMetricSelector = (metricId: string) => createSelector(
   [selectAllMetrics],
   (metrics: MetricsState): MetricData | null => metrics[metricId] || null
+);
+
+// Context-aware metric selector factory
+export const createContextAwareMetricSelector = (metricId: string, context?: string) => createSelector(
+  [selectAllMetrics],
+  (metrics: MetricsState): MetricData | null => {
+    const resolvedKey = resolveMetricKey(metricId, context);
+    return metrics[resolvedKey] || metrics[metricId] || null;
+  }
 );
 
 // Specific metric selectors for commonly used metrics

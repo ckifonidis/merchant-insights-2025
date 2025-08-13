@@ -78,10 +78,8 @@ const GenericCalendarHeatmapContainer: React.FC<GenericCalendarHeatmapContainerP
         title={title}
         valueLabel={valueLabel}
         showMerchantAndCompetition={showMerchantAndCompetition}
-        data={processedData}
-        loading={isLoading}
-        error={error}
-        dateRange={dateRange}
+        filters={null}
+        initialMonth={null}
       />
     </div>
   );

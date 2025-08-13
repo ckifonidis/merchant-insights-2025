@@ -7,6 +7,7 @@ import {
 } from '../../store/selectors/dataSelectors';
 import { processTimelineData } from '../../utils/timelineHelpers';
 import type { TimelineType } from '../ui/charts/PresentationalTimeSeriesChart';
+import type { RootState } from '../../store/index';
 
 // TypeScript interfaces
 interface DateRange {
@@ -21,7 +22,7 @@ interface Filters {
 interface GenericTimeSeriesChartContainerProps {
   title: string;
   metricId: string;
-  selector: (state: any) => any;
+  selector: (state: RootState) => any;
   formatValue: (value: number) => string;
   showCompetitor: boolean;
   merchantLabel: string;
@@ -156,8 +157,8 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
 
       return {
         date: currentItem.displayDate,
-        merchant: currentItem.merchantRevenue || 0,
-        competitor: hasCompetitorData ? (currentItem.competitorRevenue || 0) : 0,
+        merchant: parseFloat(merchantYoY.toFixed(1)),
+        competitor: hasCompetitorData ? parseFloat(competitorYoY.toFixed(1)) : 0,
         merchantChange: parseFloat(merchantYoY.toFixed(1)),
         competitorChange: hasCompetitorData ? parseFloat(competitorYoY.toFixed(1)) : 0
       };

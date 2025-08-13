@@ -5,15 +5,16 @@ import { useMetricData } from '../../hooks/useNormalizedData';
 import GenericMetricContainer from '../containers/GenericMetricContainer';
 import GenericTimeSeriesChartContainer from '../containers/GenericTimeSeriesChartContainer';
 import GenericCalendarHeatmapContainer from '../containers/GenericCalendarHeatmapContainer';
+import { selectRevenuePerDay } from '../../store/selectors/dataSelectors';
 
 // TypeScript interfaces
-interface DateRange {
+interface UIDateRange {
   start?: string;
   end?: string;
 }
 
 interface Filters {
-  dateRange?: DateRange;
+  dateRange?: UIDateRange;
 }
 
 interface CompetitionProps {
@@ -32,7 +33,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
   ];
 
   // Get competition data with automatic fetching and year-over-year comparison
-  const { data: competitionData, isLoading: loading, error } = useMetricData(competitionMetrics, { 
+  const { isLoading: loading, error } = useMetricData(competitionMetrics, { 
     autoFetch: true, 
     yearOverYear: true 
   });
@@ -125,6 +126,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
         <GenericTimeSeriesChartContainer
           title={t('competition.weeklyTurnover')}
           metricId="revenue_per_day"
+          selector={selectRevenuePerDay}
           formatValue={(value: number) => `${value.toFixed(1)}%`}
           showCompetitor={true}
           merchantLabel="Merchant"
@@ -137,7 +139,10 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
           metricId="revenue_per_day"
           valueLabel="Revenue"
           showMerchantAndCompetition={true}
-          dateRange={filters?.dateRange}
+          dateRange={filters?.dateRange ? {
+            start: new Date(filters.dateRange.start || ''),
+            end: new Date(filters.dateRange.end || '')
+          } : null}
         />
       </div>
 

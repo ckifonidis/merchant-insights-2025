@@ -110,7 +110,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           merchantColor="#10B981"
           competitorColor="#EF4444"
           formatValue={(value: number) => `${value}%`}
-          formatTooltipValue={(value: number) => `€${value.toLocaleString()}`}
+          formatTooltipValue={(value: number) => `${value} customers`}
           maxCategories={8}
         />
       </div>
