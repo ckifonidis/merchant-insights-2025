@@ -4,9 +4,11 @@ import { createSelector } from '@reduxjs/toolkit';
 import PresentationalBarChart, { BarChartDataPoint } from '../ui/charts/PresentationalBarChart';
 import { 
   selectDataLoading,
-  selectDataErrors 
+  selectDataErrors,
+  createContextAwareMetricSelector 
 } from '../../store/selectors/dataSelectors';
 import { SHOPPING_INTERESTS } from '../../data/apiSchema';
+import { getMetricStoreKey } from '../../utils/metricKeys';
 import type { RootState } from '../../store';
 import type { MetricData } from '../../types/metrics';
 import { isCategoricalEntityData, getCategoricalValue } from '../../types/metrics';
@@ -32,6 +34,7 @@ interface GenericBarChartContainerProps {
   formatValue?: (value: number) => string;
   formatTooltipValue?: (value: number) => string;
   maxCategories?: number | null;
+  context?: string; // Tab context for compound key resolution
 }
 
 /**
@@ -51,14 +54,17 @@ const GenericBarChartContainer: React.FC<GenericBarChartContainerProps> = ({
   note,
   formatValue = (value: number): string => `${value}%`,
   formatTooltipValue,
-  maxCategories = null
+  maxCategories = null,
+  context
 }) => {
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo((): ((state: RootState) => { merchant: Record<string, number>; competitor: Record<string, number> } | null) => {
     return createSelector(
       [(state: RootState): Record<string, MetricData> => state.data.metrics],
       (metrics): { merchant: Record<string, number>; competitor: Record<string, number> } | null => {
-        const metric: MetricData | undefined = metrics?.[metricId];
+        // Use context-aware key resolution for metrics that need it
+        const storeKey = getMetricStoreKey(metricId, context);
+        const metric: MetricData | undefined = metrics?.[storeKey];
         if (!metric?.merchant) return null;
         
         // Handle both new typed data and legacy untyped data
@@ -90,7 +96,7 @@ const GenericBarChartContainer: React.FC<GenericBarChartContainerProps> = ({
         };
       }
     );
-  }, [metricId]);
+  }, [metricId, context]);
 
   const rawData = useSelector(selectRawMetricData);
   const loading = useSelector(selectDataLoading);

@@ -195,6 +195,7 @@ const Revenue: React.FC<RevenueProps> = ({ filters }) => {
           <GenericBarChartContainer
             title={t('revenue.byShoppingInterests')}
             metricId="converted_customers_by_interest"
+            context="revenue"
             merchantColor="#007B85"
             competitorColor="#73AA3C"
             yAxisLabel="%"

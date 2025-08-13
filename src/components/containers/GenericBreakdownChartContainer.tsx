@@ -6,6 +6,7 @@ import {
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
 import { SHOPPING_INTERESTS } from '../../data/apiSchema';
+import { getMetricStoreKey } from '../../utils/metricKeys';
 
 // Import the presentational component
 import PresentationalBreakdownChart from '../ui/charts/PresentationalBreakdownChart';
@@ -27,6 +28,7 @@ interface GenericBreakdownChartContainerProps {
   formatTooltipValue?: (value: number) => string;
   showAbsoluteValues?: boolean;
   note?: string;
+  context?: string; // Tab context for compound key resolution
 }
 
 /**
@@ -43,14 +45,17 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
   formatValue = (value) => `${value}%`,
   formatTooltipValue,
   showAbsoluteValues = false,
-  note
+  note,
+  context
 }) => {
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo(() => {
     return createSelector(
       [state => state.data.metrics],
       (metrics: any) => {
-        const metric = metrics?.[metricId];
+        // Use context-aware key resolution for metrics that need it
+        const storeKey = getMetricStoreKey(metricId, context);
+        const metric = metrics?.[storeKey];
         
         // Debug logging for gender metric specifically
         if (metricId === 'converted_customers_by_gender') {
@@ -74,7 +79,7 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
         return result;
       }
     );
-  }, [metricId]);
+  }, [metricId, context]);
 
   const rawData = useSelector(selectRawMetricData);
   const loading = useSelector(selectDataLoading);

@@ -107,6 +107,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
         <GenericHorizontalBarChartContainer
           title={t('demographics.customersByInterests')}
           metricId="converted_customers_by_interest"
+          context="demographics"
           merchantColor="#10B981"
           competitorColor="#EF4444"
           formatValue={(value: number) => `${value}%`}

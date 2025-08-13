@@ -6,6 +6,7 @@ import {
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
 import { SHOPPING_INTERESTS } from '../../data/apiSchema';
+import { getMetricStoreKey } from '../../utils/metricKeys';
 
 // Import the presentational component
 import PresentationalHorizontalBarChart from '../ui/charts/PresentationalHorizontalBarChart';
@@ -29,6 +30,7 @@ interface GenericHorizontalBarChartContainerProps {
   maxCategories?: number;
   showTable?: boolean;
   note?: string;
+  context?: string; // Tab context for compound key resolution
 }
 
 /**
@@ -47,14 +49,29 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
   formatTooltipValue,
   maxCategories,
   showTable = true,
-  note
+  note,
+  context
 }) => {
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo(() => {
     return createSelector(
       [state => state.data.metrics],
       (metrics: any) => {
-        const metric = metrics?.[metricId];
+        // Use context-aware key resolution for metrics that need it
+        const storeKey = getMetricStoreKey(metricId, context);
+        const metric = metrics?.[storeKey];
+        
+        // Debug logging for shopping interests specifically
+        if (metricId === 'converted_customers_by_interest') {
+          console.log(`🔍 HorizontalBar - metricId: ${metricId}, context: ${context}`);
+          console.log(`🔍 HorizontalBar - storeKey: ${storeKey}`);
+          console.log(`🔍 HorizontalBar - metric exists:`, !!metric);
+          console.log(`🔍 HorizontalBar - merchant.current exists:`, !!metric?.merchant?.current);
+          if (metric?.merchant?.current) {
+            console.log(`🔍 HorizontalBar - merchant data keys:`, Object.keys(metric.merchant.current));
+          }
+        }
+        
         if (!metric?.merchant?.current) return null;
         
         return {
@@ -63,19 +80,33 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
         };
       }
     );
-  }, [metricId]);
+  }, [metricId, context]);
 
   const rawData = useSelector(selectRawMetricData);
   const loading = useSelector(selectDataLoading);
   const errors = useSelector(selectDataErrors);
   
-  // Check for specific loading/error states
-  const isLoading = loading?.metrics || loading?.specificMetrics?.[metricId] || false;
-  const error = errors?.metrics || errors?.specificMetrics?.[metricId] || null;
+  // Use compound key for loading/error state checks
+  const storeKey = getMetricStoreKey(metricId, context);
+  
+  // Check for specific loading/error states using the correct store key
+  const isLoading = loading?.metrics || loading?.specificMetrics?.[metricId] || loading?.specificMetrics?.[storeKey] || false;
+  const error = errors?.metrics || errors?.specificMetrics?.[metricId] || errors?.specificMetrics?.[storeKey] || null;
 
   // Calculate horizontal bar data from raw metric data
   const processedData = useMemo((): HorizontalBarDataPoint[] => {
-    if (!rawData || !metricId) return [];
+    // Debug logging for shopping interests specifically
+    if (metricId === 'converted_customers_by_interest') {
+      console.log(`🔍 HorizontalBar Processing - rawData:`, rawData);
+      console.log(`🔍 HorizontalBar Processing - metricId:`, metricId);
+    }
+    
+    if (!rawData || !metricId) {
+      if (metricId === 'converted_customers_by_interest') {
+        console.log(`❌ HorizontalBar Processing failed - no rawData or metricId`);
+      }
+      return [];
+    }
 
     // Handle converted_customers_by_interest
     if (metricId === 'converted_customers_by_interest') {
@@ -167,6 +198,19 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
     // Default case - no data
     return [];
   }, [rawData, metricId, maxCategories]);
+
+  // Debug loading state for shopping interests
+  if (metricId === 'converted_customers_by_interest') {
+    console.log(`🔍 HorizontalBar Final State:`, {
+      isLoading,
+      rawDataExists: !!rawData,
+      processedDataLength: processedData.length,
+      loadingMetrics: loading?.metrics,
+      loadingSpecificMetric: loading?.specificMetrics?.[metricId],
+      loadingSpecificStoreKey: loading?.specificMetrics?.[storeKey],
+      hasError: !!error
+    });
+  }
 
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200">

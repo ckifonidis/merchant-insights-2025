@@ -14,6 +14,7 @@ import {
   selectMetricsLoading,
   selectMetricsError,
 } from '../store/selectors/dataSelectors.js';
+import { createMetricKeyMapping } from '../utils/metricKeys.js';
 import { 
   selectAPIRequestParams,
   selectFiltersChanged,
@@ -81,7 +82,8 @@ export const useMetricData = (metricIds: string | string[] | null, options: UseM
       metricIDs: Array.isArray(metricIds) ? metricIds : [metricIds], 
       filters: apiRequestParams, 
       options: fetchOptions,
-      userID 
+      userID,
+      context: fetchOptions.context // Pass context for compound key generation
     }));
   }, [dispatch, metricIds, apiRequestParams, yearOverYear, fetchOptions, userID]);
 
@@ -99,13 +101,30 @@ export const useMetricData = (metricIds: string | string[] | null, options: UseM
     
     // Check if we have data for ALL required metrics for this tab
     const requiredMetrics = Array.isArray(metricIds) ? metricIds : [metricIds];
-    const hasAllRequiredData = requiredMetrics.every(metricId => allMetricsData[metricId]);
+    
+    // Create mapping of original metric IDs to their store keys (compound keys if needed)
+    const keyMapping = createMetricKeyMapping(requiredMetrics, fetchOptions.context);
+    
+    // Check if we have data for all metrics using their correct store keys
+    const hasAllRequiredData = requiredMetrics.every(metricId => {
+      const storeKey = keyMapping[metricId];
+      const hasData = allMetricsData[storeKey];
+      
+      console.log(`🔍 Data check for ${metricId}:`, {
+        originalId: metricId,
+        storeKey: storeKey,
+        hasData: !!hasData,
+        context: fetchOptions.context
+      });
+      
+      return hasData;
+    });
     
     if (!hasAllRequiredData) {
-      console.log('🔄 Initial/tab-change data fetch for metrics:', requiredMetrics, 'on tab:', selectedTab);
+      console.log('🔄 Initial/tab-change data fetch for metrics:', requiredMetrics, 'on tab:', selectedTab, 'context:', fetchOptions.context);
       fetchData();
     }
-  }, [hasServiceAccess, autoFetch, isLoading, metricIds, allMetricsData, selectedTab, fetchData, userID]);
+  }, [hasServiceAccess, autoFetch, isLoading, metricIds, allMetricsData, selectedTab, fetchData, userID, fetchOptions.context]);
 
   // Get processed data based on selector type
 
@@ -158,7 +177,8 @@ export const useRevenueData = () => {
 
   return useMetricData(revenueMetrics, { 
     autoFetch: true, 
-    yearOverYear: true 
+    yearOverYear: true,
+    context: 'revenue' // Pass revenue context for compound keys
   });
 };
 
@@ -175,6 +195,7 @@ export const useDemographicsData = () => {
 
   return useMetricData(demographicsMetrics, { 
     autoFetch: true, 
-    yearOverYear: true 
+    yearOverYear: true,
+    context: 'demographics' // Pass demographics context for compound keys
   });
 };
