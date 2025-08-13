@@ -9,8 +9,6 @@
  * returns revenue amounts or customer counts.
  */
 
-import { ANALYTICS_PROVIDER_IDS } from './apiSchema.js';
-
 export const METRIC_SPECIFIC_FILTERS = {
   'converted_customers_by_interest': {
     // Required filters for this metric
@@ -26,22 +24,6 @@ export const METRIC_SPECIFIC_FILTERS = {
       }
     }
   }
-  
-  // Future metrics can be added here following the same pattern
-  // Example:
-  // 'future_metric_example': {
-  //   required: {
-  //     data_aggregation: {
-  //       default: 'daily',
-  //       contexts: {
-  //         dashboard: 'daily',
-  //         analytics: 'hourly'
-  //       },
-  //       options: ['hourly', 'daily', 'weekly'],
-  //       description: 'Time aggregation level for the metric'
-  //     }
-  //   }
-  // }
 };
 
 /**
@@ -82,27 +64,6 @@ export const getMultipleMetricFiltersForContext = (metricIDs, context) => {
   return result;
 };
 
-/**
- * Convert metric-specific filters to API filter format
- * @param {Object} metricFilters - Object with metricID: {filterId: value} structure
- * @param {string} providerId - The provider ID to use
- * @returns {Array} Array of filter objects in API format
- */
-export const convertMetricFiltersToAPI = (metricFilters, providerId = ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS) => {
-  const apiFilters = [];
-  
-  Object.entries(metricFilters).forEach(([metricID, filters]) => {
-    Object.entries(filters).forEach(([filterId, value]) => {
-      apiFilters.push({
-        providerId,
-        filterId,
-        value: String(value)
-      });
-    });
-  });
-  
-  return apiFilters;
-};
 
 /**
  * Validate metric-specific filters
@@ -126,39 +87,3 @@ export const validateMetricFilters = (metricID, filters) => {
   
   return { valid: true };
 };
-
-/**
- * Get all available metric-specific filters for documentation/debugging
- * @returns {Object} Complete configuration object
- */
-export const getAllMetricFilters = () => METRIC_SPECIFIC_FILTERS;
-
-/**
- * Check if a metric requires metric-specific filters
- * @param {string} metricID - The metric identifier
- * @returns {boolean} True if metric has required filters
- */
-export const metricRequiresSpecificFilters = (metricID) => {
-  return !!METRIC_SPECIFIC_FILTERS[metricID];
-};
-
-/**
- * Get available contexts for a metric
- * @param {string} metricID - The metric identifier
- * @returns {string[]} Array of available context names
- */
-export const getAvailableContextsForMetric = (metricID) => {
-  const config = METRIC_SPECIFIC_FILTERS[metricID];
-  if (!config) return [];
-  
-  const contexts = new Set();
-  Object.values(config.required).forEach(filterConfig => {
-    Object.keys(filterConfig.contexts).forEach(context => {
-      contexts.add(context);
-    });
-  });
-  
-  return Array.from(contexts);
-};
-
-export default METRIC_SPECIFIC_FILTERS;

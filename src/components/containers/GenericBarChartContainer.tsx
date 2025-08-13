@@ -7,7 +7,7 @@ import {
   selectDataErrors,
   createContextAwareMetricSelector 
 } from '../../store/selectors/dataSelectors';
-import { SHOPPING_INTERESTS } from '../../data/apiSchema';
+import { SHOPPING_INTERESTS } from '../../types/apiSchema';
 import { getMetricStoreKey } from '../../utils/metricKeys';
 import type { RootState } from '../../store';
 import type { MetricData } from '../../types/metrics';

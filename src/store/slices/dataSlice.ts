@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { analyticsService } from '../../services/index.js';
-import { apiNormalizer } from '../../services/normalization/apiNormalizer.js';
+import { normalizeApiResponseToStore } from '../../utils/apiResponseNormalizer.js';
 import { generateMetricKeys, logCompoundKeyGeneration } from '../../utils/metricKeys.js';
 import type { RootState } from '../index';
 
@@ -126,8 +126,12 @@ export const fetchMetricsData = createAsyncThunk(
           console.log(`📥 Raw API response:`, apiResponse);
           
           // Normalize the API response
-          const normalizedData = apiNormalizer.normalizeApiResponse(apiResponse, metricIDs);
+          const normalizationResult = normalizeApiResponseToStore(apiResponse);
+          const normalizedData = normalizationResult.metrics;
           console.log(`✅ Normalized metrics data:`, normalizedData);
+          if (normalizationResult.errors.length > 0) {
+            console.warn(`⚠️ Normalization errors:`, normalizationResult.errors);
+          }
           
           // Generate compound keys if context is provided
           let keyMappedData = normalizedData;
@@ -249,28 +253,27 @@ export const fetchMetricsDataWithYearComparison = createAsyncThunk(
             metricIDs: metricIDs
           });
 
-          const normalizedResult = apiNormalizer.normalizeYearOverYearResponse(
+          const normalizedResult = normalizeApiResponseToStore(
             result.current, 
-            result.previous, 
-            metricIDs
+            result.previous
           );
           
           console.log(`🔍 DEBUG Step 3 - After Normalization:`, {
-            hasNormalizedMetrics: !!normalizedResult.normalizedMetrics,
-            normalizedMetricsKeys: normalizedResult.normalizedMetrics ? Object.keys(normalizedResult.normalizedMetrics) : 'none',
+            hasNormalizedMetrics: !!normalizedResult.metrics,
+            normalizedMetricsKeys: normalizedResult.metrics ? Object.keys(normalizedResult.metrics) : 'none',
             hasErrors: !!normalizedResult.errors,
             errorsCount: normalizedResult.errors ? normalizedResult.errors.length : 0,
             fullNormalizedResult: normalizedResult
           });
           
           // Generate compound keys if context is provided
-          let keyMappedMetrics = normalizedResult.normalizedMetrics;
-          if (context && normalizedResult.normalizedMetrics) {
+          let keyMappedMetrics = normalizedResult.metrics;
+          if (context && normalizedResult.metrics) {
             const metricKeyMap = generateMetricKeys(metricIDs, context);
             keyMappedMetrics = {};
             
             // Remap data using compound keys
-            Object.entries(normalizedResult.normalizedMetrics).forEach(([originalMetricId, metricData]) => {
+            Object.entries(normalizedResult.metrics).forEach(([originalMetricId, metricData]) => {
               const storeKey = metricKeyMap[originalMetricId];
               keyMappedMetrics[storeKey] = metricData;
               
@@ -281,7 +284,7 @@ export const fetchMetricsDataWithYearComparison = createAsyncThunk(
             });
             
             console.log(`🔑 YoY: Remapped data with compound keys:`, {
-              originalKeys: Object.keys(normalizedResult.normalizedMetrics),
+              originalKeys: Object.keys(normalizedResult.metrics),
               compoundKeys: Object.keys(keyMappedMetrics),
               context
             });
@@ -785,61 +788,5 @@ export const selectMetricLastUpdated = (metricId) => (state) =>
 
 export const selectDateRanges = (state) => state.data.meta.dateRanges;
 export const selectDataValidation = (state) => state.data.meta.validation;
-
-// Computed selectors (memoized)
-export const selectMetricWithYearOverYear = createSelector(
-  [(state, metricId) => selectMetric(metricId)(state), 
-   (state, metricId) => selectPreviousMetric(metricId)(state)],
-  (currentMetric, previousMetric) => ({
-    current: currentMetric,
-    previous: previousMetric,
-    hasComparison: !!previousMetric
-  })
-);
-
-// Calculate year-over-year percentage change for scalar metrics
-export const selectMetricYoYChange = createSelector(
-  [(state, metricId) => selectMerchantMetric(metricId)(state),
-   (state, metricId) => state.data.previousMetrics[metricId]?.merchant],
-  (current, previous) => {
-    if (!current || !previous) return null;
-    
-    // Handle scalar values
-    if (typeof current.current === 'number' && typeof previous.current === 'number') {
-      if (previous.current === 0) return null;
-      return ((current.current - previous.current) / previous.current) * 100;
-    }
-    
-    return null;
-  }
-);
-
-// Check if metric has valid data
-export const selectHasValidMetricData = createSelector(
-  [(state, metricId) => selectMetric(metricId)(state),
-   (state, metricId) => selectMetricFreshness(metricId)(state)],
-  (metric, freshness) => {
-    return !!metric && freshness !== 'error' && (metric.merchant || metric.competitor);
-  }
-);
-
-// Get metrics summary
-export const selectMetricsSummary = createSelector(
-  [selectAllMetrics, selectDataMeta],
-  (metrics, meta) => {
-    const totalMetrics = Object.keys(metrics).length;
-    const freshMetrics = Object.values(meta.freshness).filter(f => f === 'fresh').length;
-    const staleMetrics = Object.values(meta.freshness).filter(f => f === 'stale').length;
-    const errorMetrics = Object.values(meta.freshness).filter(f => f === 'error').length;
-    
-    return {
-      totalMetrics,
-      freshMetrics,
-      staleMetrics,
-      errorMetrics,
-      lastUpdated: meta.lastUpdated
-    };
-  }
-);
 
 export default dataSlice.reducer;

@@ -9,7 +9,7 @@
  * filter contexts would overwrite each other in the Redux store.
  */
 
-import { getMetricFiltersForContext } from '../data/metricFilters.js';
+import { getMetricFiltersForContext } from './metricFilters.js';
 
 /**
  * Generate a compound key for a metric when it has context-specific filters

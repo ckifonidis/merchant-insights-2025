@@ -5,13 +5,9 @@
  */
 
 import { 
-  API_ENDPOINTS, 
-  ANALYTICS_PROVIDER_IDS 
-} from '../data/apiSchema.js';
-import { 
   getMultipleMetricFiltersForContext, 
   validateMetricFilters 
-} from '../data/metricFilters.js';
+} from '../utils/metricFilters.js';
 import { getPreviousYearDateRange } from '../utils/dateHelpers.js';
 import { apiCallJson, handleAuthError } from '../utils/auth.js';
 
@@ -75,6 +71,15 @@ interface ApiConfig {
   DEBUG: boolean;
 }
 
+const POST_PROMOTION_ANALYTICS = '56f9cf99-3727-4f2f-bf1c-58dc532ebaf5';
+
+const API_ENDPOINTS = {
+  ANALYTICS_QUERY: '/api/ANALYTICS/QUERY',
+  AUTHORIZATION_CHECK: '/api/authorization/checkUserStatus',
+  CONFIGURATION_ADMIN: '/api/CONFIGURATION/ADMIN/GET',
+  CONFIGURATION_MERCHANT: '/api/CONFIGURATION/MERCHANT/GET'
+};
+
 const API_CONFIG: ApiConfig = {
   TIMEOUT: (() => {
     const envTimeout = import.meta.env?.VITE_API_TIMEOUT;
@@ -85,11 +90,9 @@ const API_CONFIG: ApiConfig = {
 };
 
 class AnalyticsService {
-  private readonly providerIds: typeof ANALYTICS_PROVIDER_IDS;
   private readonly config: ApiConfig;
 
   constructor() {
-    this.providerIds = ANALYTICS_PROVIDER_IDS;
     this.config = API_CONFIG;
   }
 
@@ -226,7 +229,7 @@ class AnalyticsService {
     // Always include required data_origin filter
     const requiredFilters = [
       {
-        providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+        providerId: POST_PROMOTION_ANALYTICS,
         filterId: "data_origin",
         value: "own_data"
       }
@@ -253,7 +256,7 @@ class AnalyticsService {
         userID,
         startDate,
         endDate,
-        providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+        providerId: POST_PROMOTION_ANALYTICS,
         metricIDs,
         filterValues: combinedFilters,
         metricParameters,
@@ -294,7 +297,7 @@ class AnalyticsService {
       // Convert to API format
       Object.entries(filters).forEach(([filterId, value]) => {
         metricFilters.push({
-          providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+          providerId: POST_PROMOTION_ANALYTICS,
           filterId,
           value: String(value)
         });
@@ -412,7 +415,7 @@ export const analyticsService = new AnalyticsService();
 
 export const buildFilterValue = (filterId: string, value: string): FilterValue => {
   return {
-    providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+    providerId: POST_PROMOTION_ANALYTICS,
     filterId,
     value
   };

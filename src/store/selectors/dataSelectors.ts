@@ -4,10 +4,10 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { METRIC_IDS } from '../../data/apiSchema.js';
+import { METRIC_IDS } from '../../types/apiSchema';
 import { getMetricStoreKey } from '../../utils/metricKeys.js';
 import type { RootState } from '../index';
-import type { MetricData } from '../../types/api';
+import type { MetricData } from '../../types/apiSchema';
 
 interface MetricsState {
   [metricId: string]: MetricData;

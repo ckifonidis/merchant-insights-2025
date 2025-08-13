@@ -8,13 +8,9 @@
  * - Metric-specific filters
  */
 
-import { 
-  ANALYTICS_PROVIDER_IDS,
-  SHOPPING_INTERESTS,
-  GREEK_REGIONS
-} from '../data/apiSchema.js';
-import { UIFilters, FilterOption } from '../types/filters.js';
+import { UIFilters } from '../types/filters.js';
 
+const POST_PROMOTION_ANALYTICS = '56f9cf99-3727-4f2f-bf1c-58dc532ebaf5';
 
 interface FilterValue {
   providerId: string;
@@ -28,44 +24,7 @@ interface ValidationResult {
 }
 
 // Static filter options - API values with display labels
-export const FILTER_OPTIONS = {
-  channels: [
-    { value: 'all', label: 'All Channels' },
-    { value: 'ecommerce', label: 'E-commerce' },
-    { value: 'physical', label: 'Physical Stores' }
-  ],
-  genders: [
-    { value: 'a', label: 'All Genders' },
-    { value: 'm', label: 'Male' },
-    { value: 'f', label: 'Female' }
-  ],
-  ageGroups: [
-    { value: 'generation_z', label: 'Generation Z (18-24)' },
-    { value: 'millennials', label: 'Millennials (25-40)' },
-    { value: 'generation_x', label: 'Generation X (41-56)' },
-    { value: 'baby_boomers', label: 'Baby Boomers (57-75)' },
-    { value: 'silent_generation', label: 'Silent Generation (76-96)' }
-  ],
-  regions: GREEK_REGIONS.map(region => ({
-    value: region,
-    label: region
-  })),
-  shoppingInterests: Object.entries(SHOPPING_INTERESTS).map(([id, label]) => ({
-    value: id,
-    label: label
-  })),
-  // Municipality data (static for demo - could be API-loaded if needed)
-  municipalities: {
-    'ΑΤΤΙΚΗ': ['ΑΘΗΝΑ', 'ΠΕΙΡΑΙΑΣ', 'ΠΕΡΙΣΤΕΡΙ', 'ΚΑΛΛΙΘΕΑ', 'ΝΙΚΑΙΑ', 'ΓΛΥΦΑΔΑ'],
-    'ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ': ['ΘΕΣΣΑΛΟΝΙΚΗ', 'ΚΑΛΑΜΑΡΙΑ', 'ΕΥΟΣΜΟΣ', 'ΣΤΑΥΡΟΥΠΟΛΗ'],
-    'ΘΕΣΣΑΛΙΑ': ['ΛΑΡΙΣΑ', 'ΒΟΛΟΣ', 'ΤΡΙΚΑΛΑ', 'ΚΑΡΔΙΤΣΑ'],
-    'ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ': ['ΛΑΜΙΑ', 'ΧΑΛΚΙΔΑ', 'ΛΙΒΑΔΕΙΑ', 'ΘΗΒΑ'],
-    'ΔΥΤΙΚΗ ΕΛΛΑΔΑ': ['ΠΑΤΡΑ', 'ΑΓΡΙΝΙΟ', 'ΜΕΣΟΛΟΓΓΙ', 'ΠΥΡΓΟΣ'],
-    'ΠΕΛΟΠΟΝΝΗΣΟΣ': ['ΚΑΛΑΜΑΤΑ', 'ΤΡΙΠΟΛΗ', 'ΣΠΑΡΤΗ', 'ΚΟΡΙΝΘΟΣ'],
-    'ΚΡΗΤΗ': ['ΗΡΑΚΛΕΙΟ', 'ΧΑΝΙΑ', 'ΡΕΘΥΜΝΟ', 'ΑΓΙΟΣ ΝΙΚΟΛΑΟΣ'],
-    'ΗΠΕΙΡΟΣ': ['ΙΩΑΝΝΙΝΑ', 'ΑΡΤΑ', 'ΠΡΕΒΕΖΑ', 'ΗΓΟΥΜΕΝΙΤΣΑ']
-  }
-};
+
 
 // Metric-specific filters (simplified from metricFilters.js)
 const METRIC_SPECIFIC_FILTERS = {
@@ -81,34 +40,13 @@ class FilterService {
   private providerId: string;
 
   constructor() {
-    this.providerId = ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS;
+    this.providerId = POST_PROMOTION_ANALYTICS;
   }
 
-  /**
-   * Get municipalities for selected regions
-   */
-  getMunicipalitiesForRegions(selectedRegions: string[] = []): FilterOption[] {
-    if (!selectedRegions.length) return [];
-    
-    const municipalities: FilterOption[] = [];
-    selectedRegions.forEach(region => {
-      const regionMunicipalities = (FILTER_OPTIONS.municipalities as Record<string, string[]>)[region];
-      if (regionMunicipalities) {
-        regionMunicipalities.forEach((municipality: string) => {
-          municipalities.push({
-            value: municipality,
-            label: municipality,
-            region: region
-          });
-        });
-      }
-    });
-    
-    return municipalities;
-  }
 
   /**
    * Check if merchant has Go For More (simplified - no async needed)
+   * TODO: MUST FIX
    */
   hasGoForMore(merchantId: string): boolean {
     // Demo merchants that participate in Go For More

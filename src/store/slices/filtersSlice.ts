@@ -1,9 +1,61 @@
 import { createSlice, createSelector, PayloadAction, current } from '@reduxjs/toolkit';
 import { subDays } from 'date-fns';
-import { filterService, FILTER_OPTIONS } from '../../services/filterService';
-import { ANALYTICS_PROVIDER_IDS } from '../../data/apiSchema';
+import { filterService } from '../../services/filterService';
 import { DateRangeFilter, FilterOption, UIFilters } from '../../types/filters';
 import { RootState } from '../index';
+
+
+const POST_PROMOTION_ANALYTICS = '56f9cf99-3727-4f2f-bf1c-58dc532ebaf5';
+
+// Static filter options based on types from filters.ts
+const CHANNEL_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Channels' },
+  { value: 'physical', label: 'Physical Stores' },
+  { value: 'ecommerce', label: 'E-commerce' }
+];
+
+const GENDER_OPTIONS: FilterOption[] = [
+  { value: 'a', label: 'All Genders' },
+  { value: 'm', label: 'Male' },
+  { value: 'f', label: 'Female' }
+];
+
+const AGE_GROUP_OPTIONS: FilterOption[] = [
+  { value: 'generation_z', label: 'Generation Z (18-24)' },
+  { value: 'millennials', label: 'Millennials (25-40)' },
+  { value: 'generation_x', label: 'Generation X (41-56)' },
+  { value: 'baby_boomers', label: 'Baby Boomers (57-75)' },
+  { value: 'silent_generation', label: 'Silent Generation (76-96)' }
+];
+
+const SHOPPING_INTEREST_OPTIONS: FilterOption[] = [
+  { value: 'SHOPINT1', label: 'Fashion & Apparel' },
+  { value: 'SHOPINT2', label: 'Electronics & Technology' },
+  { value: 'SHOPINT3', label: 'Home & Garden' },
+  { value: 'SHOPINT4', label: 'Health & Beauty' },
+  { value: 'SHOPINT5', label: 'Sports & Outdoor' },
+  { value: 'SHOPINT6', label: 'Books & Media' },
+  { value: 'SHOPINT7', label: 'Food & Beverages' },
+  { value: 'SHOPINT8', label: 'Automotive' },
+  { value: 'SHOPINT9', label: 'Travel & Leisure' },
+  { value: 'SHOPINT10', label: 'Jewelry & Accessories' },
+  { value: 'SHOPINT11', label: 'Baby & Kids' },
+  { value: 'SHOPINT12', label: 'Pet Supplies' },
+  { value: 'SHOPINT13', label: 'Office & Business' },
+  { value: 'SHOPINT14', label: 'Arts & Crafts' },
+  { value: 'SHOPINT15', label: 'Other Interests' }
+];
+
+const REGION_OPTIONS: FilterOption[] = [
+  { value: 'ΑΤΤΙΚΗ', label: 'Αττική' },
+  { value: 'ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ', label: 'Κεντρική Μακεδονία' },
+  { value: 'ΘΕΣΣΑΛΙΑ', label: 'Θεσσαλία' },
+  { value: 'ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ', label: 'Κεντρική Ελλάδα' },
+  { value: 'ΔΥΤΙΚΗ ΕΛΛΑΔΑ', label: 'Δυτική Ελλάδα' },
+  { value: 'ΠΕΛΟΠΟΝΝΗΣΟΣ', label: 'Πελοπόννησος' },
+  { value: 'ΚΡΗΤΗ', label: 'Κρήτη' },
+  { value: 'ΗΠΕΙΡΟΣ', label: 'Ήπειρος' }
+];
 
 // Date range presets
 const DATE_PRESETS = {
@@ -138,7 +190,7 @@ const getInitialState = (): AppFiltersState => {
     // Global context
     context: {
       merchantId: "52ba3854-a5d4-47bd-9d1a-b789ae139803",
-      providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+      providerId: POST_PROMOTION_ANALYTICS,
       userID: null, // Will be set when user info is available
       showCompetition: true,
       selectedTab: 'dashboard'
@@ -408,17 +460,12 @@ export const selectFilterSummary = createSelector(
 );
 
 // Static filter options selectors (no async loading needed)
-export const selectChannelOptions = (): FilterOption[] => FILTER_OPTIONS.channels;
-export const selectGenderOptions = (): FilterOption[] => FILTER_OPTIONS.genders;
-export const selectAgeGroupOptions = (): FilterOption[] => FILTER_OPTIONS.ageGroups;
-export const selectRegionOptions = (): FilterOption[] => FILTER_OPTIONS.regions;
-export const selectShoppingInterestOptions = (): FilterOption[] => FILTER_OPTIONS.shoppingInterests;
+export const selectChannelOptions = (state: RootState): FilterOption[] => CHANNEL_OPTIONS;
+export const selectGenderOptions = (state: RootState): FilterOption[] => GENDER_OPTIONS;
+export const selectAgeGroupOptions = (state: RootState): FilterOption[] => AGE_GROUP_OPTIONS;
+export const selectRegionOptions = (state: RootState): FilterOption[] => REGION_OPTIONS;
+export const selectShoppingInterestOptions = (state: RootState): FilterOption[] => SHOPPING_INTEREST_OPTIONS;
 
-// Dynamic selectors
-export const selectMunicipalityOptions = createSelector(
-  [selectRegions],
-  (selectedRegions) => filterService.getMunicipalitiesForRegions(selectedRegions)
-);
 
 export const selectGoForMoreAvailable = createSelector(
   [selectMerchantId],

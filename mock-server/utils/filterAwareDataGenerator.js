@@ -229,7 +229,15 @@ function applyGeneralFilter(data, parsedFilters) {
   // Apply reduction to scalar values
   if (data.scalarValue && !isNaN(parseFloat(data.scalarValue))) {
     const originalValue = parseFloat(data.scalarValue);
-    data.scalarValue = (originalValue * reductionFactor).toFixed(2);
+    const reducedValue = originalValue * reductionFactor;
+    
+    // For customer and transaction counts, return integers
+    if (data.metricID === 'total_customers' || data.metricID === 'total_transactions') {
+      data.scalarValue = Math.floor(reducedValue).toString();
+    } else {
+      // For revenue and other metrics, keep decimals
+      data.scalarValue = reducedValue.toFixed(2);
+    }
   }
   
   // Apply reduction to time series data
@@ -237,9 +245,20 @@ function applyGeneralFilter(data, parsedFilters) {
     data.seriesValues[0].seriesPoints = data.seriesValues[0].seriesPoints.map(point => {
       if (!isNaN(parseFloat(point.value1))) {
         const originalValue = parseFloat(point.value1);
+        const reducedValue = originalValue * reductionFactor;
+        
+        // For customer and transaction counts, return integers
+        if (data.metricID === 'customers_per_day' || data.metricID === 'transactions_per_day') {
+          return {
+            ...point,
+            value1: Math.floor(reducedValue).toString()
+          };
+        }
+        
+        // For revenue and other metrics, keep decimals
         return {
           ...point,
-          value1: (originalValue * reductionFactor).toFixed(2)
+          value1: reducedValue.toFixed(2)
         };
       }
       return point;

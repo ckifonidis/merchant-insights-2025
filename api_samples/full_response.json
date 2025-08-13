@@ -1,0 +1,571 @@
+{
+    "payload": {
+        "metrics": [
+            {
+                "metricID": "converted_customers_by_activity",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "139",
+                                "value2": "frequent"
+                            },
+                            {
+                                "value1": "159",
+                                "value2": "less_frequent"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "converted_customers_by_age",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "11",
+                                "value2": "18-24"
+                            },
+                            {
+                                "value1": "75",
+                                "value2": "25-40"
+                            },
+                            {
+                                "value1": "134",
+                                "value2": "41-56"
+                            },
+                            {
+                                "value1": "65",
+                                "value2": "57-75"
+                            },
+                            {
+                                "value1": "12",
+                                "value2": "76-96"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "converted_customers_by_gender",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "180",
+                                "value2": "f"
+                            },
+                            {
+                                "value1": "117",
+                                "value2": "m"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "converted_customers_by_interest",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "2",
+                                "value2": ""
+                            },
+                            {
+                                "value1": "0",
+                                "value2": "other_category"
+                            },
+                            {
+                                "value1": "91",
+                                "value2": "SHOPINT1"
+                            },
+                            {
+                                "value1": "27",
+                                "value2": "SHOPINT10"
+                            },
+                            {
+                                "value1": "28",
+                                "value2": "SHOPINT11"
+                            },
+                            {
+                                "value1": "83",
+                                "value2": "SHOPINT12"
+                            },
+                            {
+                                "value1": "76",
+                                "value2": "SHOPINT13"
+                            },
+                            {
+                                "value1": "76",
+                                "value2": "SHOPINT14"
+                            },
+                            {
+                                "value1": "22",
+                                "value2": "SHOPINT15"
+                            },
+                            {
+                                "value1": "6",
+                                "value2": "SHOPINT2"
+                            },
+                            {
+                                "value1": "184",
+                                "value2": "SHOPINT3"
+                            },
+                            {
+                                "value1": "30",
+                                "value2": "SHOPINT4"
+                            },
+                            {
+                                "value1": "7",
+                                "value2": "SHOPINT5"
+                            },
+                            {
+                                "value1": "6",
+                                "value2": "SHOPINT6"
+                            },
+                            {
+                                "value1": "43",
+                                "value2": "SHOPINT7"
+                            },
+                            {
+                                "value1": "36",
+                                "value2": "SHOPINT8"
+                            },
+                            {
+                                "value1": "42",
+                                "value2": "SHOPINT9"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "customers_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "19",
+                                "value2": "2025-08-10"
+                            },
+                            {
+                                "value1": "117",
+                                "value2": "2025-08-11"
+                            },
+                            {
+                                "value1": "165",
+                                "value2": "2025-08-12"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "redeemed_points",
+                "percentageValue": false,
+                "scalarValue": "0",
+                "seriesValues": null,
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "redeemed_amount",
+                "percentageValue": false,
+                "scalarValue": "0.00",
+                "seriesValues": null,
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "rewarded_points",
+                "percentageValue": false,
+                "scalarValue": "80",
+                "seriesValues": null,
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "rewarded_amount",
+                "percentageValue": false,
+                "scalarValue": "20.40",
+                "seriesValues": null,
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "revenue_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "revenue",
+                        "seriesPoints": [
+                            {
+                                "value1": "1296.56",
+                                "value2": "2025-08-10"
+                            },
+                            {
+                                "value1": "8940.39",
+                                "value2": "2025-08-11"
+                            },
+                            {
+                                "value1": "13427.14",
+                                "value2": "2025-08-12"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "transactions_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "19.0",
+                                "value2": "2025-08-10"
+                            },
+                            {
+                                "value1": "139.0",
+                                "value2": "2025-08-11"
+                            },
+                            {
+                                "value1": "193.0",
+                                "value2": "2025-08-12"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "total_transactions",
+                "percentageValue": false,
+                "scalarValue": "351.0",
+                "seriesValues": null,
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "67.419059829059829",
+                "seriesValues": null,
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "transactions_by_geo",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "13.0",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "3.0",
+                                "value2": "ΝΗΣΙΑ ΙΟΝΙΟΥ"
+                            },
+                            {
+                                "value1": "3.0",
+                                "value2": "ΠΕΛΟΠΟΝΝΗΣΟΣ"
+                            },
+                            {
+                                "value1": "61.0",
+                                "value2": "ΑΤΤΙΚΗ"
+                            },
+                            {
+                                "value1": "8.0",
+                                "value2": "ΔΥΤΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "238.0",
+                                "value2": "ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ"
+                            },
+                            {
+                                "value1": "1.0",
+                                "value2": "ΝΟΤΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "6.0",
+                                "value2": "ΚΡΗΤΗ"
+                            },
+                            {
+                                "value1": "6.0",
+                                "value2": "ΘΕΣΣΑΛΙΑ"
+                            },
+                            {
+                                "value1": "3.0",
+                                "value2": "ΒΟΡΕΙΟ ΑΙΓΑΙΟ"
+                            },
+                            {
+                                "value1": "1.0",
+                                "value2": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ΚΑΙ ΘΡΑΚΗ"
+                            },
+                            {
+                                "value1": "2.0",
+                                "value2": "ΔΥΤΙΚΗ ΜΑΚΕΔΟΝΙΑ"
+                            },
+                            {
+                                "value1": "1.0",
+                                "value2": "ΗΠΕΙΡΟΣ"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "ΓΕΝΙΚΗ ΕΜΠΟΡΙΚΗ ΑΕ"
+            },
+            {
+                "metricID": "converted_customers_by_age",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "693",
+                                "value2": "18-24"
+                            },
+                            {
+                                "value1": "1952",
+                                "value2": "25-40"
+                            },
+                            {
+                                "value1": "2870",
+                                "value2": "41-56"
+                            },
+                            {
+                                "value1": "1178",
+                                "value2": "57-75"
+                            },
+                            {
+                                "value1": "150",
+                                "value2": "76-96"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "converted_customers_by_gender",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "5475",
+                                "value2": "f"
+                            },
+                            {
+                                "value1": "1368",
+                                "value2": "m"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "converted_customers_by_interest",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "0",
+                                "value2": ""
+                            },
+                            {
+                                "value1": "96",
+                                "value2": "other_category"
+                            },
+                            {
+                                "value1": "853",
+                                "value2": "SHOPINT1"
+                            },
+                            {
+                                "value1": "848",
+                                "value2": "SHOPINT10"
+                            },
+                            {
+                                "value1": "561",
+                                "value2": "SHOPINT11"
+                            },
+                            {
+                                "value1": "2175",
+                                "value2": "SHOPINT12"
+                            },
+                            {
+                                "value1": "2199",
+                                "value2": "SHOPINT13"
+                            },
+                            {
+                                "value1": "1534",
+                                "value2": "SHOPINT14"
+                            },
+                            {
+                                "value1": "938",
+                                "value2": "SHOPINT15"
+                            },
+                            {
+                                "value1": "196",
+                                "value2": "SHOPINT2"
+                            },
+                            {
+                                "value1": "4376",
+                                "value2": "SHOPINT3"
+                            },
+                            {
+                                "value1": "730",
+                                "value2": "SHOPINT4"
+                            },
+                            {
+                                "value1": "284",
+                                "value2": "SHOPINT5"
+                            },
+                            {
+                                "value1": "418",
+                                "value2": "SHOPINT6"
+                            },
+                            {
+                                "value1": "1448",
+                                "value2": "SHOPINT7"
+                            },
+                            {
+                                "value1": "843",
+                                "value2": "SHOPINT8"
+                            },
+                            {
+                                "value1": "1249",
+                                "value2": "SHOPINT9"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "revenue_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "revenue",
+                        "seriesPoints": [
+                            {
+                                "value1": "597.076",
+                                "value2": "2025-08-10"
+                            },
+                            {
+                                "value1": "13271.104000000001",
+                                "value2": "2025-08-11"
+                            },
+                            {
+                                "value1": "13050.521",
+                                "value2": "2025-08-12"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "transactions_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "transactions",
+                        "seriesPoints": [
+                            {
+                                "value1": "15.4",
+                                "value2": "2025-08-10"
+                            },
+                            {
+                                "value1": "356.2",
+                                "value2": "2025-08-11"
+                            },
+                            {
+                                "value1": "374.9",
+                                "value2": "2025-08-12"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "total_transactions",
+                "percentageValue": false,
+                "scalarValue": "746.5",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "avg_ticket_per_user",
+                "percentageValue": false,
+                "scalarValue": "36.059880776959143",
+                "seriesValues": null,
+                "merchantId": "competition"
+            },
+            {
+                "metricID": "customers_per_day",
+                "percentageValue": false,
+                "scalarValue": null,
+                "seriesValues": [
+                    {
+                        "seriesID": "customers",
+                        "seriesPoints": [
+                            {
+                                "value1": "151",
+                                "value2": "2025-08-10"
+                            },
+                            {
+                                "value1": "3309",
+                                "value2": "2025-08-11"
+                            },
+                            {
+                                "value1": "3492",
+                                "value2": "2025-08-12"
+                            }
+                        ]
+                    }
+                ],
+                "merchantId": "competition"
+            }
+        ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0.0
+}

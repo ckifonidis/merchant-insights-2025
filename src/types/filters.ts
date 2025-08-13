@@ -2,6 +2,8 @@
  * Filter System Type Definitions
  */
 
+import { selectGenderOptions } from "../store/slices/filtersSlice";
+
 // Filter types
 export type FilterType = 
   | 'dateRange'
@@ -57,7 +59,6 @@ export interface UIFilters {
   stores: string[];
 }
 
-// APIFilters interface no longer needed - UIFilters stores API values directly
 
 // Filter configuration for specific metrics
 export interface MetricFilterConfig {
@@ -76,9 +77,6 @@ export interface FiltersState {
   state: {
     // UI filters (user selections)
     uiFilters: UIFilters;
-    
-    // API filters (converted for backend)
-    apiFilters: APIFilters;
     
     // Change tracking
     filtersChanged: boolean;

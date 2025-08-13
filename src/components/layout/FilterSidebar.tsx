@@ -11,8 +11,7 @@ import {
   selectAgeGroupOptions,
   selectRegionOptions,
   selectShoppingInterestOptions,
-  selectMunicipalityOptions,
-  selectGoForMoreAvailable,
+    selectGoForMoreAvailable,
   setCustomDateRange,
   setChannel,
   setGender,
@@ -42,7 +41,6 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
   const shoppingInterestOptions = useSelector(selectShoppingInterestOptions);
   
   // Get dynamic options
-  const municipalityOptions = useSelector(selectMunicipalityOptions);
   const goForMoreAvailable = useSelector(selectGoForMoreAvailable);
 
   // Local state for date pickers only
@@ -267,22 +265,6 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
               className="text-sm"
             />
           </div>
-
-          {/* Municipalities */}
-          {municipalityOptions.length > 0 && (
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                {t('filters.municipalities')}
-              </label>
-              <Select
-                isMulti
-                options={municipalityOptions}
-                value={municipalityOptions.filter(option => filters?.municipalities?.includes(option.value))}
-                onChange={(options) => handleFilterChange('municipalities', options ? options.map(opt => opt.value) : [])}
-                className="text-sm"
-              />
-            </div>
-          )}
         </div>
 
         {/* Go For More (conditional) */}

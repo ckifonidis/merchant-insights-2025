@@ -5,7 +5,7 @@ import {
   selectDataLoading,
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
-import { SHOPPING_INTERESTS } from '../../data/apiSchema';
+import { SHOPPING_INTERESTS } from '../../types/apiSchema';
 import { getMetricStoreKey } from '../../utils/metricKeys';
 
 // Import the presentational component
