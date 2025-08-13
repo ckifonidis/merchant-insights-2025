@@ -103,6 +103,14 @@ const ChartSelector: React.FC<ChartSelectorProps> = ({
         borderColor: '#007B85'
       }
     }),
+    menu: (provided: any) => ({
+      ...provided,
+      zIndex: 9999  // Ensure dropdown appears above sticky elements (z-10)
+    }),
+    menuPortal: (provided: any) => ({
+      ...provided,
+      zIndex: 9999  // Portal version for better compatibility
+    }),
     option: (provided: any, state: any) => ({
       ...provided,
       backgroundColor: state.isSelected 

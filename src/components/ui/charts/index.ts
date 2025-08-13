@@ -4,6 +4,7 @@ export { default as ChartTooltip } from './ChartTooltip';
 export { default as ChartTable } from './ChartTable';
 export { default as TimeSeriesChart } from './TimeSeriesChart';
 export { default as PresentationalTimeSeriesChart } from './PresentationalTimeSeriesChart';
+export { default as PresentationalCalendarHeatmap } from './PresentationalCalendarHeatmap';
 export { default as UniversalBreakdownChart } from './UniversalBreakdownChart';
 export { default as UniversalTimelineChart } from './UniversalTimelineChart';
 export { default as UniversalCalendarHeatmap } from './UniversalCalendarHeatmap';

@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { createSelector } from '@reduxjs/toolkit';
-import { UniversalCalendarHeatmap } from '../ui';
+import PresentationalCalendarHeatmap from '../ui/charts/PresentationalCalendarHeatmap';
 import { 
+  createMetricSelector,
   selectDataLoading,
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
+import type { CalendarHeatmapData } from '../ui/charts/PresentationalCalendarHeatmap';
 
 interface GenericCalendarHeatmapContainerProps {
   title: string;
@@ -22,7 +23,7 @@ interface GenericCalendarHeatmapContainerProps {
  * Generic Calendar Heatmap Container Component
  * 
  * Smart container component that connects to Redux store for calendar heatmap metrics,
- * processes daily revenue data, and passes to universal heatmap component.
+ * processes daily revenue data, and passes to presentational component.
  * Used for competition monthly heatmap charts.
  */
 const GenericCalendarHeatmapContainer: React.FC<GenericCalendarHeatmapContainerProps> = ({
@@ -32,23 +33,8 @@ const GenericCalendarHeatmapContainer: React.FC<GenericCalendarHeatmapContainerP
   showMerchantAndCompetition = true,
   dateRange = null
 }) => {
-  // Memoized selector for raw metric data
-  const selectRawMetricData = useMemo(() => {
-    return createSelector(
-      [state => state.data.metrics],
-      (metrics: any) => {
-        const metric = metrics?.[metricId];
-        if (!metric?.merchant?.current) return null;
-        
-        return {
-          merchant: metric.merchant.current,
-          competitor: metric.competitor?.current || {}
-        };
-      }
-    );
-  }, [metricId]);
-
-  const rawData = useSelector(selectRawMetricData);
+  // Connect to store using metricId
+  const storeData = useSelector(createMetricSelector(metricId));
   const loading = useSelector(selectDataLoading);
   const errors = useSelector(selectDataErrors);
   
@@ -56,29 +42,43 @@ const GenericCalendarHeatmapContainer: React.FC<GenericCalendarHeatmapContainerP
   const isLoading = loading?.metrics || loading?.specificMetrics?.[metricId] || false;
   const error = errors?.metrics || errors?.specificMetrics?.[metricId] || null;
 
-  // Process data for calendar heatmap
-  const processedData = useMemo(() => {
-    if (!rawData || !metricId) return { merchant: {}, competitor: {} };
-
-    // Return daily data as-is for calendar heatmap
-    // Format: { "2025-06-13": 85326.35, "2025-06-14": 92156.78, ... }
-    return {
-      merchant: rawData.merchant || {},
-      competitor: rawData.competitor || {}
-    };
-  }, [rawData, metricId]);
+  // Transform store data to heatmap format - MEMOIZED to prevent infinite loops
+  const heatmapData: CalendarHeatmapData = useMemo(() => {
+    if (!storeData) return {};
+    
+    const transformedData: CalendarHeatmapData = {};
+    
+    // Process merchant data
+    if (storeData.merchant?.current) {
+      Object.entries(storeData.merchant.current).forEach(([dateKey, value]) => {
+        if (!transformedData[dateKey]) transformedData[dateKey] = {};
+        transformedData[dateKey].merchant = value as number;
+      });
+    }
+    
+    // Process competitor data
+    if (storeData.competitor?.current) {
+      Object.entries(storeData.competitor.current).forEach(([dateKey, value]) => {
+        if (!transformedData[dateKey]) transformedData[dateKey] = {};
+        transformedData[dateKey].competitor = value as number;
+      });
+    }
+    
+    return transformedData;
+  }, [storeData]);
 
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         {title}
       </h3>
-      <UniversalCalendarHeatmap 
-        metricId={metricId}
+      <PresentationalCalendarHeatmap 
+        heatmapData={heatmapData}
         title={title}
         valueLabel={valueLabel}
         showMerchantAndCompetition={showMerchantAndCompetition}
-        filters={null}
+        isLoading={isLoading}
+        error={error || undefined}
         initialMonth={null}
       />
     </div>

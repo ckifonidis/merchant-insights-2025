@@ -1,6 +1,6 @@
 # CLAUDE.md - Merchant Insights Dashboard Architecture Guide
 
-**React business intelligence dashboard for NBG (National Bank of Greece) - Complete implementation guide based on established Dashboard tab patterns**
+**React business intelligence dashboard for NBG (National Bank of Greece) - Complete implementation guide with authentication, data flow, and architectural patterns**
 
 ---
 
@@ -9,11 +9,151 @@
 **Tech Stack:** React + TypeScript, Vite, Tailwind CSS, Recharts, Redux Toolkit, React i18next  
 **Purpose:** Merchant analytics dashboard with transaction volumes, revenue, customer data, and competitive analysis  
 **Architecture:** Smart/Presentational component pattern with MetricId-driven data flow  
+**Authentication:** OAuth2 + JWT with proxy-based session management  
 **Multi-language:** English/Greek localization with NBG branding  
 
 ---
 
-## 🏗️ COMPONENT ARCHITECTURE (Based on Dashboard Implementation)
+## 🔐 AUTHENTICATION SYSTEM ARCHITECTURE
+
+### **Authentication Flow Overview**
+
+The authentication system uses a **multi-layer approach** combining OAuth2, JWT tokens, and user service enrollment:
+
+```
+OAuth2 Flow → JWT Token → User Service Check → Dashboard Access
+```
+
+### **1. Authentication Manager (App-Level)**
+
+**Component:** `AuthenticationManager.tsx`  
+**Purpose:** Single initialization point for authentication at app startup
+
+```tsx
+// Runs EXACTLY ONCE when app starts
+<AuthenticationManager>
+  <App />
+</AuthenticationManager>
+```
+
+**Key Responsibilities:**
+- ✅ Initialize authentication on app startup
+- ✅ Handle OAuth callback flow detection  
+- ✅ Fetch user info from OpenID Connect
+- ✅ Check user service enrollment status
+- ✅ Load user configuration and merchant details
+- ✅ Does NOT re-render based on auth state changes
+
+### **2. Authentication Utilities (`utils/auth.ts`)**
+
+**Core Functions:**
+- `checkAuthStatus()` - Verify authentication via `/auth/status`
+- `fetchUserInfo()` - Get user details from `/userinfo` endpoint
+- `fetchWithAuth(url, options)` - Universal fetch wrapper with auto-auth handling
+- `login(returnUrl)` - Redirect to OAuth login flow
+- `logout(returnUrl)` - Clear session and redirect
+- `handleAuthError(error)` - Auto-redirect on 401 errors
+
+**Auto-Authentication Features:**
+- ✅ Automatic 401 handling with login redirect
+- ✅ Request timeout management (2 minute default)
+- ✅ Network error detection and recovery
+- ✅ Session persistence with cookies
+- ✅ Return URL preservation
+
+### **3. Auth State Management (Redux)**
+
+**Store Structure:**
+```typescript
+state.auth = {
+  // OAuth Authentication State
+  isAuthenticated: boolean | null,  // null = loading
+  authLoading: boolean,
+  authError: string | null,
+  authData: AuthData | null,        // Token expiry, scope
+  userInfo: UserInfo | null,        // OpenID Connect user details
+  
+  // Service Enrollment State
+  userStatus: 'signedup' | 'notsigned' | 'noaccess' | null,
+  serviceLoading: boolean,
+  serviceError: string | null,
+  
+  // Control State
+  isAuthenticating: boolean,
+  lastUpdated: string | null
+}
+```
+
+**Auth Flow Stages:**
+1. **OAuth Authentication** - JWT token validation
+2. **User Info Fetch** - OpenID Connect profile
+3. **Service Enrollment Check** - NBG service access verification  
+4. **User Configuration Load** - Merchant IDs and preferences
+5. **Merchant Details Fetch** - Business information
+
+### **4. Protected Route System**
+
+**Component:** `ProtectedRoute.tsx`  
+**Pattern:** Read-only authentication state consumer
+
+```tsx
+// Route Protection Logic
+const {
+  shouldShowLoading,      // Auth or service loading
+  shouldShowError,        // Auth/service errors  
+  shouldRedirectToLogin,  // Not authenticated
+  shouldShowFirstPage,    // Needs service signup
+  shouldShowNoAccess,     // Access denied
+  shouldShowDashboard     // Full access granted
+} = useAuthState();
+```
+
+**Route Decision Matrix:**
+```
+Loading State → LoadingPage
+Error State → ErrorPage  
+Not Authenticated → Login Redirect
+Authenticated + Not Signed Up → FirstPage (signup flow)
+Authenticated + No Access → NoAccessPage
+Authenticated + Signed Up → Dashboard
+```
+
+### **5. Authentication Hooks**
+
+**Primary Hook:** `useAuthState()` - Read-only auth state access
+
+```tsx
+const {
+  isAuthenticated,
+  userInfo,
+  userStatus,
+  shouldShowDashboard,
+  hasServiceAccess,
+  isSessionExpired,
+  timeUntilExpiry
+} = useAuthState();
+```
+
+**Specialized Hooks:**
+- `useUserInfo()` - User profile access
+- `useUserStatus()` - Service enrollment status
+- `useAuthRequired()` - Simple auth check
+
+### **6. User Service Integration**
+
+**Service Endpoints:**
+- `/api/authorization/checkUserStatus` - Check service enrollment
+- `/api/CONFIGURATION/ADMIN/GET` - Admin configuration
+- `/api/CONFIGURATION/MERCHANT/GET` - Merchant details
+
+**Enrollment Status:**
+- `signedup` - Full access to dashboard
+- `notsigned` - Show signup flow  
+- `noaccess` - Access denied
+
+---
+
+## 🏗️ COMPONENT ARCHITECTURE
 
 ### **Core Pattern: Configuration-Only Tabs → Smart Containers → Presentational Components**
 
@@ -29,38 +169,24 @@ The Dashboard tab establishes the gold standard architecture based on **configur
 />
 ```
 
-This flows through the architecture:
+**Architecture Flow:**
 1. **Tab Level**: Pure configuration - passes props to containers
 2. **Smart Container**: Handles Redux, data processing, business logic  
 3. **Presentational Component**: Pure UI rendering with no dependencies
-
-### **Configuration vs Composition Anti-Pattern**
-
-```tsx
-// ✅ CORRECT (Dashboard Pattern): Direct container configuration
-<GenericMetricContainer
-  title={t('dashboard.totalRevenue')}
-  metricId="total_revenue"
-  valueType="currency"
-  icon={<RevenueIcon />}
-/>
-
-// ❌ WRONG (Revenue Pattern): Unnecessary wrapper components
-<TotalRevenueMetric title={t('revenue.totalRevenue')} />
-// TotalRevenueMetric.jsx just wraps UniversalMetricCard - adds no value
-```
 
 ### **Smart Container Responsibilities**
 - **Redux Store Connection**: Via `useSelector` with `createMetricSelector(metricId)`
 - **Data Processing**: YoY calculations, error handling, loading states
 - **Business Logic**: Data transformations, formatting rules
 - **State Management**: Loading/error states, data freshness
+- **Type Safety**: Full TypeScript interfaces and validation
 
 ### **Presentational Component Responsibilities**
 - **Pure UI Rendering**: No store dependencies, no business logic
 - **Prop-Based Display**: All data received as props
 - **Responsive Design**: Mobile-first layout patterns
 - **Accessibility**: ARIA labels, keyboard navigation
+- **CSS Classes**: Tailwind-based styling with design system
 
 ---
 
@@ -81,11 +207,11 @@ const Dashboard = ({ filters }) => {
         valueType="currency"
         icon={<RevenueIcon />}
       />
-      <GenericMetricContainer
-        title={t('dashboard.totalTransactions')}
-        metricId="total_transactions" 
-        valueType="number"
-        icon={<TransactionIcon />}
+      <GenericTimeSeriesChartContainer
+        title={t('dashboard.dailyRevenue')}
+        metricId="revenue_per_day"
+        showCompetitor={true}
+        formatValue={formatCurrency}
       />
     </div>
   );
@@ -98,26 +224,48 @@ const Dashboard = ({ filters }) => {
 - **Flexibility**: Easy to modify configurations inline
 - **Consistency**: All metrics use identical container pattern
 
-### **2. Component Layer Elimination**
+### **2. Smart/Presentational Separation**
 
-**Anti-Pattern** (Revenue tab current state):
+**CORRECT Pattern** (Established standard):
 ```
-Revenue.jsx → TotalRevenueMetric.jsx → UniversalMetricCard.jsx → DOM
-```
-
-**Correct Pattern** (Dashboard established):
-```
-Dashboard.tsx → GenericMetricContainer.tsx → PresentationalMetricCard.tsx → DOM
+Tab.tsx → GenericContainer.tsx → PresentationalComponent.tsx → DOM
 ```
 
-The wrapper component layer (`TotalRevenueMetric.jsx`) adds no value and should be eliminated.
+**Container Layer:**
+- ✅ Redux connections (`useSelector`)
+- ✅ Data processing and transformation
+- ✅ Loading/error state management
+- ✅ Business logic implementation
 
-### **3. Smart/Presentational Separation**
+**Presentational Layer:**
+- ✅ Pure UI components with no dependencies
+- ✅ Prop-driven rendering
+- ✅ Reusable across different contexts
+- ✅ Easy to test and maintain
 
-Maintained at the **container level**, not component level:
-- **Smart**: `GenericMetricContainer` handles Redux, business logic
-- **Presentational**: `PresentationalMetricCard` handles pure UI
-- **Configuration**: Tab handles props and configuration only
+### **3. TypeScript-First Development**
+
+All new components **MUST** follow TypeScript patterns:
+
+```tsx
+// Smart Container Example
+interface GenericMetricContainerProps {
+  title: string;
+  metricId: string;
+  valueType: ValueType;
+  icon: React.ReactNode;
+  variant?: MetricVariant;
+}
+
+// Presentational Component Example  
+interface PresentationalMetricCardProps {
+  merchantData: MetricData;
+  competitorData: MetricData;
+  valueType: ValueType;
+  isLoading: boolean;
+  error: string | null;
+}
+```
 
 ---
 
@@ -128,167 +276,258 @@ Maintained at the **container level**, not component level:
 Every component is driven by a `metricId` string that maps directly to API endpoints:
 
 ```tsx
-// Component Configuration
-const DASHBOARD_METRICS = [
-  'total_revenue',
-  'total_transactions', 
-  'avg_ticket_per_user',
-  'revenue_per_day',
-  'transactions_per_day',
-  'customers_per_day'
-];
+// Centralized Metric Definitions (apiSchema.ts)
+export const METRICS = {
+  SCALAR: {
+    TOTAL_REVENUE: 'total_revenue',
+    TOTAL_TRANSACTIONS: 'total_transactions',
+    AVG_TICKET_PER_USER: 'avg_ticket_per_user'
+  },
+  TIME_SERIES: {
+    REVENUE_PER_DAY: 'revenue_per_day',
+    TRANSACTIONS_PER_DAY: 'transactions_per_day'
+  },
+  CATEGORICAL: {
+    CONVERTED_CUSTOMERS_BY_GENDER: 'converted_customers_by_gender'
+  }
+};
 
-// Hook Usage
-const { data, isLoading, error } = useDashboardData();
-
-// Smart Container Props
+// Component Usage
 <GenericMetricContainer metricId="total_revenue" />
+<GenericTimeSeriesChartContainer metricId="revenue_per_day" />
 ```
 
-### **2. Redux Store Structure**
+### **2. Enhanced Redux Store Structure**
 
 ```typescript
-state.data.metrics = {
-  total_revenue: {
-    merchant: {
-      current: 1250000,      // Raw absolute value from API
-      previous: 1087000      // Previous year for YoY calculation
-    },
-    competitor: {
-      current: 980000,
-      previous: 895000
+state.data = {
+  metrics: {
+    total_revenue: {
+      merchant: {
+        current: 1250000,     // Raw absolute value from API
+        previous: 1087000     // Previous year for YoY calculation
+      },
+      competitor: {
+        current: 980000,
+        previous: 895000
+      }
     }
+  },
+  meta: {
+    lastUpdated: { total_revenue: '2025-01-13T10:30:00Z' },
+    freshness: { total_revenue: 'fresh' | 'stale' | 'error' },
+    sources: { total_revenue: 'analytics_api' },
+    dateRanges: {
+      current: { startDate: '2025-01-01', endDate: '2025-01-13' },
+      previous: { startDate: '2024-01-01', endDate: '2024-01-13' }
+    },
+    validation: {
+      hasValidCurrentData: boolean,
+      missingMetrics: string[],
+      incompletePeriods: string[]
+    }
+  },
+  loading: {
+    metrics: boolean,
+    yearOverYear: boolean,
+    specificMetrics: { [metricId]: boolean }
+  },
+  errors: {
+    metrics: string | null,
+    specificMetrics: { [metricId]: string }
   }
 }
 ```
 
-### **3. Generic Selector Pattern**
+### **3. Enhanced Selector System**
 
 ```typescript
-// Selector Factory (works with any metricId)
+// Metric Selector Factory
 export const createMetricSelector = (metricId: string) => 
   createSelector(
     [selectAllMetrics],
     (metrics) => metrics[metricId] || null
   );
 
-// YoY Calculation Selector
-export const createYoYChangeSelector = (metricId: string, entity: 'merchant' | 'competitor') =>
+// Data Quality Selectors
+export const createHasValidDataSelector = (metricId: string) => 
   createSelector(
-    [createCurrentDataSelector(metricId, entity), createPreviousDataSelector(metricId, entity)],
-    (current, previous) => {
-      if (!current || !previous) return null;
-      return ((current - previous) / previous) * 100;
+    [createMetricSelector(metricId), selectDataMeta],
+    (metric, meta) => {
+      if (!metric) return false;
+      const freshness = meta.freshness?.[metricId];
+      return freshness !== 'error' && (metric.merchant || metric.competitor);
     }
   );
+
+// Performance Selectors
+export const selectMetricsSummary = createSelector(
+  [selectAllMetrics, selectDataMeta],
+  (metrics, meta) => ({
+    totalMetrics: Object.keys(metrics).length,
+    freshMetrics: Object.values(meta.freshness || {}).filter(f => f === 'fresh').length,
+    staleMetrics: Object.values(meta.freshness || {}).filter(f => f === 'stale').length,
+    errorMetrics: Object.values(meta.freshness || {}).filter(f => f === 'error').length
+  })
+);
 ```
 
-### **4. Data Fetching Flow**
+### **4. API Integration & Data Normalization**
 
+**Service Architecture:**
 ```
-Tab Mount → useDashboardData() → fetchMetricsDataWithYearComparison() → API Call → Store Update → Component Re-render
+AnalyticsService → API Call → Response Normalizer → Redux Store → Component
+```
+
+**Key Services:**
+- `analyticsService.ts` - API request handling with auth
+- `userService.ts` - User enrollment and configuration
+- `filterService.ts` - Filter management and validation
+- `normalization/` - Data transformation layer
+
+**Data Normalizers:**
+- `scalarNormalizer.ts` - Single value metrics
+- `timeSeriesNormalizer.ts` - Chart data transformation  
+- `categoricalNormalizer.ts` - Breakdown data processing
+- `apiNormalizer.ts` - Universal API response handling
+
+---
+
+## 🗃️ TYPE SYSTEM CONSOLIDATION
+
+### **Recent Consolidation: apiConfig.ts → apiSchema.ts**
+
+**Problem Solved:**
+- ✅ Eliminated duplicate filter definitions
+- ✅ Consolidated API interfaces into single source
+- ✅ Removed redundant type definitions
+- ✅ Established `filters.ts` as filter type authority
+
+**Consolidated Types in `apiSchema.ts`:**
+```typescript
+// API Request Types
+export interface APIRequestParams { ... }
+export interface AnalyticsRequestConfig { ... }
+export interface MetricConfig { ... }
+
+// Data Structure Types  
+export interface EntityData { ... }
+export interface MetricData { ... }
+export interface NormalizedMetricData { ... }
+
+// Chart Data Types
+export interface TimeSeriesDataPoint { ... }
+export interface ChartDataPoint { ... }
+export interface CategoryDataPoint { ... }
+
+// Formatting Types
+export interface FormatConfig { ... }
+export interface MetricDisplayConfig { ... }
+```
+
+**Import Pattern:**
+```typescript
+// CORRECT: Single import source
+import { MetricData, EntityData, ChartDataPoint } from '../types/apiSchema';
+
+// WRONG: Multiple import sources (eliminated)
+import { MetricData } from '../types/apiConfig';
+import { FilterValue } from '../types/api';
+```
+
+### **Filter Type Hierarchy**
+
+**Source of Truth:** `filters.ts`
+```typescript
+// Basic filter types (authoritative)
+export type ChannelOption = 'all' | 'physical' | 'ecommerce';
+export type GenderOption = 'a' | 'm' | 'f';
+export type AgeGroupOption = 'generation_z' | 'millennials' | 'generation_x' | 'baby_boomers';
+
+// UI filter state
+export interface UIFilters {
+  dateRange: UIDateRange;
+  channel: ChannelOption;
+  gender: GenderOption;
+  ageGroups: AgeGroupOption[];
+  // ...
+}
+```
+
+**API Schema Integration:**
+```typescript
+// apiSchema.ts imports from filters.ts
+import type { ChannelOption, GenderOption, AgeGroupOption } from './filters';
+
+export type ChannelValue = ChannelOption;  // Alias for API usage
+export type GenderValue = GenderOption;    // Alias for API usage
 ```
 
 ---
 
-## 📊 IMPLEMENTATION STATUS BY TAB
+## 📊 COMPONENT IMPLEMENTATION STATUS
 
 ### **Dashboard Tab ✅ GOLD STANDARD**
 
 **Architecture:** Smart/Presentational with Generic Containers  
 **TypeScript:** ✅ Fully migrated  
-**Data Flow:** MetricId-driven with Redux selectors  
-**Components:** All use Generic Containers  
+**Data Flow:** MetricId-driven with enhanced selectors  
+**Authentication:** ✅ Full integration  
 
-**Metrics (Scalar Values):**
-- `total_revenue` → GenericMetricContainer → PresentationalMetricCard ✅
-- `total_transactions` → GenericMetricContainer → PresentationalMetricCard ✅  
-- `avg_ticket_per_user` → GenericMetricContainer → PresentationalMetricCard ✅
+**Components:**
+- ✅ All metrics use `GenericMetricContainer` → `PresentationalMetricCard`
+- ✅ All charts use `GenericTimeSeriesChartContainer` → `PresentationalTimeSeriesChart`  
+- ✅ Calendar heatmaps use `GenericCalendarHeatmapContainer` → `PresentationalCalendarHeatmap`
 
-**Charts (Time Series):**
-- `revenue_per_day` → GenericTimeSeriesChartContainer → PresentationalTimeSeriesChart ✅
-- `transactions_per_day` → GenericTimeSeriesChartContainer → PresentationalTimeSeriesChart ✅
-- `customers_per_day` → GenericTimeSeriesChartContainer → PresentationalTimeSeriesChart ✅
+### **Calendar Heatmap Refactor ✅ COMPLETED**
 
-**Features:**
-- ✅ Automatic year-over-year comparison
-- ✅ Filter integration with Redux
-- ✅ Mobile-responsive design  
-- ✅ Error handling and loading states
-- ✅ TypeScript type safety
-
----
-
-### **Revenue Tab 🔴 NOT ALIGNED**
-
-**Current Status:** Violates configuration-only architecture with unnecessary wrapper components
-
-**Major Architectural Issues:**
-- Creates wrapper components (`TotalRevenueMetric`, `AvgDailyRevenueMetric`, etc.) instead of direct container configuration
-- Uses `UniversalMetricCard` instead of `GenericMetricContainer` (violates smart/presentational separation)
-- Adds unnecessary component composition layer that Dashboard eliminates
-- 6 wrapper files that add no value - just pass props to `UniversalMetricCard`
-
-**Configuration vs Composition Violation:**
-```jsx
-// Current (WRONG): Creates wrapper components  
-<TotalRevenueMetric title={t('revenue.totalRevenue')} />
-<AvgDailyRevenueMetric title={t('revenue.avgDailyRevenue')} />
-
-// Should be (CORRECT): Direct container configuration
-<GenericMetricContainer title={t('revenue.totalRevenue')} metricId="total_revenue" />
-<GenericMetricContainer title={t('revenue.avgDailyRevenue')} metricId="avg_daily_revenue" />
+**Before (Anti-pattern):**
+```
+GenericCalendarHeatmapContainer → UniversalCalendarHeatmap (with Redux connections)
 ```
 
-**Required Changes:**
-1. **Eliminate wrapper components** - Replace with direct `GenericMetricContainer` configuration
-2. **Delete unnecessary files** - Remove all `/metrics/*.jsx` wrapper components  
-3. **Replace UniversalMetricCard** - Use `GenericMetricContainer` for proper smart/presentational separation
-4. **Complete TypeScript migration** - Convert to `.tsx` with proper interfaces
+**After (Correct pattern):**
+```
+GenericCalendarHeatmapContainer (Redux + processing) → PresentationalCalendarHeatmap (pure UI)
+```
 
----
+**Architectural Fixes:**
+- ✅ Moved Redux connections to container layer
+- ✅ Created pure presentational component
+- ✅ Proper TypeScript interfaces
+- ✅ Enhanced prop-based data flow
 
-### **Demographics Tab 🔴 NOT ALIGNED**
+### **Revenue Tab 🔴 REQUIRES ALIGNMENT**
 
-**Current Status:** Uses old component patterns, no Generic Containers
+**Current Issues:**
+- Creates unnecessary wrapper components
+- Uses `UniversalMetricCard` instead of generic containers
+- Missing TypeScript migration
+- Violates configuration-only principle
 
-**Major Issues:**
+### **Demographics Tab 🔴 REQUIRES ALIGNMENT**
+
+**Current Issues:**
 - No Generic Container usage
 - Custom hooks instead of normalized data hooks
 - Missing TypeScript types
 - No MetricId-driven architecture
 
-**Required Changes:**
-1. Replace all custom components with Generic Containers
-2. Implement `useDemographicsData()` hook following Dashboard pattern
-3. Add TypeScript interfaces
-4. Migrate to MetricId-driven data flow
+### **Competition Tab 🔴 REQUIRES ALIGNMENT**
 
----
-
-### **Competition Tab 🔴 NOT ALIGNED**
-
-**Current Status:** Custom implementation, not following established patterns
-
-**Major Issues:**
+**Current Issues:**
 - Custom metric and chart components
 - No Generic Container pattern
-- Special competition-specific logic hardcoded in components
+- Special competition-specific logic hardcoded
 - Missing data integration
-
-**Required Changes:**
-1. Create competition-specific container variants
-2. Implement competition data hooks
-3. Align with MetricId system
-4. Add TypeScript support
 
 ---
 
 ## 🛠️ GENERIC CONTAINER SPECIFICATIONS
 
-### **GenericMetricContainer**
+### **GenericMetricContainer.tsx**
 
-**Purpose:** Smart container for all scalar metric display (revenue, transactions, etc.)
+**Purpose:** Smart container for all scalar metric display
 
 ```tsx
 interface GenericMetricContainerProps {
@@ -296,47 +535,61 @@ interface GenericMetricContainerProps {
   metricId: string;        // API metric identifier  
   valueType: ValueType;    // 'currency' | 'number' | 'percentage'
   icon: React.ReactNode;   // Icon component
-  variant?: MetricVariant; // 'single' | 'detailed' | 'comparison' | 'competition'
+  variant?: MetricVariant; // 'single' | 'detailed' | 'comparison'
 }
 ```
 
 **Data Processing:**
-1. Connects to Redux store via `createMetricSelector(metricId)`
+1. Connects to Redux via `createMetricSelector(metricId)`
 2. Calculates YoY percentages via `createYoYChangeSelector(metricId)`
-3. Handles loading/error states
-4. Passes processed data to `PresentationalMetricCard`
+3. Handles loading/error states with enhanced selectors
+4. Validates data freshness and quality
+5. Passes processed data to `PresentationalMetricCard`
 
-### **GenericTimeSeriesChartContainer**  
+### **GenericTimeSeriesChartContainer.tsx**
 
-**Purpose:** Smart container for all time-based chart data (daily revenue, transactions, etc.)
+**Purpose:** Smart container for all time-based chart data
 
 ```tsx
 interface GenericTimeSeriesChartContainerProps {
   title: string;
   metricId: string;
-  selector: (state: any) => any;     // Redux selector function
+  selector: (state: RootState) => any;
   formatValue: (value: number) => string;
   showCompetitor: boolean;
   merchantLabel: string;
   hasCompetitorData: boolean;
-  filters?: Filters;
+  yAxisMode?: 'absolute' | 'percentage';
 }
 ```
 
-**Data Processing:**
-1. Fetches time series data via provided selector
-2. Transforms raw API data to chart format
-3. Handles timeline aggregation (daily → weekly → monthly)
-4. Calculates YoY percentages for each time period
-5. Passes chart-ready data to `PresentationalTimeSeriesChart`
+### **GenericCalendarHeatmapContainer.tsx** ✅ **RECENTLY REFACTORED**
+
+**Purpose:** Smart container for calendar heatmap visualization
+
+```tsx
+interface GenericCalendarHeatmapContainerProps {
+  title: string;
+  metricId: string;
+  valueLabel?: string;
+  showMerchantAndCompetition?: boolean;
+  dateRange?: { start: Date; end: Date } | null;
+}
+```
+
+**Refactoring Pattern Applied:**
+- ✅ Moved Redux connections from presentational component to container
+- ✅ Created proper TypeScript interfaces
+- ✅ Established clear data transformation layer
+- ✅ Pure presentational component with no store dependencies
 
 ---
 
-## 🎯 IMPLEMENTATION GUIDELINES
+## 🎯 IMPLEMENTATION PATTERNS & BEST PRACTICES
 
-### **Creating New Components (Follow Dashboard Pattern)**
+### **Creating New Components (Dashboard Pattern)**
 
-**Step 1: Direct Container Configuration (NOT wrapper components)**
+**Step 1: Direct Container Configuration**
 ```tsx
 // ✅ CORRECT: Direct container configuration in tab
 <GenericMetricContainer
@@ -352,23 +605,19 @@ const NewMetricComponent = ({ title }) => (
 );
 ```
 
-**Key Principle: Configuration Over Composition**
-- Tabs should directly configure containers with props
-- Avoid creating intermediate wrapper components
-- Each metric = one `GenericMetricContainer` configuration, not a new component file
-
 **Step 2: Add MetricId to Schema**
 ```typescript
-// src/data/apiSchema.ts
-export const METRIC_IDS = {
-  // ... existing metrics
-  NEW_METRIC: 'new_metric_id'
+// src/types/apiSchema.ts
+export const METRICS = {
+  SCALAR: {
+    // ... existing metrics
+    NEW_METRIC: 'new_metric_id'
+  }
 };
 ```
 
-**Step 3: Update Tab Data Hook**
+**Step 3: Update Data Hooks**
 ```typescript
-// src/hooks/useNormalizedData.ts
 export const useTabData = () => {
   const metrics = [
     'existing_metric',
@@ -382,20 +631,46 @@ export const useTabData = () => {
 };
 ```
 
-### **TypeScript Migration Checklist**
+### **Authentication Integration**
 
-1. **Convert .jsx to .tsx**: Change file extensions
-2. **Add Interface Definitions**: Props, data structures
-3. **Type Redux Selectors**: Proper typing for store access
-4. **Type Hook Returns**: Ensure type safety for data hooks
-5. **Type Component Props**: Full prop interface definitions
+**Hook Usage:**
+```tsx
+const YourComponent = () => {
+  const { shouldShowDashboard, userInfo } = useAuthState();
+  
+  if (!shouldShowDashboard) {
+    return null; // ProtectedRoute handles auth states
+  }
+  
+  return <div>Welcome, {userInfo?.name}</div>;
+};
+```
 
-### **Performance Best Practices**
+**API Calls:**
+```tsx
+// Use authenticated fetch wrapper
+const response = await apiCallJson('/api/ANALYTICS/QUERY', {
+  method: 'POST',
+  body: JSON.stringify(requestData)
+});
+```
 
-1. **Use createSelector**: Always memoize selectors that return objects
+### **TypeScript Refactoring Checklist**
+
+1. **Convert Extensions**: `.jsx` → `.tsx`
+2. **Add Interfaces**: Component props, data structures  
+3. **Type Redux State**: Store access and selectors
+4. **Type API Responses**: Request/response interfaces
+5. **Type Component Props**: Full prop definitions
+6. **Import Consolidation**: Use `apiSchema.ts` as primary source
+
+### **Performance Optimization**
+
+1. **Memoized Selectors**: Use `createSelector` for complex computations
 2. **Stable References**: Define constants outside components
-3. **Proper Dependencies**: Memoize useCallback/useEffect dependencies
-4. **Generic Containers**: Reuse containers instead of creating custom ones
+3. **Proper Dependencies**: Careful `useCallback`/`useEffect` dependencies
+4. **Container Reuse**: Prefer generic containers over custom components
+5. **Data Freshness**: Use validation selectors to avoid stale data
 
 ---
 
@@ -403,66 +678,131 @@ export const useTabData = () => {
 
 ### **File Organization**
 ```
-src/components/
-├── dashboard/
-│   └── Dashboard.tsx              # Tab component (TypeScript)
-├── revenue/  
-│   └── Revenue.jsx               # Tab component (needs TS migration)
-├── containers/                   # Smart containers
-│   ├── GenericMetricContainer.tsx
-│   └── GenericTimeSeriesChartContainer.tsx
-└── ui/                          # Presentational components
-    ├── metrics/
-    │   └── PresentationalMetricCard.tsx
-    └── charts/
-        └── PresentationalTimeSeriesChart.tsx
+src/
+├── components/
+│   ├── dashboard/
+│   │   └── Dashboard.tsx              # Tab (TypeScript)
+│   ├── containers/                    # Smart containers
+│   │   ├── GenericMetricContainer.tsx
+│   │   ├── GenericTimeSeriesChartContainer.tsx
+│   │   └── GenericCalendarHeatmapContainer.tsx
+│   ├── ui/                            # Presentational
+│   │   ├── metrics/
+│   │   │   └── PresentationalMetricCard.tsx
+│   │   └── charts/
+│   │       ├── PresentationalTimeSeriesChart.tsx
+│   │       └── PresentationalCalendarHeatmap.tsx
+│   ├── AuthenticationManager.tsx       # App-level auth
+│   └── ProtectedRoute.tsx             # Route protection
+├── types/
+│   ├── apiSchema.ts                   # Consolidated API types
+│   ├── filters.ts                     # Filter type authority
+│   ├── auth.ts                        # Authentication types
+│   └── components.ts                  # Component interfaces
+├── store/
+│   ├── slices/
+│   │   ├── authSlice.ts              # Authentication state
+│   │   ├── dataSlice.ts              # Metrics data
+│   │   └── filtersSlice.ts           # Filter state
+│   └── selectors/
+│       └── dataSelectors.ts          # Enhanced selectors
+├── utils/
+│   ├── auth.ts                       # Authentication utilities
+│   └── metricFilters.ts              # Filter management
+└── services/
+    ├── analyticsService.ts           # API integration
+    ├── userService.ts                # User management
+    └── normalization/                # Data processing
+        ├── apiNormalizer.ts
+        ├── scalarNormalizer.ts
+        ├── timeSeriesNormalizer.ts
+        └── categoricalNormalizer.ts
 ```
 
 ### **Naming Conventions**
 - **Smart Containers:** `Generic{ComponentType}Container`
 - **Presentational:** `Presentational{ComponentType}`
-- **Tab Components:** `{TabName}.tsx`
-- **Hooks:** `use{TabName}Data()`
-- **Selectors:** `create{DataType}Selector`
+- **Authentication:** `Auth{Purpose}` / `use{Auth}State`
+- **Hooks:** `use{TabName}Data()` / `use{Feature}State()`
+- **Selectors:** `create{DataType}Selector` / `select{Feature}`
+- **Services:** `{domain}Service.ts`
 
-### **Data Format Standards**
+### **Data Standards**
 - **Store Values:** Raw absolute values from API
 - **Percentage Precision:** 2 decimal places (15.67%)
 - **Currency Formatting:** Greek locale (€1,250,000.00)
-- **YoY Display:** "+15.3% from last year" format
+- **Date Format:** ISO 8601 strings
+- **Authentication:** JWT tokens with automatic refresh
 
 ---
 
-## 🚀 NEXT STEPS - TAB ALIGNMENT PLAN
+## 🚀 ARCHITECTURAL ROADMAP
 
-### **Phase 1: Revenue Tab Alignment**
-1. **Eliminate wrapper components** - Replace all wrapper components with direct `GenericMetricContainer` configuration in Revenue.tsx
-2. **Delete unnecessary files** - Remove `/metrics/TotalRevenueMetric.jsx`, `/metrics/AvgDailyRevenueMetric.jsx`, etc.
-3. **Replace UniversalMetricCard** - Use `GenericMetricContainer` → `PresentationalMetricCard` pattern
-4. **Complete TypeScript migration** - Convert Revenue.jsx → Revenue.tsx with proper interfaces
-5. **Test configuration-only approach** - Verify direct container configuration works like Dashboard
+### **Phase 1: Complete Current Refactors**
+1. ✅ **Calendar Heatmap Refactor** - COMPLETED
+2. ✅ **Type System Consolidation** - COMPLETED  
+3. ✅ **Enhanced Data Selectors** - COMPLETED
 
-### **Phase 2: Demographics Tab Implementation**  
-1. Replace all custom components with Generic Containers
-2. Implement proper `useDemographicsData()` hook
-3. Add missing MetricIds to API schema
-4. Full TypeScript implementation
+### **Phase 2: Tab Alignment (In Progress)**
+1. **Revenue Tab**: Eliminate wrapper components, use Generic Containers
+2. **Demographics Tab**: Implement Generic Container pattern
+3. **Competition Tab**: Align with MetricId system
 
-### **Phase 3: Competition Tab Implementation**
-1. Create competition-specific container variants or Generic Container configurations
-2. Implement competition data integration
-3. Align with established MetricId patterns
-4. Add comprehensive TypeScript support
+### **Phase 3: Advanced Features**
+1. **Performance Monitoring**: Add metrics freshness indicators
+2. **Error Recovery**: Enhanced error handling and retry logic
+3. **Caching Strategy**: Implement smart data caching
+4. **Testing Framework**: Component and integration test suite
 
 ### **Success Criteria**
-- All tabs use **configuration-only** approach - direct `GenericMetricContainer` setup
-- **No wrapper components** - eliminate unnecessary abstraction layers
-- All tabs follow `GenericMetricContainer` → `PresentationalMetricCard` pattern
-- All tabs fully TypeScript migrated  
-- Consistent MetricId-driven data flow
-- No custom data fetching outside of established hooks
-- Configuration over composition principle maintained across all tabs
+- ✅ All tabs use configuration-only approach
+- ✅ No wrapper components or unnecessary abstractions  
+- ✅ Full TypeScript coverage across codebase
+- ✅ Consistent authentication integration
+- ✅ Enhanced data quality validation
+- ✅ Smart/presentational separation maintained
+- ✅ MetricId-driven data flow throughout
 
 ---
 
-This guide represents the actual implementation patterns established in the Dashboard tab and serves as the blueprint for aligning all other tabs with this proven architecture.
+## 🔧 TROUBLESHOOTING & DEBUGGING
+
+### **Authentication Issues**
+```bash
+# Check auth status
+curl -b cookies.txt /auth/status
+
+# Debug user info
+curl -b cookies.txt /userinfo
+
+# Monitor auth errors in Redux DevTools
+state.auth.authError
+state.auth.serviceError
+```
+
+### **Data Flow Issues**
+```typescript
+// Debug metric data availability
+const metricData = useSelector(createMetricSelector('total_revenue'));
+const isValid = useSelector(createHasValidDataSelector('total_revenue'));
+const summary = useSelector(selectMetricsSummary);
+```
+
+### **Component Testing**
+```tsx
+// Test smart container in isolation
+<Provider store={testStore}>
+  <GenericMetricContainer metricId="test_metric" />
+</Provider>
+
+// Test presentational component
+<PresentationalMetricCard 
+  merchantData={{ value: 1000, change: 15.5 }}
+  isLoading={false}
+  error={null}
+/>
+```
+
+---
+
+This guide represents the complete architectural implementation of the NBG Merchant Insights Dashboard, including authentication, data flow, component patterns, and recent refactoring work. All future development should follow these established patterns and principles.

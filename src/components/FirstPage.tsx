@@ -1,25 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { UniversalMetricCard, TimeSeriesChart, UniversalCalendarHeatmap } from './ui';
+import { TimeSeriesChart, UniversalCalendarHeatmap } from './ui';
+import GenericMetricContainer from './containers/GenericMetricContainer';
 import { METRIC_VARIANTS } from '../utils/constants';
 
-// Static competition metrics for demo
-const competitionMetrics = {
-  revenue: {
-    merchantChangeFromLastYear: 15.3,
-    merchantVsCompetition: 8.7,
-    competitionChangeFromLastYear: 6.6
-  },
-  transactions: {
-    merchantChangeFromLastYear: 12.1,
-    merchantVsCompetition: 5.4,
-    competitionChangeFromLastYear: 6.7
-  },
-  avgTransactionAmount: {
-    merchantChangeFromLastYear: 2.8,
-    merchantVsCompetition: 3.2,
-    competitionChangeFromLastYear: -0.4
-  }
-};
 
 const FirstPage = ({ onInterestClick }) => {
   const { t } = useTranslation();
@@ -95,48 +78,30 @@ const FirstPage = ({ onInterestClick }) => {
           </h3>
           <div className="space-y-4">
             {/* Revenue Metric */}
-            <UniversalMetricCard
-              variant={METRIC_VARIANTS.competition}
+            <GenericMetricContainer
               title={t('competition.revenue')}
+              metricId="total_revenue"
+              valueType="currency"
+              variant={METRIC_VARIANTS.competition}
               icon={<RevenueIcon />}
-              merchantData={{
-                value: competitionMetrics.revenue.merchantChangeFromLastYear
-              }}
-              competitorData={{
-                value: competitionMetrics.revenue.merchantVsCompetition,
-                competitorChange: competitionMetrics.revenue.competitionChangeFromLastYear
-              }}
-              metricId="rewarded_amount"
             />
 
             {/* Transactions Metric */}
-            <UniversalMetricCard
-              variant={METRIC_VARIANTS.competition}
+            <GenericMetricContainer
               title={t('competition.transactions')}
+              metricId="total_transactions"
+              valueType="number"
+              variant={METRIC_VARIANTS.competition}
               icon={<TransactionsIcon />}
-              merchantData={{
-                value: competitionMetrics.transactions.merchantChangeFromLastYear
-              }}
-              competitorData={{
-                value: competitionMetrics.transactions.merchantVsCompetition,
-                competitorChange: competitionMetrics.transactions.competitionChangeFromLastYear
-              }}
-              metricId="rewarded_amount"
             />
 
             {/* Average Transaction Amount Metric */}
-            <UniversalMetricCard
-              variant={METRIC_VARIANTS.competition}
+            <GenericMetricContainer
               title={t('competition.avgTransactionAmount')}
+              metricId="avg_ticket_per_user"
+              valueType="currency"
+              variant={METRIC_VARIANTS.competition}
               icon={<AvgTransactionIcon />}
-              merchantData={{
-                value: competitionMetrics.avgTransactionAmount.merchantChangeFromLastYear
-              }}
-              competitorData={{
-                value: competitionMetrics.avgTransactionAmount.merchantVsCompetition,
-                competitorChange: competitionMetrics.avgTransactionAmount.competitionChangeFromLastYear
-              }}
-              metricId="rewarded_amount"
             />
           </div>
         </div>
