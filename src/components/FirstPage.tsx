@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { TimeSeriesChart, UniversalCalendarHeatmap } from './ui';
 import GenericMetricContainer from './containers/GenericMetricContainer';
+import GenericTimeSeriesChartContainer from './containers/GenericTimeSeriesChartContainer';
+import GenericCalendarHeatmapContainer from './containers/GenericCalendarHeatmapContainer';
 import { METRIC_VARIANTS } from '../utils/constants';
+import { formatCurrency } from '../utils/formatters';
 
 
 const FirstPage = ({ onInterestClick }) => {
@@ -112,13 +114,13 @@ const FirstPage = ({ onInterestClick }) => {
             Revenue Trends Preview
           </h3>
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <TimeSeriesChart
-              filters={defaultFilters}
-              dataType="revenue"
+            <GenericTimeSeriesChartContainer
               title={t('dashboard.revenue')}
-              showComparison={false}
-              chartType="line"
-              timeline="daily"
+              metricId="revenue_per_day"
+              formatValue={formatCurrency}
+              showCompetitor={false}
+              merchantLabel="Your Business"
+              hasCompetitorData={false}
             />
           </div>
         </div>
@@ -129,11 +131,10 @@ const FirstPage = ({ onInterestClick }) => {
             Monthly Turnover Heatmap Preview
           </h3>
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <UniversalCalendarHeatmap 
+            <GenericCalendarHeatmapContainer
               metricId="revenue_per_day"
               title={t('competition.monthlyTurnover')}
               valueLabel="Turnover"
-              filters={defaultFilters}
             />
           </div>
         </div>
