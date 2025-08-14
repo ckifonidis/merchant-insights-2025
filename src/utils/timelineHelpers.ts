@@ -47,8 +47,8 @@ export const processTimelineData = (
 };
 
 const processDailyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
-  // For daily, just return the data as is but limit to reasonable amount
-  return data.slice(-30).map(item => ({
+  // For daily, return all filtered data
+  return data.map(item => ({
     ...item,
     displayDate: format(new Date(item.date), 'dd/MM/yyyy')
   }));
@@ -83,7 +83,6 @@ const processWeeklyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] =
 
   return Object.keys(weeklyGroups)
     .sort()
-    .slice(-20) // Last 20 weeks
     .map(weekKey => {
       const group = weeklyGroups[weekKey];
       const weekStart = new Date(weekKey);
@@ -92,11 +91,11 @@ const processWeeklyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] =
       return {
         date: weekKey,
         displayDate: `${format(weekStart, 'dd/MM')} - ${format(weekEnd, 'dd/MM/yyyy')}`,
-        merchantTransactions: Math.round(average(group.merchantTransactions)),
-        competitorTransactions: Math.round(average(group.competitorTransactions)),
-        merchantRevenue: Math.round(average(group.merchantRevenue)),
-        competitorRevenue: Math.round(average(group.competitorRevenue)),
-        merchantCustomers: Math.round(average(group.merchantCustomers))
+        merchantTransactions: Math.round(sum(group.merchantTransactions)),
+        competitorTransactions: Math.round(sum(group.competitorTransactions)),
+        merchantRevenue: Math.round(sum(group.merchantRevenue)),
+        competitorRevenue: Math.round(sum(group.competitorRevenue)),
+        merchantCustomers: Math.round(sum(group.merchantCustomers))
       };
     });
 };
@@ -130,7 +129,6 @@ const processMonthlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] 
 
   return Object.keys(monthlyGroups)
     .sort()
-    .slice(-12) // Last 12 months
     .map(monthKey => {
       const group = monthlyGroups[monthKey];
       const monthStart = new Date(monthKey + '-01');
@@ -176,7 +174,6 @@ const processQuarterlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[
 
   return Object.keys(quarterlyGroups)
     .sort()
-    .slice(-8) // Last 8 quarters
     .map(quarterKey => {
       const group = quarterlyGroups[quarterKey];
       
@@ -225,7 +222,6 @@ const processYearlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] =
 
   return Object.keys(yearlyGroups)
     .sort()
-    .slice(-3) // Last 3 years
     .map(yearKey => {
       const group = yearlyGroups[yearKey];
       

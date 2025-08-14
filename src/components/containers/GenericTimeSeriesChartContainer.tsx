@@ -5,7 +5,8 @@ import {
   selectDataLoading,
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
-import { processTimelineData } from '../../utils/timelineHelpers';
+import { processTimelineData, getAvailableTimelines } from '../../utils/timelineHelpers';
+import { CHART_CONFIG } from '../../utils/constants';
 import type { TimelineType } from '../ui/charts/PresentationalTimeSeriesChart';
 import type { RootState } from '../../store/index';
 
@@ -59,6 +60,27 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
   // Check for specific loading/error states
   const isLoading = loading?.metrics || loading?.specificMetrics?.[metricId] || false;
   const error = errors?.metrics || errors?.specificMetrics?.[metricId] || null;
+
+  // Calculate available timeline options based on date range
+  const availableTimelineOptions = useMemo(() => {
+    // Get all possible timeline options from constants
+    const allOptions = CHART_CONFIG.timelines.map(timeline => ({
+      value: timeline.value,
+      label: timeline.labelKey // Pass labelKey for translation in presentational component
+    }));
+    
+    // If dateRange is available, filter based on availability
+    if (filters?.dateRange?.start && filters?.dateRange?.end) {
+      const availableTimelines = getAvailableTimelines(
+        filters.dateRange.start,
+        filters.dateRange.end
+      );
+      return allOptions.filter(option => availableTimelines.includes(option.value));
+    }
+    
+    // Otherwise return all options
+    return allOptions;
+  }, [filters?.dateRange]);
 
   // Transform raw store data to chart format
   const chartData = useMemo(() => {
@@ -185,6 +207,7 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
       error={error}
       onTimelineChange={setTimeline}
       timeline={timeline}
+      availableTimelineOptions={availableTimelineOptions}
     />
   );
 };
