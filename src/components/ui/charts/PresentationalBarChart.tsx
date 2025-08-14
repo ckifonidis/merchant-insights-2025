@@ -18,9 +18,9 @@ interface PresentationalBarChartProps {
   competitorColor?: string;
   yAxisLabel?: string;
   showAbsoluteValues?: boolean;
-  note?: string;
+  note?: string | undefined;
   formatValue?: (value: number) => string;
-  formatTooltipValue?: (value: number) => string;
+  formatTooltipValue?: ((value: number) => string) | undefined;
   loading?: boolean;
   error?: string | null;
 }

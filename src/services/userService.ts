@@ -1,5 +1,4 @@
 import { apiCall } from '../utils/auth.js';
-import { API_ENDPOINTS } from '../data/apiSchema.js';
 
 /**
  * User Service - Functional API for user enrollment and service access checks
@@ -64,6 +63,13 @@ interface MerchantDetailsResponse {
   exception?: any;
   messages?: any[];
 }
+
+const API_ENDPOINTS = {
+  ANALYTICS_QUERY: '/api/ANALYTICS/QUERY',
+  AUTHORIZATION_CHECK: '/api/authorization/checkUserStatus',
+  CONFIGURATION_ADMIN: '/api/CONFIGURATION/ADMIN/GET',
+  CONFIGURATION_MERCHANT: '/api/CONFIGURATION/MERCHANT/GET'
+};
 
 /**
  * Generate a GUID for request IDs

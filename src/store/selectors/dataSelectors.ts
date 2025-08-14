@@ -4,9 +4,10 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { METRIC_IDS } from '../../data/apiSchema.js';
+import { METRIC_IDS } from '../../types/apiSchema';
+import { getMetricStoreKey } from '../../utils/metricKeys.js';
 import type { RootState } from '../index';
-import type { MetricData } from '../../types/api';
+import type { MetricData } from '../../types/apiSchema';
 
 interface MetricsState {
   [metricId: string]: MetricData;
@@ -77,10 +78,24 @@ export const selectMetricsError = (state: RootState): string | null => state.dat
 // Individual Metric Selectors
 // =============================================================================
 
+// Context-aware metric key resolver - uses utility functions for compound keys
+const resolveMetricKey = (metricId: string, context?: string): string => {
+  return getMetricStoreKey(metricId, context);
+};
+
 // Generic metric selector factory
 export const createMetricSelector = (metricId: string) => createSelector(
   [selectAllMetrics],
   (metrics: MetricsState): MetricData | null => metrics[metricId] || null
+);
+
+// Context-aware metric selector factory
+export const createContextAwareMetricSelector = (metricId: string, context?: string) => createSelector(
+  [selectAllMetrics],
+  (metrics: MetricsState): MetricData | null => {
+    const resolvedKey = resolveMetricKey(metricId, context);
+    return metrics[resolvedKey] || metrics[metricId] || null;
+  }
 );
 
 // Specific metric selectors for commonly used metrics
@@ -102,6 +117,10 @@ export const selectCustomersByGender = createMetricSelector(METRIC_IDS.CONVERTED
 export const selectCustomersByAge = createMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_AGE);
 export const selectCustomersByInterest = createMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_INTEREST);
 export const selectRevenueByChannel = createMetricSelector(METRIC_IDS.REVENUE_BY_CHANNEL);
+
+// Context-specific selectors for metrics that require compound keys
+export const selectCustomersByInterestRevenue = createContextAwareMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_INTEREST, 'revenue');
+export const selectCustomersByInterestDemographics = createContextAwareMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_INTEREST, 'demographics');
 
 // =============================================================================
 // Entity-Specific Selectors (Merchant/Competitor)

@@ -5,13 +5,9 @@
  */
 
 import { 
-  API_ENDPOINTS, 
-  ANALYTICS_PROVIDER_IDS 
-} from '../data/apiSchema.js';
-import { 
   getMultipleMetricFiltersForContext, 
   validateMetricFilters 
-} from '../data/metricFilters.js';
+} from '../utils/metricFilters.js';
 import { getPreviousYearDateRange } from '../utils/dateHelpers.js';
 import { apiCallJson, handleAuthError } from '../utils/auth.js';
 
@@ -21,7 +17,7 @@ interface FilterValue {
   value: string;
 }
 
-interface AnalyticsRequest {
+interface AnalyticsRequestPayload {
   userID: string;
   startDate: string;
   endDate: string;
@@ -30,6 +26,14 @@ interface AnalyticsRequest {
   filterValues: FilterValue[];
   metricParameters: Record<string, any>;
   merchantId: string;
+}
+
+interface AnalyticsRequest {
+  header: {
+    ID: string;
+    application: string;
+  };
+  payload: AnalyticsRequestPayload;
 }
 
 interface FetchOptions {
@@ -61,16 +65,35 @@ interface BuildRequestParams {
   context?: string | null;
 }
 
-// API Configuration
-const API_CONFIG = {
-  TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 180000, // 3 minutes default timeout for analytics
-  DEBUG: import.meta.env.VITE_DEBUG_API === 'true' || import.meta.env.DEV
+// API Configuration with proper typing and validation
+interface ApiConfig {
+  TIMEOUT: number;
+  DEBUG: boolean;
+}
+
+const POST_PROMOTION_ANALYTICS = '56f9cf99-3727-4f2f-bf1c-58dc532ebaf5';
+
+const API_ENDPOINTS = {
+  ANALYTICS_QUERY: '/api/ANALYTICS/QUERY',
+  AUTHORIZATION_CHECK: '/api/authorization/checkUserStatus',
+  CONFIGURATION_ADMIN: '/api/CONFIGURATION/ADMIN/GET',
+  CONFIGURATION_MERCHANT: '/api/CONFIGURATION/MERCHANT/GET'
 };
 
+const API_CONFIG: ApiConfig = {
+  TIMEOUT: (() => {
+    const envTimeout = import.meta.env?.VITE_API_TIMEOUT;
+    const parsed = envTimeout ? parseInt(envTimeout, 10) : 180000;
+    return isNaN(parsed) ? 180000 : parsed; // 3 minutes default
+  })(),
+  DEBUG: import.meta.env?.VITE_DEBUG_API === 'true' || import.meta.env?.DEV === true
+};
 
 class AnalyticsService {
+  private readonly config: ApiConfig;
+
   constructor() {
-    this.providerIds = ANALYTICS_PROVIDER_IDS;
+    this.config = API_CONFIG;
   }
 
   /**
@@ -110,7 +133,9 @@ class AnalyticsService {
     }
 
     // Calculate previous year date range
+    console.log('🔍 DEBUG: Filters received in fetchTabDataWithYearComparison:', filters);
     const previousYearDates = getPreviousYearDateRange(filters.startDate, filters.endDate);
+    console.log('🔍 DEBUG: Previous year dates calculated:', previousYearDates);
     
     if (!previousYearDates.startDate || !previousYearDates.endDate) {
       const currentData = await this.fetchTabData(tabName, metricIDs, filters, options);
@@ -127,6 +152,15 @@ class AnalyticsService {
       ...filters,
       metricSpecificFilters,
       context: autoInferContext ? tabName : null
+    });
+    
+    console.log('🔍 DEBUG: Current request startDate/endDate:', {
+      startDate: filters.startDate,
+      endDate: filters.endDate
+    });
+    console.log('🔍 DEBUG: Previous request startDate/endDate:', {
+      startDate: previousYearDates.startDate,
+      endDate: previousYearDates.endDate
     });
 
     const previousRequest = this.buildAnalyticsRequest({
@@ -156,18 +190,20 @@ class AnalyticsService {
         }
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       
-      // Fallback: try to get at least current year data
+      // Implement progressive fallback strategy for business continuity
       try {
         const currentData = await this.fetchTabData(tabName, metricIDs, filters, options);
         return {
           current: currentData,
           previous: null,
-          error: `Previous year data unavailable: ${error.message}`
+          error: `Previous year data unavailable: ${errorMessage}`
         };
-      } catch (fallbackError) {
-        throw new Error(`Both current and previous year data failed: ${fallbackError.message}`);
+      } catch (fallbackError: unknown) {
+        const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown fallback error';
+        throw new Error(`Critical failure - both current and previous year data failed: ${errorMessage} | ${fallbackMessage}`);
       }
     }
   }
@@ -193,7 +229,7 @@ class AnalyticsService {
     // Always include required data_origin filter
     const requiredFilters = [
       {
-        providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+        providerId: POST_PROMOTION_ANALYTICS,
         filterId: "data_origin",
         value: "own_data"
       }
@@ -220,7 +256,7 @@ class AnalyticsService {
         userID,
         startDate,
         endDate,
-        providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+        providerId: POST_PROMOTION_ANALYTICS,
         metricIDs,
         filterValues: combinedFilters,
         metricParameters,
@@ -261,7 +297,7 @@ class AnalyticsService {
       // Convert to API format
       Object.entries(filters).forEach(([filterId, value]) => {
         metricFilters.push({
-          providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+          providerId: POST_PROMOTION_ANALYTICS,
           filterId,
           value: String(value)
         });
@@ -276,11 +312,11 @@ class AnalyticsService {
   }
 
   /**
-   * Main analytics query method
+   * Main analytics query method with comprehensive error handling
    */
   async queryAnalytics(request: AnalyticsRequest): Promise<any> {
     try {
-      if (API_CONFIG.DEBUG) {
+      if (this.config.DEBUG) {
         console.log('🔍 Analytics API request:', {
           endpoint: `${API_ENDPOINTS.ANALYTICS_QUERY}`,
           metricIDs: request.payload?.metricIDs,
@@ -291,10 +327,10 @@ class AnalyticsService {
       const response = await apiCallJson(`${API_ENDPOINTS.ANALYTICS_QUERY}`, {
         method: 'POST',
         body: JSON.stringify(request),
-        timeout: API_CONFIG.TIMEOUT
+        timeout: this.config.TIMEOUT
       });
 
-      if (API_CONFIG.DEBUG) {
+      if (this.config.DEBUG) {
         console.log('✅ Analytics API response received:', {
           hasPayload: !!response?.payload,
           dataPoints: response?.payload?.data?.length || 0
@@ -302,16 +338,63 @@ class AnalyticsService {
       }
 
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ Analytics API call failed:', error);
       
-      // Handle authentication errors
-      if (error.status === 401) {
-        handleAuthError(error);
-        return null;
+      // Business-logic-aware error categorization and recovery
+      if (error && typeof error === 'object' && 'status' in error) {
+        const statusCode = (error as any).status;
+        
+        switch (statusCode) {
+          case 401:
+            // Authentication failure - delegate to auth handler
+            handleAuthError(error);
+            return null;
+            
+          case 403:
+            // Authorization failure - user lacks permissions
+            throw new Error('Access denied: Your account does not have permission to access this analytics data. Please contact your administrator.');
+            
+          case 429:
+            // Rate limiting - implement exponential backoff
+            const retryAfter = (error as any).headers?.['retry-after'] || '60';
+            throw new Error(`Rate limit exceeded. Please wait ${retryAfter} seconds before retrying.`);
+            
+          case 400:
+            // Bad request - likely invalid filters or metric IDs
+            const errorMessage = (error as any).message || 'Invalid request parameters';
+            throw new Error(`Request validation failed: ${errorMessage}. Please check your filter settings and try again.`);
+            
+          case 500:
+          case 502:
+          case 503:
+          case 504:
+            // Server errors - suggest retry with graceful degradation
+            throw new Error('Analytics service is temporarily unavailable. Data may be displayed from cache. Please try again in a few moments.');
+            
+          default:
+            // Unknown HTTP error
+            const message = error instanceof Error ? error.message : `HTTP ${statusCode} error`;
+            throw new Error(`Analytics service error: ${message}`);
+        }
       }
-
-      throw error;
+      
+      // Network or other non-HTTP errors
+      if (error instanceof Error) {
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          throw new Error('Network connection failed. Please check your internet connection and try again.');
+        }
+        
+        if (error.name === 'AbortError' || error.message.includes('timeout')) {
+          throw new Error(`Request timed out after ${this.config.TIMEOUT / 1000} seconds. The analytics service may be experiencing high load.`);
+        }
+        
+        // Re-throw with business context
+        throw new Error(`Analytics data retrieval failed: ${error.message}`);
+      }
+      
+      // Fallback for unknown error types
+      throw new Error('An unexpected error occurred while retrieving analytics data. Please try again.');
     }
   }
 
@@ -330,16 +413,16 @@ export const analyticsService = new AnalyticsService();
 // Note: buildAnalyticsRequest is now only available as a class method
 // Use analyticsService.buildAnalyticsRequest() for full feature support including metric-specific filters
 
-export const buildFilterValue = (filterId, value) => {
+export const buildFilterValue = (filterId: string, value: string): FilterValue => {
   return {
-    providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+    providerId: POST_PROMOTION_ANALYTICS,
     filterId,
     value
   };
 };
 
 // Generate a new GUID for request headers
-export const generateGUID = () => {
+export const generateGUID = (): string => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);

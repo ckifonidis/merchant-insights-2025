@@ -3,8 +3,8 @@
  */
 
 import React from 'react';
-import { MetricId } from './analytics';
-import { ChartType, TimelineAggregation, ChartColors } from './charts';
+import { MetricId } from './constants';
+import { ChartColors } from './charts';
 
 // Base component props
 export interface BaseComponentProps {
@@ -39,11 +39,6 @@ export interface MetricCardProps {
   className?: string;
 }
 
-// Universal metric card props
-export interface UniversalMetricCardProps extends MetricCardProps {
-  loading?: boolean;
-  error?: string | null;
-}
 
 // Change indicator props
 export interface ChangeIndicatorProps {
@@ -97,12 +92,4 @@ export interface BaseChartProps {
   loading?: boolean;
   error?: string | null;
   className?: string;
-}
-
-// Bespoke chart component props (tab-specific)
-export interface BespokeChartProps extends BaseChartProps {
-  metricId: MetricId;
-  colors?: ChartColors;
-  formatValue?: (value: number) => string;
-  formatTooltipValue?: (value: number) => string;
 }

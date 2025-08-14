@@ -3,13 +3,35 @@
  * Utility functions for date calculations and year-over-year comparisons
  */
 
+// TypeScript interfaces for date operations
+export interface DateRange {
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export interface ValidDateRange {
+  startDate: string;
+  endDate: string;
+}
+
+export interface DateCalculationResult {
+  current: ValidDateRange;
+  previous: DateRange;
+}
+
+export interface DateFormatOptions {
+  year?: 'numeric' | '2-digit';
+  month?: 'numeric' | '2-digit' | 'long' | 'short' | 'narrow';
+  day?: 'numeric' | '2-digit';
+}
+
 /**
  * Calculate previous year date range based on current date range
- * @param {string} startDate - Current start date in YYYY-MM-DD format
- * @param {string} endDate - Current end date in YYYY-MM-DD format
- * @returns {object} Previous year date range
+ * @param startDate - Current start date in YYYY-MM-DD format
+ * @param endDate - Current end date in YYYY-MM-DD format
+ * @returns Previous year date range
  */
-export const getPreviousYearDateRange = (startDate, endDate) => {
+export const getPreviousYearDateRange = (startDate: string, endDate: string): DateRange => {
   if (!startDate || !endDate) {
     console.warn('getPreviousYearDateRange: Invalid date inputs', { startDate, endDate });
     return { startDate: null, endDate: null };
@@ -53,24 +75,24 @@ export const getPreviousYearDateRange = (startDate, endDate) => {
 
 /**
  * Calculate the number of days between two dates
- * @param {string} startDate - Start date in YYYY-MM-DD format
- * @param {string} endDate - End date in YYYY-MM-DD format
- * @returns {number} Number of days
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @returns Number of days
  */
-export const getDaysBetween = (startDate, endDate) => {
+export const getDaysBetween = (startDate: string, endDate: string): number => {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const diffTime = Math.abs(end - start);
+  const diffTime = Math.abs(end.getTime() - start.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 /**
  * Format date for display
- * @param {string} dateString - Date in YYYY-MM-DD format
- * @param {string} locale - Locale for formatting (default: 'en-US')
- * @returns {string} Formatted date
+ * @param dateString - Date in YYYY-MM-DD format
+ * @param locale - Locale for formatting (default: 'en-US')
+ * @returns Formatted date
  */
-export const formatDateForDisplay = (dateString, locale = 'en-US') => {
+export const formatDateForDisplay = (dateString: string, locale: string = 'en-US'): string => {
   if (!dateString) return '';
   
   try {
@@ -88,11 +110,11 @@ export const formatDateForDisplay = (dateString, locale = 'en-US') => {
 
 /**
  * Check if a date range is valid
- * @param {string} startDate - Start date in YYYY-MM-DD format
- * @param {string} endDate - End date in YYYY-MM-DD format
- * @returns {boolean} True if valid
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @returns True if valid
  */
-export const isValidDateRange = (startDate, endDate) => {
+export const isValidDateRange = (startDate: string, endDate: string): boolean => {
   if (!startDate || !endDate) return false;
   
   try {
@@ -109,11 +131,11 @@ export const isValidDateRange = (startDate, endDate) => {
 
 /**
  * Get date range period description
- * @param {string} startDate - Start date in YYYY-MM-DD format
- * @param {string} endDate - End date in YYYY-MM-DD format
- * @returns {string} Description like "30 days", "3 months", etc.
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @returns Description like "30 days", "3 months", etc.
  */
-export const getDateRangePeriod = (startDate, endDate) => {
+export const getDateRangePeriod = (startDate: string, endDate: string): string => {
   if (!isValidDateRange(startDate, endDate)) return 'Invalid range';
   
   const days = getDaysBetween(startDate, endDate);
@@ -127,12 +149,12 @@ export const getDateRangePeriod = (startDate, endDate) => {
 
 /**
  * Generate a cache key for date-based requests
- * @param {string} startDate - Start date in YYYY-MM-DD format  
- * @param {string} endDate - End date in YYYY-MM-DD format
- * @param {string} suffix - Optional suffix
- * @returns {string} Cache key
+ * @param startDate - Start date in YYYY-MM-DD format  
+ * @param endDate - End date in YYYY-MM-DD format
+ * @param suffix - Optional suffix
+ * @returns Cache key
  */
-export const generateDateCacheKey = (startDate, endDate, suffix = '') => {
+export const generateDateCacheKey = (startDate: string, endDate: string, suffix: string = ''): string => {
   return `${startDate}_${endDate}${suffix ? `_${suffix}` : ''}`;
 };
 
@@ -144,4 +166,6 @@ export const DATE_CONSTANTS = {
   DAYS_IN_MONTH: 30, // Approximate
   DAYS_IN_YEAR: 365,
   MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24
-};
+} as const;
+
+export type DateConstants = typeof DATE_CONSTANTS;

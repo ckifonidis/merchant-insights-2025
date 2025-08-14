@@ -13,10 +13,8 @@ import {
   selectMetricsData,
   selectMetricsLoading,
   selectMetricsError,
-  createMetricCardDataSelector,
-  createTimeSeriesChartDataSelector,
-  createCategoricalChartDataSelector
 } from '../store/selectors/dataSelectors.js';
+import { createMetricKeyMapping } from '../utils/metricKeys.js';
 import { 
   selectAPIRequestParams,
   selectFiltersChanged,
@@ -25,7 +23,14 @@ import {
 } from '../store/slices/filtersSlice.js';
 import { selectHasServiceAccess } from '../store/slices/authSlice.js';
 import type { RootState, AppDispatch } from '../store/index';
-import type { MetricData } from '../types/api';
+// Hook return type interfaces
+
+interface MetricDataResult {
+  isLoading: boolean;
+  error: string | null;
+  fetchData: () => void;
+  refetch: () => void;
+}
 
 // =============================================================================
 // Core Generic Hook - Replaces all specialized variants
@@ -45,7 +50,7 @@ interface UseMetricDataOptions {
  * Replaces: useMetricsData, useMetricCardData, useTimeSeriesChartData, 
  *          useCategoricalChartData, and all their ReadOnly variants
  */
-export const useMetricData = (metricIds: string | string[] | null, options: UseMetricDataOptions = {}) => {
+export const useMetricData = (metricIds: string | string[] | null, options: UseMetricDataOptions = {}): MetricDataResult => {
   const dispatch = useDispatch<AppDispatch>();
   const {
     autoFetch = false,
@@ -62,18 +67,25 @@ export const useMetricData = (metricIds: string | string[] | null, options: UseM
   const filtersChanged = useSelector((state: RootState) => selectFiltersChanged(state));
   const selectedTab = useSelector((state: RootState) => selectSelectedTab(state));
   const hasServiceAccess = useSelector((state: RootState) => selectHasServiceAccess(state));
+  const userID = useSelector((state: RootState) => state.userConfig?.userId);
 
   // Fetch functions
   const fetchData = useCallback(() => {
     if (!metricIds || metricIds.length === 0) return;
+    if (!userID) {
+      console.warn('Cannot fetch metrics: userID not available');
+      return;
+    }
 
     const fetchAction = yearOverYear ? fetchMetricsDataWithYearComparison : fetchMetricsData;
     dispatch(fetchAction({ 
       metricIDs: Array.isArray(metricIds) ? metricIds : [metricIds], 
       filters: apiRequestParams, 
-      options: fetchOptions 
+      options: fetchOptions,
+      userID,
+      context: fetchOptions.context // Pass context for compound key generation
     }));
-  }, [dispatch, metricIds, apiRequestParams, yearOverYear, fetchOptions]);
+  }, [dispatch, metricIds, apiRequestParams, yearOverYear, fetchOptions, userID]);
 
   // Auto-fetch on filter changes
   useEffect(() => {
@@ -85,48 +97,38 @@ export const useMetricData = (metricIds: string | string[] | null, options: UseM
 
   // Initial fetch when user is authenticated and has service access
   useEffect(() => {
-    if (!hasServiceAccess || !autoFetch || isLoading || !metricIds) return;
+    if (!hasServiceAccess || !autoFetch || isLoading || !metricIds || !userID) return;
     
     // Check if we have data for ALL required metrics for this tab
     const requiredMetrics = Array.isArray(metricIds) ? metricIds : [metricIds];
-    const hasAllRequiredData = requiredMetrics.every(metricId => allMetricsData[metricId]);
+    
+    // Create mapping of original metric IDs to their store keys (compound keys if needed)
+    const keyMapping = createMetricKeyMapping(requiredMetrics, fetchOptions.context);
+    
+    // Check if we have data for all metrics using their correct store keys
+    const hasAllRequiredData = requiredMetrics.every(metricId => {
+      const storeKey = keyMapping[metricId];
+      const hasData = allMetricsData[storeKey];
+      
+      console.log(`🔍 Data check for ${metricId}:`, {
+        originalId: metricId,
+        storeKey: storeKey,
+        hasData: !!hasData,
+        context: fetchOptions.context
+      });
+      
+      return hasData;
+    });
     
     if (!hasAllRequiredData) {
-      console.log('🔄 Initial/tab-change data fetch for metrics:', requiredMetrics, 'on tab:', selectedTab);
+      console.log('🔄 Initial/tab-change data fetch for metrics:', requiredMetrics, 'on tab:', selectedTab, 'context:', fetchOptions.context);
       fetchData();
     }
-  }, [hasServiceAccess, autoFetch, isLoading, metricIds, allMetricsData, selectedTab, fetchData]);
+  }, [hasServiceAccess, autoFetch, isLoading, metricIds, allMetricsData, selectedTab, fetchData, userID, fetchOptions.context]);
 
   // Get processed data based on selector type
-  const getData = useCallback(() => {
-    if (!metricIds) return null;
-
-    const singleMetricId = Array.isArray(metricIds) ? metricIds[0] : metricIds;
-    
-    switch (selector) {
-      case 'card':
-        // Note: This approach with useSelector inside useCallback is not ideal
-        // but maintained for compatibility. In production, consider restructuring.
-        return null; // TODO: Refactor to avoid useSelector in callback
-      case 'timeSeries':
-        return null; // TODO: Refactor to avoid useSelector in callback
-      case 'categorical':
-        return null; // TODO: Refactor to avoid useSelector in callback
-      default:
-        // Raw data
-        if (Array.isArray(metricIds)) {
-          const result: Record<string, MetricData> = {};
-          metricIds.forEach(id => {
-            if (allMetricsData[id]) result[id] = allMetricsData[id];
-          });
-          return result;
-        }
-        return allMetricsData[metricIds] || null;
-    }
-  }, [metricIds, selector, allMetricsData]);
 
   return {
-    data: getData(),
     isLoading,
     error,
     fetchData,
@@ -175,7 +177,8 @@ export const useRevenueData = () => {
 
   return useMetricData(revenueMetrics, { 
     autoFetch: true, 
-    yearOverYear: true 
+    yearOverYear: true,
+    context: 'revenue' // Pass revenue context for compound keys
   });
 };
 
@@ -192,87 +195,7 @@ export const useDemographicsData = () => {
 
   return useMetricData(demographicsMetrics, { 
     autoFetch: true, 
-    yearOverYear: true 
+    yearOverYear: true,
+    context: 'demographics' // Pass demographics context for compound keys
   });
-};
-
-// =============================================================================
-// Component-Specific Convenience Hooks
-// =============================================================================
-
-/**
- * Metric card data - uses generic hook with card selector
- */
-export const useMetricCardData = (metricId, autoFetch = false) => {
-  const { data, isLoading, error, fetchData } = useMetricData(metricId, { 
-    selector: 'card', 
-    autoFetch,
-    yearOverYear: true 
-  });
-  
-  return {
-    merchantData: data?.merchantData || { current: null, previous: null },
-    competitorData: data?.competitorData || { current: null, previous: null },
-    isLoading,
-    error,
-    refetch: fetchData
-  };
-};
-
-/**
- * Time series chart data - uses generic hook with timeSeries selector
- */
-export const useTimeSeriesChartData = (metricId, autoFetch = false) => {
-  const { data, isLoading, fetchData } = useMetricData(metricId, { 
-    selector: 'timeSeries', 
-    autoFetch,
-    yearOverYear: true 
-  });
-  
-  return {
-    chartData: data,
-    isLoading,
-    refetch: fetchData
-  };
-};
-
-/**
- * Categorical chart data - uses generic hook with categorical selector
- */
-export const useCategoricalChartData = (metricId, autoFetch = false) => {
-  const { data, isLoading, fetchData } = useMetricData(metricId, { 
-    selector: 'categorical', 
-    autoFetch,
-    yearOverYear: true 
-  });
-  
-  return {
-    chartData: data || [],
-    isLoading,
-    refetch: fetchData
-  };
-};
-
-// =============================================================================
-// Legacy Compatibility Exports (for gradual migration)
-// =============================================================================
-
-// Keep the most commonly used names for backward compatibility
-export const useDashboardDataNormalized = useDashboardData;
-export const useRevenueDataNormalized = useRevenueData;
-export const useDemographicsDataNormalized = useDemographicsData;
-
-// Single metric hook for convenience
-export const useMetric = (metricId) => {
-  const cardData = useMetricCardData(metricId);
-  const timeSeriesData = useTimeSeriesChartData(metricId);
-  const categoricalData = useCategoricalChartData(metricId);
-  
-  return {
-    metricId,
-    cardData,
-    timeSeriesData,
-    categoricalData,
-    refetch: cardData.refetch
-  };
 };

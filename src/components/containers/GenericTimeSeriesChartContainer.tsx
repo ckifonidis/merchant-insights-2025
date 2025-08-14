@@ -5,8 +5,10 @@ import {
   selectDataLoading,
   selectDataErrors 
 } from '../../store/selectors/dataSelectors';
-import { processTimelineData } from '../../utils/timelineHelpers';
+import { processTimelineData, getAvailableTimelines } from '../../utils/timelineHelpers';
+import { CHART_CONFIG } from '../../utils/constants';
 import type { TimelineType } from '../ui/charts/PresentationalTimeSeriesChart';
+import type { RootState } from '../../store/index';
 
 // TypeScript interfaces
 interface DateRange {
@@ -21,12 +23,13 @@ interface Filters {
 interface GenericTimeSeriesChartContainerProps {
   title: string;
   metricId: string;
-  selector: (state: any) => any;
+  selector: (state: RootState) => any;
   formatValue: (value: number) => string;
   showCompetitor: boolean;
   merchantLabel: string;
   hasCompetitorData: boolean;
   filters?: Filters | undefined;
+  yAxisMode?: 'absolute' | 'percentage';
 }
 
 /**
@@ -44,7 +47,8 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
   showCompetitor,
   merchantLabel,
   hasCompetitorData,
-  filters
+  filters,
+  yAxisMode = 'absolute'
 }) => {
   const [timeline, setTimeline] = useState<TimelineType>('daily');
   
@@ -56,6 +60,27 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
   // Check for specific loading/error states
   const isLoading = loading?.metrics || loading?.specificMetrics?.[metricId] || false;
   const error = errors?.metrics || errors?.specificMetrics?.[metricId] || null;
+
+  // Calculate available timeline options based on date range
+  const availableTimelineOptions = useMemo(() => {
+    // Get all possible timeline options from constants
+    const allOptions = CHART_CONFIG.timelines.map(timeline => ({
+      value: timeline.value,
+      label: timeline.labelKey // Pass labelKey for translation in presentational component
+    }));
+    
+    // If dateRange is available, filter based on availability
+    if (filters?.dateRange?.start && filters?.dateRange?.end) {
+      const availableTimelines = getAvailableTimelines(
+        filters.dateRange.start,
+        filters.dateRange.end
+      );
+      return allOptions.filter(option => availableTimelines.includes(option.value));
+    }
+    
+    // Otherwise return all options
+    return allOptions;
+  }, [filters?.dateRange]);
 
   // Transform raw store data to chart format
   const chartData = useMemo(() => {
@@ -156,20 +181,21 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
 
       return {
         date: currentItem.displayDate,
-        merchant: currentItem.merchantRevenue || 0,
-        competitor: hasCompetitorData ? (currentItem.competitorRevenue || 0) : 0,
+        merchant: yAxisMode === 'percentage' ? parseFloat(merchantYoY.toFixed(1)) : currentItem.merchantRevenue,
+        competitor: hasCompetitorData ? 
+          (yAxisMode === 'percentage' ? parseFloat(competitorYoY.toFixed(1)) : currentItem.competitorRevenue) : 0,
         merchantChange: parseFloat(merchantYoY.toFixed(1)),
         competitorChange: hasCompetitorData ? parseFloat(competitorYoY.toFixed(1)) : 0
       };
     });
 
     return processedData;
-  }, [rawStoreData, timeline, filters?.dateRange, hasCompetitorData]);
+  }, [rawStoreData, timeline, filters?.dateRange, hasCompetitorData, yAxisMode]);
 
   return (
     <PresentationalTimeSeriesChart
       chartData={chartData}
-      yAxisMode="absolute"
+      yAxisMode={yAxisMode}
       showCompetitor={showCompetitor}
       yearOverYear={true}
       allowedChartTypes={['line', 'bar', 'table']}
@@ -181,6 +207,7 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
       error={error}
       onTimelineChange={setTimeline}
       timeline={timeline}
+      availableTimelineOptions={availableTimelineOptions}
     />
   );
 };

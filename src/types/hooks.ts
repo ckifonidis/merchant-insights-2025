@@ -2,8 +2,19 @@
  * Custom Hook Type Definitions
  */
 
-import { MetricId, ProcessedMetricData, RawMetricData } from './analytics';
+
 import { AuthState, UserInfo, UserStatus } from './auth';
+
+export interface RawMetricData {
+  merchant: {
+    current: Record<string, number | Record<string, number>>;
+    previous: Record<string, number | Record<string, number>>;
+  };
+  competitor?: {
+    current: Record<string, number | Record<string, number>>;
+    previous: Record<string, number | Record<string, number>>;
+  };
+}
 
 // Hook return types for data fetching
 export interface UseMetricDataReturn {

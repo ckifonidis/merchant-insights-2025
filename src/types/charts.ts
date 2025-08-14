@@ -1,9 +1,55 @@
 /**
  * Chart Component Type Definitions
+ * Consolidated chart data types and component interfaces
  */
 
 // Chart types available in the application
 export type ChartType = 'bar' | 'line' | 'pie' | 'table' | 'heatmap' | 'timeline';
+
+// === CHART DATA TYPES (Consolidated) ===
+
+// Time series chart data point (unified)
+export interface TimeSeriesDataPoint {
+  date: string;
+  merchant: number;
+  competitor?: number;
+  merchantChange?: number;
+  competitorChange?: number;
+  displayDate?: string; // For timeline helpers
+}
+
+// Timeline-specific data point (for timelineHelpers.ts)
+export interface TimelineDataPoint {
+  date: string;
+  displayDate?: string;
+  merchantRevenue?: number;
+  competitorRevenue?: number;
+  merchantTransactions?: number;
+  competitorTransactions?: number;
+  merchantCustomers?: number;
+  competitorCustomers?: number;
+}
+
+// Categorical/breakdown chart data point (unified)
+export interface CategoryDataPoint {
+  category: string;
+  merchant: number;
+  competitor?: number;
+  merchantAbsolute?: number;
+  competitorAbsolute?: number;
+  percentage?: number;
+  value?: number; // For backward compatibility
+  color?: string;
+}
+
+// Generic chart data point (for flexible use)
+export interface ChartDataPoint {
+  date: string;
+  merchant: number;
+  competitor?: number;
+  merchantChange?: number;
+  competitorChange?: number;
+}
 
 // Timeline aggregation options
 export type TimelineAggregation = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';

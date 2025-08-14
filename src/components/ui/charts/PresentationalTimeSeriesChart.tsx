@@ -9,7 +9,7 @@ import { CHART_CONFIG } from '../../../utils/constants';
 
 // TypeScript interfaces
 export type ChartType = 'line' | 'bar' | 'table';
-export type TimelineType = 'daily' | 'weekly' | 'monthly';
+export type TimelineType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
 export interface ChartDataPoint {
   date: string;
@@ -55,6 +55,7 @@ export interface PresentationalTimeSeriesChartProps {
   // Interaction props
   onTimelineChange?: (timeline: TimelineType) => void;
   timeline?: TimelineType;
+  availableTimelineOptions?: Array<{value: string, label: string}>;
   
   // Layout props
   title?: string;
@@ -87,6 +88,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   // Interaction props
   onTimelineChange = () => {},
   timeline = 'daily',
+  availableTimelineOptions,
   
   // Layout props
   title = '',
@@ -104,6 +106,15 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   };
 
   const getTimelineOptions = (): TimelineOption[] => {
+    // Use provided available options if available, otherwise default to basic set
+    if (availableTimelineOptions) {
+      return availableTimelineOptions.map(option => ({
+        value: option.value as TimelineType,
+        label: t(option.label) // Translate the labelKey
+      }));
+    }
+    
+    // Fallback to basic options
     return [
       { value: 'daily', label: t('chartOptions.daily') },
       { value: 'weekly', label: t('chartOptions.weekly') },
@@ -238,7 +249,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   };
 
   // Render chart based on type
-  const renderChart = () => {
+  const renderChart = (): React.ReactElement | null => {
     const commonProps = {
       data: chartData,
       margin: CHART_CONFIG.margins
@@ -313,12 +324,16 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   };
 
   // Type-safe event handlers
-  const handleChartTypeChange = (value: string) => {
-    setChartType(value as ChartType);
+  const handleChartTypeChange = (value: string | undefined) => {
+    if (value) {
+      setChartType(value as ChartType);
+    }
   };
 
-  const handleTimelineChange = (value: string) => {
-    onTimelineChange(value as TimelineType);
+  const handleTimelineChange = (value: string | undefined) => {
+    if (value) {
+      onTimelineChange(value as TimelineType);
+    }
   };
 
   // Create controls for title row
@@ -347,7 +362,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
       {chartType !== 'table' ? (
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            {renderChart()}
+            {renderChart() || <div />}
           </ResponsiveContainer>
         </div>
       ) : (

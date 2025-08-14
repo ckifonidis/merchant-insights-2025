@@ -29,6 +29,5 @@
     "noUncheckedIndexedAccess": false
   },
   "include": ["src/**/*", "vite.config.ts"],
-  "exclude": ["node_modules", "dist", "build", "mock-server", "proxy-server"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["node_modules", "dist", "build", "mock-server", "proxy-server"]
 }

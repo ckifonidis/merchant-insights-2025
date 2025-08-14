@@ -1,4 +1,4 @@
-import { format, startOfWeek, startOfMonth, startOfQuarter, startOfYear, endOfWeek, endOfMonth, endOfQuarter, endOfYear, isWithinInterval } from 'date-fns';
+import { format, startOfWeek, startOfMonth, startOfQuarter, startOfYear, endOfWeek } from 'date-fns';
 
 // TypeScript types
 export type TimelineType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
@@ -8,6 +8,33 @@ export interface TimeSeriesDataPoint {
   displayDate: string;
   merchantRevenue: number;
   competitorRevenue: number;
+  merchantTransactions?: number;
+  competitorTransactions?: number;
+  merchantCustomers?: number;
+}
+
+interface GroupedData {
+  dates: string[];
+  merchantTransactions: number[];
+  competitorTransactions: number[];
+  merchantRevenue: number[];
+  competitorRevenue: number[];
+  merchantCustomers: number[];
+}
+
+interface ProcessedDataPoint extends TimeSeriesDataPoint {
+  merchantTransactions: number;
+  competitorTransactions: number;
+  merchantCustomers: number;
+}
+
+interface TimelineConfig {
+  timelineRules?: {
+    weekly?: number;
+    monthly?: number;
+    quarterly?: number;
+    yearly?: number;
+  };
 }
 
 /**
@@ -47,15 +74,15 @@ export const processTimelineData = (
 };
 
 const processDailyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
-  // For daily, just return the data as is but limit to reasonable amount
-  return data.slice(-30).map(item => ({
+  // For daily, return all filtered data
+  return data.map(item => ({
     ...item,
     displayDate: format(new Date(item.date), 'dd/MM/yyyy')
   }));
 };
 
-const processWeeklyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
-  const weeklyGroups = {};
+const processWeeklyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] => {
+  const weeklyGroups: Record<string, GroupedData> = {};
 
   data.forEach(item => {
     const date = new Date(item.date);
@@ -83,26 +110,28 @@ const processWeeklyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] =
 
   return Object.keys(weeklyGroups)
     .sort()
-    .slice(-20) // Last 20 weeks
     .map(weekKey => {
       const group = weeklyGroups[weekKey];
+      if (!group) {
+        throw new Error(`Group not found for week key: ${weekKey}`);
+      }
       const weekStart = new Date(weekKey);
       const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
       
       return {
         date: weekKey,
         displayDate: `${format(weekStart, 'dd/MM')} - ${format(weekEnd, 'dd/MM/yyyy')}`,
-        merchantTransactions: Math.round(average(group.merchantTransactions)),
-        competitorTransactions: Math.round(average(group.competitorTransactions)),
-        merchantRevenue: Math.round(average(group.merchantRevenue)),
-        competitorRevenue: Math.round(average(group.competitorRevenue)),
-        merchantCustomers: Math.round(average(group.merchantCustomers))
+        merchantTransactions: Math.round(sum(group.merchantTransactions)),
+        competitorTransactions: Math.round(sum(group.competitorTransactions)),
+        merchantRevenue: Math.round(sum(group.merchantRevenue)),
+        competitorRevenue: Math.round(sum(group.competitorRevenue)),
+        merchantCustomers: Math.round(sum(group.merchantCustomers))
       };
     });
 };
 
-const processMonthlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
-  const monthlyGroups = {};
+const processMonthlyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] => {
+  const monthlyGroups: Record<string, GroupedData> = {};
 
   data.forEach(item => {
     const date = new Date(item.date);
@@ -130,9 +159,11 @@ const processMonthlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] 
 
   return Object.keys(monthlyGroups)
     .sort()
-    .slice(-12) // Last 12 months
     .map(monthKey => {
       const group = monthlyGroups[monthKey];
+      if (!group) {
+        throw new Error(`Group not found for month key: ${monthKey}`);
+      }
       const monthStart = new Date(monthKey + '-01');
       
       return {
@@ -147,8 +178,8 @@ const processMonthlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] 
     });
 };
 
-const processQuarterlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
-  const quarterlyGroups = {};
+const processQuarterlyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] => {
+  const quarterlyGroups: Record<string, GroupedData> = {};
 
   data.forEach(item => {
     const date = new Date(item.date);
@@ -176,13 +207,18 @@ const processQuarterlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[
 
   return Object.keys(quarterlyGroups)
     .sort()
-    .slice(-8) // Last 8 quarters
     .map(quarterKey => {
       const group = quarterlyGroups[quarterKey];
+      if (!group) {
+        throw new Error(`Group not found for quarter key: ${quarterKey}`);
+      }
       
       // Parse quarter from quarterKey format 'yyyy-QQ' (e.g., '2024-02' for Q2)
       const [year, quarterPart] = quarterKey.split('-');
-      const quarter = parseInt(quarterPart); // QQ format gives 01, 02, 03, 04
+      if (!year || !quarterPart) {
+        throw new Error(`Invalid quarter key format: ${quarterKey}`);
+      }
+      const quarter = parseInt(quarterPart, 10); // QQ format gives 01, 02, 03, 04
       
       return {
         date: quarterKey,
@@ -196,8 +232,8 @@ const processQuarterlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[
     });
 };
 
-const processYearlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] => {
-  const yearlyGroups = {};
+const processYearlyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] => {
+  const yearlyGroups: Record<string, GroupedData> = {};
 
   data.forEach(item => {
     const date = new Date(item.date);
@@ -225,9 +261,11 @@ const processYearlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] =
 
   return Object.keys(yearlyGroups)
     .sort()
-    .slice(-3) // Last 3 years
     .map(yearKey => {
       const group = yearlyGroups[yearKey];
+      if (!group) {
+        throw new Error(`Group not found for year key: ${yearKey}`);
+      }
       
       return {
         date: yearKey,
@@ -243,12 +281,16 @@ const processYearlyData = (data: TimeSeriesDataPoint[]): TimeSeriesDataPoint[] =
 
 /**
  * Get available timeline options based on date range
- * @param {string} startDate - Start date in YYYY-MM-DD format
- * @param {string} endDate - End date in YYYY-MM-DD format
- * @param {object} config - Optional configuration overrides
- * @returns {Array} Array of available timeline values
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @param config - Optional configuration overrides
+ * @returns Array of available timeline values
  */
-export const getAvailableTimelines = (startDate, endDate, config = {}) => {
+export const getAvailableTimelines = (
+  startDate: string | null,
+  endDate: string | null,
+  config: TimelineConfig = {}
+): TimelineType[] => {
   if (!startDate || !endDate) {
     console.warn('getAvailableTimelines: Invalid date inputs, defaulting to daily only');
     return ['daily'];
@@ -263,7 +305,7 @@ export const getAvailableTimelines = (startDate, endDate, config = {}) => {
       return ['daily'];
     }
 
-    const diffTime = Math.abs(end - start);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
     const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     // Configuration-driven availability rules (matches documentation requirements)
@@ -275,7 +317,7 @@ export const getAvailableTimelines = (startDate, endDate, config = {}) => {
       ...config.timelineRules // Allow configuration override
     };
 
-    const available = ['daily']; // Always available
+    const available: TimelineType[] = ['daily']; // Always available
     
     if (days >= rules.weekly) available.push('weekly');
     if (days >= rules.monthly) available.push('monthly');
@@ -291,5 +333,5 @@ export const getAvailableTimelines = (startDate, endDate, config = {}) => {
 };
 
 // Helper functions
-const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);
-const average = (arr) => arr.length > 0 ? sum(arr) / arr.length : 0;
+const sum = (arr: number[]): number => arr.reduce((acc, val) => acc + val, 0);
+const average = (arr: number[]): number => arr.length > 0 ? sum(arr) / arr.length : 0;

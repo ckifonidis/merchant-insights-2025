@@ -98,3 +98,12 @@
 .recharts-wrapper {
   width: 100% !important;
 }
+
+/* React-Select dropdown z-index fix - ensure dropdowns appear above sticky elements */
+.select__menu {
+  z-index: 9999 !important;
+}
+
+.select__menu-portal {
+  z-index: 9999 !important;
+}

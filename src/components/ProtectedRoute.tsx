@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAuthState } from '../hooks/useAuthState.js';
 import { login } from '../utils/auth.js';
-import FirstPage from './FirstPage.jsx';
-import LoadingPage from './LoadingPage.jsx';
-import ErrorPage from './ErrorPage.jsx';
-import NoAccessPage from './NoAccessPage.jsx';
+import FirstPage from './FirstPage';
+import LoadingPage from './LoadingPage';
+import ErrorPage from './ErrorPage';
+import NoAccessPage from './NoAccessPage';
 
 /**
  * Protected Route Component
@@ -12,7 +12,7 @@ import NoAccessPage from './NoAccessPage.jsx';
  * Does NOT trigger authentication - only reads auth state from Redux
  * Authentication is handled by AuthenticationManager at the app level
  */
-export function ProtectedRoute({ children }) {
+export function ProtectedRoute({ children }: { children: React.ReactNode }): React.ReactElement {
   // Read authentication state from Redux (read-only)
   const {
     shouldShowLoading,
@@ -21,8 +21,7 @@ export function ProtectedRoute({ children }) {
     shouldShowFirstPage,
     shouldShowNoAccess,
     shouldShowDashboard,
-    error,
-    isAuthenticated
+    error
   } = useAuthState();
 
   // Step 1: Loading (either auth or service loading)
@@ -76,7 +75,7 @@ export function ProtectedRoute({ children }) {
 
   // Step 6: User is enrolled - show dashboard
   if (shouldShowDashboard) {
-    return children;
+    return <>{children}</>;
   }
 
   // Fallback state (should not normally reach here)
@@ -98,11 +97,11 @@ export function ProtectedRoute({ children }) {
  * Lightweight Protected Route for components that just need auth check
  * without full loading UI - READ-ONLY, does not trigger authentication
  */
-export function RequireAuth({ children, fallback = null }) {
+export function RequireAuth({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode | null }): React.ReactNode {
   const { shouldShowContent } = useAuthState();
   
   if (shouldShowContent) {
-    return children;
+    return <>{children}</>;
   }
   
   return fallback;

@@ -17,9 +17,9 @@ interface PresentationalBreakdownChartProps {
   data: BreakdownDataPoint[];
   colors: Record<string, string>;
   formatValue?: (value: number) => string;
-  formatTooltipValue?: (value: number) => string;
+  formatTooltipValue?: ((value: number) => string) | undefined;
   showAbsoluteValues?: boolean;
-  note?: string;
+  note?: string | undefined;
   loading?: boolean;
   error?: string | null;
 }

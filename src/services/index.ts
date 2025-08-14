@@ -18,9 +18,6 @@ export {
 
 // Re-export API schema constants for convenience
 export {
-  API_ENDPOINTS,
-  ANALYTICS_PROVIDER_IDS,
+  ANALYTICS_PROVIDERS,
   METRIC_IDS,
-  FILTER_IDS,
-  FILTER_VALUES
-} from '../data/apiSchema.js';
+} from '../types/apiSchema';

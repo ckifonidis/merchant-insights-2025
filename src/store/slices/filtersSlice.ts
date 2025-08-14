@@ -1,9 +1,61 @@
-import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createSelector, PayloadAction, current } from '@reduxjs/toolkit';
 import { subDays } from 'date-fns';
-import { filterService, FILTER_OPTIONS } from '../../services/filterService';
-import { ANALYTICS_PROVIDER_IDS } from '../../data/apiSchema';
-import { FiltersState, UIFilters, APIFilters, DateRangeFilter } from '../../types/filters';
+import { filterService } from '../../services/filterService';
+import { DateRangeFilter, FilterOption, UIFilters } from '../../types/filters';
 import { RootState } from '../index';
+
+
+const POST_PROMOTION_ANALYTICS = '56f9cf99-3727-4f2f-bf1c-58dc532ebaf5';
+
+// Static filter options based on types from filters.ts
+const CHANNEL_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Channels' },
+  { value: 'physical', label: 'Physical Stores' },
+  { value: 'ecommerce', label: 'E-commerce' }
+];
+
+const GENDER_OPTIONS: FilterOption[] = [
+  { value: 'a', label: 'All Genders' },
+  { value: 'm', label: 'Male' },
+  { value: 'f', label: 'Female' }
+];
+
+const AGE_GROUP_OPTIONS: FilterOption[] = [
+  { value: 'generation_z', label: 'Generation Z (18-24)' },
+  { value: 'millennials', label: 'Millennials (25-40)' },
+  { value: 'generation_x', label: 'Generation X (41-56)' },
+  { value: 'baby_boomers', label: 'Baby Boomers (57-75)' },
+  { value: 'silent_generation', label: 'Silent Generation (76-96)' }
+];
+
+const SHOPPING_INTEREST_OPTIONS: FilterOption[] = [
+  { value: 'SHOPINT1', label: 'Fashion & Apparel' },
+  { value: 'SHOPINT2', label: 'Electronics & Technology' },
+  { value: 'SHOPINT3', label: 'Home & Garden' },
+  { value: 'SHOPINT4', label: 'Health & Beauty' },
+  { value: 'SHOPINT5', label: 'Sports & Outdoor' },
+  { value: 'SHOPINT6', label: 'Books & Media' },
+  { value: 'SHOPINT7', label: 'Food & Beverages' },
+  { value: 'SHOPINT8', label: 'Automotive' },
+  { value: 'SHOPINT9', label: 'Travel & Leisure' },
+  { value: 'SHOPINT10', label: 'Jewelry & Accessories' },
+  { value: 'SHOPINT11', label: 'Baby & Kids' },
+  { value: 'SHOPINT12', label: 'Pet Supplies' },
+  { value: 'SHOPINT13', label: 'Office & Business' },
+  { value: 'SHOPINT14', label: 'Arts & Crafts' },
+  { value: 'SHOPINT15', label: 'Other Interests' }
+];
+
+const REGION_OPTIONS: FilterOption[] = [
+  { value: 'ΑΤΤΙΚΗ', label: 'Αττική' },
+  { value: 'ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ', label: 'Κεντρική Μακεδονία' },
+  { value: 'ΘΕΣΣΑΛΙΑ', label: 'Θεσσαλία' },
+  { value: 'ΚΕΝΤΡΙΚΗ ΕΛΛΑΔΑ', label: 'Κεντρική Ελλάδα' },
+  { value: 'ΔΥΤΙΚΗ ΕΛΛΑΔΑ', label: 'Δυτική Ελλάδα' },
+  { value: 'ΠΕΛΟΠΟΝΝΗΣΟΣ', label: 'Πελοπόννησος' },
+  { value: 'ΚΡΗΤΗ', label: 'Κρήτη' },
+  { value: 'ΗΠΕΙΡΟΣ', label: 'Ήπειρος' }
+];
 
 // Date range presets
 const DATE_PRESETS = {
@@ -15,6 +67,31 @@ const DATE_PRESETS = {
 } as const;
 
 type DatePreset = keyof typeof DATE_PRESETS;
+
+// Filter state structure
+interface FilterState {
+  filtersChanged: boolean;
+  hasUnsavedChanges: boolean;
+  lastApplied: string;
+  isValid: boolean;
+  validationErrors: string[];
+}
+
+// Context structure
+interface FilterContext {
+  merchantId: string;
+  providerId: string;
+  userID: string | null;
+  showCompetition: boolean;
+  selectedTab: string;
+}
+
+// Root filters state
+interface AppFiltersState {
+  filters: UIFilters;
+  state: FilterState;
+  context: FilterContext;
+}
 
 // Get preset date range
 const getPresetDateRange = (preset: DatePreset): DateRangeFilter => {
@@ -45,7 +122,7 @@ const getPresetDateRange = (preset: DatePreset): DateRangeFilter => {
 };
 
 // Load persisted filters from localStorage
-const loadPersistedFilters = () => {
+const loadPersistedFilters = (): UIFilters | null => {
   try {
     const stored = localStorage.getItem('merchant-insights-filters-v3'); // Updated version
     if (stored) {
@@ -65,7 +142,7 @@ const loadPersistedFilters = () => {
 };
 
 // Save filters to localStorage
-const persistFilters = (filters) => {
+const persistFilters = (filters: UIFilters): void => {
   try {
     localStorage.setItem('merchant-insights-filters-v3', JSON.stringify(filters));
   } catch (error) {
@@ -74,19 +151,19 @@ const persistFilters = (filters) => {
 };
 
 // Initialize state with single source of truth
-const getInitialState = () => {
+const getInitialState = (): AppFiltersState => {
   const persistedFilters = loadPersistedFilters();
   const defaultDateRange = getPresetDateRange(DATE_PRESETS.lastMonth);
   
   // Default filters (single state structure)
-  const defaultFilters = {
+  const defaultFilters: UIFilters = {
     dateRange: {
-      start: defaultDateRange.start,
-      end: defaultDateRange.end,
+      start: defaultDateRange.startDate,
+      end: defaultDateRange.endDate,
       preset: DATE_PRESETS.lastMonth
     },
     channel: 'all',
-    gender: 'all',
+    gender: 'a',
     ageGroups: [],
     regions: [],
     municipalities: [],
@@ -113,7 +190,7 @@ const getInitialState = () => {
     // Global context
     context: {
       merchantId: "52ba3854-a5d4-47bd-9d1a-b789ae139803",
-      providerId: ANALYTICS_PROVIDER_IDS.POST_PROMOTION_ANALYTICS,
+      providerId: POST_PROMOTION_ANALYTICS,
       userID: null, // Will be set when user info is available
       showCompetition: true,
       selectedTab: 'dashboard'
@@ -128,13 +205,13 @@ const filtersSlice = createSlice({
   initialState,
   reducers: {
     // Date range management
-    setDateRangePreset: (state, action) => {
+    setDateRangePreset: (state, action: PayloadAction<DatePreset>) => {
       const preset = action.payload;
       const dateRange = getPresetDateRange(preset);
       
       state.filters.dateRange = {
-        start: dateRange.start,
-        end: dateRange.end,
+        start: dateRange.startDate,
+        end: dateRange.endDate,
         preset
       };
       
@@ -142,12 +219,12 @@ const filtersSlice = createSlice({
       persistFilters(state.filters);
     },
     
-    setCustomDateRange: (state, action) => {
+    setCustomDateRange: (state, action: PayloadAction<{ start: string | Date; end: string | Date }>) => {
       const { start, end } = action.payload;
       
       state.filters.dateRange = {
-        start: start instanceof Date ? start.toISOString().split('T')[0] : start,
-        end: end instanceof Date ? end.toISOString().split('T')[0] : end,
+        start: typeof start === 'string' ? start : start.toISOString().split('T')[0],
+        end: typeof end === 'string' ? end : end.toISOString().split('T')[0],
         preset: DATE_PRESETS.custom
       };
       
@@ -156,25 +233,25 @@ const filtersSlice = createSlice({
     },
     
     // Simple filter setters
-    setChannel: (state, action) => {
+    setChannel: (state, action: PayloadAction<string>) => {
       state.filters.channel = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
-    setGender: (state, action) => {
+    setGender: (state, action: PayloadAction<string>) => {
       state.filters.gender = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
-    setAgeGroups: (state, action) => {
+    setAgeGroups: (state, action: PayloadAction<string[]>) => {
       state.filters.ageGroups = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
-    setRegions: (state, action) => {
+    setRegions: (state, action: PayloadAction<string[]>) => {
       state.filters.regions = action.payload;
       // Clear municipalities when regions change
       state.filters.municipalities = [];
@@ -182,32 +259,32 @@ const filtersSlice = createSlice({
       persistFilters(state.filters);
     },
     
-    setMunicipalities: (state, action) => {
+    setMunicipalities: (state, action: PayloadAction<string[]>) => {
       state.filters.municipalities = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
-    setGoForMore: (state, action) => {
+    setGoForMore: (state, action: PayloadAction<boolean | null>) => {
       state.filters.goForMore = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
-    setShoppingInterests: (state, action) => {
+    setShoppingInterests: (state, action: PayloadAction<string[]>) => {
       state.filters.shoppingInterests = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
-    setStores: (state, action) => {
+    setStores: (state, action: PayloadAction<string[]>) => {
       state.filters.stores = action.payload;
       state.state.hasUnsavedChanges = true;
       persistFilters(state.filters);
     },
     
     // Bulk filter update
-    updateFilters: (state, action) => {
+    updateFilters: (state, action: PayloadAction<Partial<UIFilters>>) => {
       const updates = action.payload;
       state.filters = { ...state.filters, ...updates };
       state.state.hasUnsavedChanges = true;
@@ -236,15 +313,15 @@ const filtersSlice = createSlice({
     },
     
     // Context management
-    setMerchantId: (state, action) => {
+    setMerchantId: (state, action: PayloadAction<string>) => {
       state.context.merchantId = action.payload;
     },
     
-    setProviderId: (state, action) => {
+    setProviderId: (state, action: PayloadAction<string>) => {
       state.context.providerId = action.payload;
     },
     
-    setUserID: (state, action) => {
+    setUserID: (state, action: PayloadAction<string | null>) => {
       state.context.userID = action.payload;
     },
     
@@ -252,11 +329,11 @@ const filtersSlice = createSlice({
       state.context.showCompetition = !state.context.showCompetition;
     },
     
-    setCompetition: (state, action) => {
+    setCompetition: (state, action: PayloadAction<boolean>) => {
       state.context.showCompetition = action.payload;
     },
     
-    setSelectedTab: (state, action) => {
+    setSelectedTab: (state, action: PayloadAction<string>) => {
       state.context.selectedTab = action.payload;
     },
     
@@ -266,12 +343,12 @@ const filtersSlice = createSlice({
       
       state.filters = {
         dateRange: {
-          start: defaultDateRange.start,
-          end: defaultDateRange.end,
+          start: defaultDateRange.startDate,
+          end: defaultDateRange.endDate,
           preset: DATE_PRESETS.lastMonth
         },
         channel: 'all',
-        gender: 'all',
+        gender: 'a',
         ageGroups: [],
         regions: [],
         municipalities: [],
@@ -313,55 +390,50 @@ export const {
 } = filtersSlice.actions;
 
 // Basic selectors
-export const selectFilters = (state) => state.filters.filters;
-export const selectFilterState = (state) => state.filters.state;
-export const selectFilterContext = (state) => state.filters.context;
+export const selectFilters = (state: RootState): UIFilters => state.filters.filters;
+export const selectFilterState = (state: RootState): FilterState => state.filters.state;
+export const selectFilterContext = (state: RootState): FilterContext => state.filters.context;
 
 // Specific filter selectors
-export const selectDateRange = (state) => state.filters.filters.dateRange;
-export const selectChannel = (state) => state.filters.filters.channel;
-export const selectGender = (state) => state.filters.filters.gender;
-export const selectAgeGroups = (state) => state.filters.filters.ageGroups;
-export const selectRegions = (state) => state.filters.filters.regions;
-export const selectMunicipalities = (state) => state.filters.filters.municipalities;
-export const selectGoForMore = (state) => state.filters.filters.goForMore;
-export const selectShoppingInterests = (state) => state.filters.filters.shoppingInterests;
-export const selectStores = (state) => state.filters.filters.stores;
+export const selectDateRange = (state: RootState) => state.filters.filters.dateRange;
+export const selectChannel = (state: RootState): string => state.filters.filters.channel;
+export const selectGender = (state: RootState): string => state.filters.filters.gender;
+export const selectAgeGroups = (state: RootState): string[] => state.filters.filters.ageGroups;
+export const selectRegions = (state: RootState): string[] => state.filters.filters.regions;
+export const selectMunicipalities = (state: RootState): string[] => state.filters.filters.municipalities;
+export const selectGoForMore = (state: RootState): boolean | null => state.filters.filters.goForMore;
+export const selectShoppingInterests = (state: RootState): string[] => state.filters.filters.shoppingInterests;
+export const selectStores = (state: RootState): string[] => state.filters.filters.stores;
 
 // Context selectors
-export const selectMerchantId = (state) => state.filters.context.merchantId;
-export const selectProviderId = (state) => state.filters.context.providerId;
-export const selectUserID = (state) => state.filters.context.userID;
-export const selectShowCompetition = (state) => state.filters.context.showCompetition;
-export const selectSelectedTab = (state) => state.filters.context.selectedTab;
+export const selectMerchantId = (state: RootState): string => state.filters.context.merchantId;
+export const selectProviderId = (state: RootState): string => state.filters.context.providerId;
+export const selectUserID = (state: RootState): string | null => state.filters.context.userID;
+export const selectShowCompetition = (state: RootState): boolean => state.filters.context.showCompetition;
+export const selectSelectedTab = (state: RootState): string => state.filters.context.selectedTab;
 
 // State selectors
-export const selectFiltersChanged = (state) => state.filters.state.filtersChanged;
-export const selectHasUnsavedChanges = (state) => state.filters.state.hasUnsavedChanges;
-export const selectFiltersValid = (state) => state.filters.state.isValid;
-export const selectValidationErrors = (state) => state.filters.state.validationErrors;
+export const selectFiltersChanged = (state: RootState): boolean => state.filters.state.filtersChanged;
+export const selectHasUnsavedChanges = (state: RootState): boolean => state.filters.state.hasUnsavedChanges;
+export const selectFiltersValid = (state: RootState): boolean => state.filters.state.isValid;
+export const selectValidationErrors = (state: RootState): string[] => state.filters.state.validationErrors;
 
 // Computed selectors (memoized)
-export const selectAPIFilters = createSelector(
-  [selectFilters],
-  (filters) => filterService.toAPIFormat(filters)
-);
-
 export const selectAPIRequestParams = createSelector(
   [
     selectUserID,
-    selectAPIFilters,
+    selectFilters,
     selectProviderId,
     selectMerchantId
   ],
-  (userID, apiFilters, providerId, merchantId) => {
+  (userID, filters, providerId, merchantId) => {
     return {
       userID,
-      startDate: apiFilters.dateRange?.start,
-      endDate: apiFilters.dateRange?.end,
+      startDate: filters.dateRange.start,
+      endDate: filters.dateRange.end,
       providerId,
       merchantId,
-      filterValues: filterService.toFilterValuesArray(apiFilters),
+      filterValues: filterService.toFilterValuesArray(filters),
       metricParameters: {}
     };
   }
@@ -383,22 +455,17 @@ export const selectFilterSummary = createSelector(
       return 'No filters applied';
     }
     
-    return filterService.getFilterSummary(filters);
+    return filterService.getFilterSummary(filters as UIFilters);
   }
 );
 
 // Static filter options selectors (no async loading needed)
-export const selectChannelOptions = () => FILTER_OPTIONS.channels;
-export const selectGenderOptions = () => FILTER_OPTIONS.genders;
-export const selectAgeGroupOptions = () => FILTER_OPTIONS.ageGroups;
-export const selectRegionOptions = () => FILTER_OPTIONS.regions;
-export const selectShoppingInterestOptions = () => FILTER_OPTIONS.shoppingInterests;
+export const selectChannelOptions = (state: RootState): FilterOption[] => CHANNEL_OPTIONS;
+export const selectGenderOptions = (state: RootState): FilterOption[] => GENDER_OPTIONS;
+export const selectAgeGroupOptions = (state: RootState): FilterOption[] => AGE_GROUP_OPTIONS;
+export const selectRegionOptions = (state: RootState): FilterOption[] => REGION_OPTIONS;
+export const selectShoppingInterestOptions = (state: RootState): FilterOption[] => SHOPPING_INTEREST_OPTIONS;
 
-// Dynamic selectors
-export const selectMunicipalityOptions = createSelector(
-  [selectRegions],
-  (selectedRegions) => filterService.getMunicipalitiesForRegions(selectedRegions)
-);
 
 export const selectGoForMoreAvailable = createSelector(
   [selectMerchantId],

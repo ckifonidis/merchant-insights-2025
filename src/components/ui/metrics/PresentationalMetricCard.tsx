@@ -118,7 +118,7 @@ const PresentationalMetricCard: React.FC<PresentationalMetricCardProps> = ({
   }
 
   // Render single metric section
-  const renderMetricSection = (data: MetricData, label = '') => {
+  const renderMetricSection = (data: MetricData, label = ''): React.ReactElement => {
     const { value: sectionValue, change: sectionChange } = data;
     
     return (
@@ -146,7 +146,7 @@ const PresentationalMetricCard: React.FC<PresentationalMetricCardProps> = ({
   };
 
   // Render icon section
-  const renderIcon = () => {
+  const renderIcon = (): React.ReactElement | null => {
     if (!showIcon || !icon) return null;
     
     return (
@@ -157,7 +157,7 @@ const PresentationalMetricCard: React.FC<PresentationalMetricCardProps> = ({
   };
 
   // Render header (title/subtitle)
-  const renderHeader = () => (
+  const renderHeader = (): React.ReactElement => (
     <div className="flex items-center mb-3">
       {layout === 'horizontal' && renderIcon()}
       <div className="flex-1">

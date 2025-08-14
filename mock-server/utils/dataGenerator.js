@@ -171,24 +171,25 @@ function generateShoppingInterestPoints(interestType = 'customers', isCompetitio
   const competitionMultiplier = isCompetition ? 1.2 : 1.0; // Competition typically has higher values
   
   // Shopping interests based on the API sample data
+  // Shopping interests - matches /src/data/apiSchema.ts SHOPPING_INTERESTS dictionary
   const interests = [
     { code: '', label: 'Unspecified' },
     { code: 'other_category', label: 'Other Category' },
-    { code: 'SHOPINT1', label: 'Automotive & Fuel Products' },
-    { code: 'SHOPINT2', label: 'Electronics & Household Appliances' },
-    { code: 'SHOPINT3', label: 'Telecommunication' },
-    { code: 'SHOPINT4', label: 'Health & Medical Care' },
-    { code: 'SHOPINT5', label: 'Entertainment & Hobbies' },
-    { code: 'SHOPINT6', label: 'Education' },
-    { code: 'SHOPINT7', label: 'Toys' },
-    { code: 'SHOPINT8', label: 'Travel & Transportation' },
-    { code: 'SHOPINT9', label: 'Personal Care' },
-    { code: 'SHOPINT10', label: 'Pets' },
-    { code: 'SHOPINT11', label: 'Fashion, Cosmetics & Jewelry' },
-    { code: 'SHOPINT12', label: 'Tourism' },
-    { code: 'SHOPINT13', label: 'Home & Garden' },
-    { code: 'SHOPINT14', label: 'Restaurants, Bars, Fast Food & Coffee' },
-    { code: 'SHOPINT15', label: 'Food & Drinks' }
+    { code: 'SHOPINT1', label: 'Αυτοκίνητο & Καύσιμα' },
+    { code: 'SHOPINT2', label: 'Εκπαίδευση' },
+    { code: 'SHOPINT3', label: 'Ένδυση, Ομορφιά & Κόσμημα' },
+    { code: 'SHOPINT4', label: 'Ηλεκτρονικά & Οικιακές Συσκευές' },
+    { code: 'SHOPINT5', label: 'Κατοικίδια' },
+    { code: 'SHOPINT6', label: 'Παιχνίδια' },
+    { code: 'SHOPINT7', label: 'Προσωπική Φροντίδα' },
+    { code: 'SHOPINT8', label: 'Σπίτι & Κήπος' },
+    { code: 'SHOPINT9', label: 'Ταξίδι & Μεταφορικά Μέσα' },
+    { code: 'SHOPINT10', label: 'Τηλεπικοινωνίες' },
+    { code: 'SHOPINT11', label: 'Τουρισμός' },
+    { code: 'SHOPINT12', label: 'Τρόφιμα, Ποτά & Supermarket' },
+    { code: 'SHOPINT13', label: 'Υπηρεσίες Εστίασης' },
+    { code: 'SHOPINT14', label: 'Υπηρεσίες Υγείας' },
+    { code: 'SHOPINT15', label: 'Ψυχαγωγία & Hobbies' }
   ];
   
   interests.forEach(interest => {

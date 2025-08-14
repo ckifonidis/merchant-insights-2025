@@ -118,6 +118,7 @@ const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
           merchantLabel="Merchant"
           hasCompetitorData={true}
           filters={filters}
+          yAxisMode="absolute"
         />
 
         <GenericTimeSeriesChartContainer
@@ -129,6 +130,7 @@ const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
           merchantLabel="Merchant"
           hasCompetitorData={true}
           filters={filters}
+          yAxisMode="absolute"
         />
 
         <GenericTimeSeriesChartContainer
@@ -140,6 +142,7 @@ const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
           merchantLabel="Customers"
           hasCompetitorData={false}
           filters={filters}
+          yAxisMode="absolute"
         />
       </div>
 

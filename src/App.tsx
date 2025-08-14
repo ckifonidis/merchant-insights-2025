@@ -19,7 +19,7 @@ import { RootState, AppDispatch } from './store/index';
 import './i18n';
 import './styles/dashboard.css';
 
-function AppContent(): JSX.Element {
+function AppContent() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const filters = useSelector((state: RootState) => selectFilters(state));
@@ -50,7 +50,7 @@ function AppContent(): JSX.Element {
     logout();
   };
 
-  const renderTabContent = (): JSX.Element => {
+  const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard filters={filters} />;
@@ -142,7 +142,7 @@ function AppContent(): JSX.Element {
 }
 
 // Wrap the app with Redux Provider and OAuth Authentication
-function App(): JSX.Element {
+function App() {
   return (
     <Provider store={store}>
       <AuthenticationManager>

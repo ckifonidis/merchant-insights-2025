@@ -4,28 +4,14 @@ import { createSelector } from '@reduxjs/toolkit';
 import PresentationalBarChart, { BarChartDataPoint } from '../ui/charts/PresentationalBarChart';
 import { 
   selectDataLoading,
-  selectDataErrors 
+  selectDataErrors,
+  createContextAwareMetricSelector 
 } from '../../store/selectors/dataSelectors';
-
-// Shopping interest labels mapping
-const SHOPPING_INTEREST_LABELS = {
-  'SHOPINT1': 'Fashion & Apparel',
-  'SHOPINT2': 'Electronics & Tech',
-  'SHOPINT3': 'Home & Garden',
-  'SHOPINT4': 'Sports & Fitness',
-  'SHOPINT5': 'Books & Media',
-  'SHOPINT6': 'Beauty & Personal Care',
-  'SHOPINT7': 'Food & Beverages',
-  'SHOPINT8': 'Travel & Tourism',
-  'SHOPINT9': 'Automotive',
-  'SHOPINT10': 'Health & Wellness',
-  'SHOPINT11': 'Entertainment',
-  'SHOPINT12': 'Jewelry & Accessories',
-  'SHOPINT13': 'Toys & Games',
-  'SHOPINT14': 'Art & Crafts',
-  'SHOPINT15': 'Office & Business',
-  'other_category': 'Other'
-};
+import { SHOPPING_INTERESTS } from '../../types/apiSchema';
+import { getMetricStoreKey } from '../../utils/metricKeys';
+import type { RootState } from '../../store';
+import type { MetricData } from '../../types/metrics';
+import { isCategoricalEntityData, getCategoricalValue } from '../../types/metrics';
 
 // Age group labels mapping
 const AGE_GROUP_LABELS = {
@@ -48,6 +34,7 @@ interface GenericBarChartContainerProps {
   formatValue?: (value: number) => string;
   formatTooltipValue?: (value: number) => string;
   maxCategories?: number | null;
+  context?: string; // Tab context for compound key resolution
 }
 
 /**
@@ -65,25 +52,51 @@ const GenericBarChartContainer: React.FC<GenericBarChartContainerProps> = ({
   yAxisLabel = '%',
   showAbsoluteValues = false,
   note,
-  formatValue = (value) => `${value}%`,
+  formatValue = (value: number): string => `${value}%`,
   formatTooltipValue,
-  maxCategories = null
+  maxCategories = null,
+  context
 }) => {
   // Memoized selector for raw metric data
-  const selectRawMetricData = useMemo(() => {
+  const selectRawMetricData = useMemo((): ((state: RootState) => { merchant: Record<string, number>; competitor: Record<string, number> } | null) => {
     return createSelector(
-      [state => state.data.metrics],
-      (metrics: any) => {
-        const metric = metrics?.[metricId];
-        if (!metric?.merchant?.current) return null;
+      [(state: RootState): Record<string, MetricData> => state.data.metrics],
+      (metrics): { merchant: Record<string, number>; competitor: Record<string, number> } | null => {
+        // Use context-aware key resolution for metrics that need it
+        const storeKey = getMetricStoreKey(metricId, context);
+        const metric: MetricData | undefined = metrics?.[storeKey];
+        if (!metric?.merchant) return null;
+        
+        // Handle both new typed data and legacy untyped data
+        let merchantData: Record<string, number> | null = null;
+        let competitorData: Record<string, number> = {};
+        
+        // Check if merchant data has type field (new unified system)
+        if ('type' in metric.merchant && isCategoricalEntityData(metric.merchant)) {
+          merchantData = getCategoricalValue(metric.merchant);
+        } else if ('current' in metric.merchant && metric.merchant.current && typeof metric.merchant.current === 'object') {
+          // Legacy data structure: { current: {...}, previous: {...} }
+          merchantData = metric.merchant.current as Record<string, number>;
+        }
+        
+        if (!merchantData) return null;
+        
+        // Handle competitor data similarly
+        if (metric.competitor) {
+          if ('type' in metric.competitor && isCategoricalEntityData(metric.competitor)) {
+            competitorData = getCategoricalValue(metric.competitor) || {};
+          } else if ('current' in metric.competitor && metric.competitor.current && typeof metric.competitor.current === 'object') {
+            competitorData = metric.competitor.current as Record<string, number>;
+          }
+        }
         
         return {
-          merchant: metric.merchant.current,
-          competitor: metric.competitor?.current || {}
+          merchant: merchantData,
+          competitor: competitorData
         };
       }
     );
-  }, [metricId]);
+  }, [metricId, context]);
 
   const rawData = useSelector(selectRawMetricData);
   const loading = useSelector(selectDataLoading);
@@ -103,15 +116,20 @@ const GenericBarChartContainer: React.FC<GenericBarChartContainerProps> = ({
       const competitorData = rawData.competitor;
       
       // Calculate totals for percentage calculation
-      const merchantTotal = Object.values(merchantData).reduce((sum: number, val: any) => sum + (val || 0), 0);
-      const competitorTotal = Object.values(competitorData).reduce((sum: number, val: any) => sum + (val || 0), 0);
+      const merchantTotal = Object.values(merchantData).reduce((sum: number, val: number) => sum + (val || 0), 0);
+      const competitorTotal = Object.values(competitorData).reduce((sum: number, val: number) => sum + (val || 0), 0);
       
       let result = Object.keys(merchantData).map(interest => {
         const merchantAbsolute = merchantData[interest] || 0;
         const competitorAbsolute = competitorData[interest] || 0;
         
+        // Use Greek labels from SHOPPING_INTERESTS, with fallback for other_category
+        const categoryLabel = interest === 'other_category' 
+          ? 'Άλλα' 
+          : SHOPPING_INTERESTS[interest as keyof typeof SHOPPING_INTERESTS] || interest;
+        
         return {
-          category: SHOPPING_INTEREST_LABELS[interest as keyof typeof SHOPPING_INTEREST_LABELS] || interest,
+          category: categoryLabel,
           // Store both absolute and percentage values
           merchant: merchantTotal > 0 ? Number(((merchantAbsolute / merchantTotal) * 100).toFixed(2)) : 0,
           competitor: competitorTotal > 0 ? Number(((competitorAbsolute / competitorTotal) * 100).toFixed(2)) : 0,
@@ -143,8 +161,8 @@ const GenericBarChartContainer: React.FC<GenericBarChartContainerProps> = ({
       const competitorData = rawData.competitor;
       
       // Calculate totals for percentage calculation
-      const merchantTotal = Object.values(merchantData).reduce((sum: number, val: any) => sum + (val || 0), 0);
-      const competitorTotal = Object.values(competitorData).reduce((sum: number, val: any) => sum + (val || 0), 0);
+      const merchantTotal = Object.values(merchantData).reduce((sum: number, val: number) => sum + (val || 0), 0);
+      const competitorTotal = Object.values(competitorData).reduce((sum: number, val: number) => sum + (val || 0), 0);
       
       let result = Object.keys(merchantData).map(ageGroup => {
         const merchantAbsolute = merchantData[ageGroup] || 0;
