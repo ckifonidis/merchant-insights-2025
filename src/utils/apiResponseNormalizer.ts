@@ -148,7 +148,7 @@ function validateValue(value: number | null, metricId: string): number | null {
   const category = getMetricType(metricId);
 
   switch (category) {
-    case 'scalar':
+    case 'scalar': {
       // Revenue metrics should be non-negative
       const revenueMetrics = [
         METRICS.SCALAR.TOTAL_REVENUE,
@@ -176,6 +176,7 @@ function validateValue(value: number | null, metricId: string): number | null {
       }
 
       return value;
+    }
 
     case 'timeSeries':
     case 'categorical':
@@ -433,7 +434,7 @@ function groupMetricsByIdAndEntity(metrics: MetricResponse[]): GroupedMetrics {
       grouped[metricID][entityType] = [];
     }
     
-    grouped[metricID][entityType]!.push(metric);
+    grouped[metricID][entityType].push(metric);
   });
 
   return grouped;
