@@ -20,7 +20,7 @@
 - **Charts**: Recharts with custom responsive components
 - **Internationalization**: React i18next
 - **Development**: Mock server with filter-aware data generation
-- **Production**: HTTPS proxy server with OAuth2 authentication
+- **Production**: HTTPS proxy server with OAuth2 authentication (Node.js or .NET Core 8)
 
 ## 🚀 Quick Start
 
@@ -40,31 +40,50 @@ npm run dev
 ```
 
 ### 🔒 Production Mode (Frontend + Proxy + Real API)
-For production deployment with OAuth2 authentication:
+For production deployment with OAuth2 authentication. **Choose your preferred proxy implementation:**
 
+#### Option A: Node.js Proxy
 ```bash
 # 1. Build the frontend application
 npm run build
 
-# 2. Setup proxy server
+# 2. Setup Node.js proxy server
 npm run proxy:setup
 
-# 3. Configure environment (see Environment Setup below)
-cp proxy-server/.env.example proxy-server/.env
-# Edit proxy-server/.env with your configuration
+# 3. Configure environment
+cp proxy-server/node/.env.example proxy-server/node/.env
+# Edit proxy-server/node/.env with your configuration
 
-# 4. Start proxy server
-npm run proxy
-# Opens at https://localhost:5443 (secure HTTPS with OAuth2)
+# 4. Start Node.js proxy server
+npm run proxy:node
+# Opens at https://localhost:5443
+```
+
+#### Option B: .NET Core 8 Proxy
+```bash
+# 1. Build the frontend application
+npm run build
+
+# 2. Configure .NET Core proxy
+# Edit proxy-server/csharp/MerchantInsightsProxy/appsettings.Development.json
+
+# 3. Start .NET Core proxy server
+npm run proxy:csharp
+# Opens at https://localhost:5443
 ```
 
 ### 🛠️ Development with Proxy (Optional)
 For testing OAuth2 flow in development:
 
 ```bash
-# Build frontend and start proxy in dev mode
+# Build frontend and start preferred proxy in dev mode
 npm run build
+
+# Node.js proxy
 npm run proxy:dev
+
+# OR .NET Core proxy
+cd proxy-server/csharp/MerchantInsightsProxy && dotnet run
 ```
 
 ## 🎯 Filter Integration

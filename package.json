@@ -16,10 +16,12 @@
     "preview": "vite preview",
     "setup:mock-server": "cd mock-server && npm install",
     "test:mock-server": "cd mock-server && npm test",
-    "proxy": "npm run build && cd proxy-server && npm start",
-    "proxy:dev": "cd proxy-server && npm run dev",
-    "proxy:setup": "cd proxy-server && npm install && npm run generate-certs",
-    "proxy:test": "cd proxy-server && npm test"
+    "proxy": "npm run build && cd proxy-server/node && npm start",
+    "proxy:dev": "cd proxy-server/node && npm run dev",
+    "proxy:setup": "cd proxy-server/node && npm install && npm run generate-certs",
+    "proxy:test": "cd proxy-server/node && npm test",
+    "proxy:node": "npm run build && cd proxy-server/node && npm start",
+    "proxy:csharp": "npm run build && cd proxy-server/csharp/MerchantInsightsProxy && dotnet run"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",

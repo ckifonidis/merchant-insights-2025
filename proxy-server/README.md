@@ -2,6 +2,10 @@
 
 A secure HTTPS proxy server with OAuth2 authentication for the NBG Merchant Insights UI application.
 
+**Available Implementations:**
+- **Node.js**: Express-based proxy server (in `node/` directory)
+- **.NET Core 8**: ASP.NET Core-based proxy server (in `csharp/` directory)
+
 ## Features
 
 - 🔒 **HTTPS/SSL** - Secure communication with self-signed certificates for development
@@ -10,28 +14,85 @@ A secure HTTPS proxy server with OAuth2 authentication for the NBG Merchant Insi
 - 🔄 **API Proxy** - Seamless proxying to backend API with automatic token injection
 - 📱 **SPA Support** - Static file serving with client-side routing fallback
 - 🚀 **Production Ready** - Comprehensive error handling and security headers
+- ⚖️ **Technology Choice** - Choose between Node.js or .NET Core based on your preferences
 
 ## Quick Start
 
-### Prerequisites
+Choose your preferred implementation:
 
+### 🟢 Node.js Implementation
+
+#### Prerequisites
 - Node.js 18+ 
 - OpenSSL (for certificate generation)
 - Backend API running on the configured port
 
-### Installation
-
+#### Installation
 ```bash
 # Install dependencies
-cd proxy-server
+cd proxy-server/node
 npm install
 
-# Generate SSL certificates
+# Generate SSL certificates (shared between implementations)
 npm run generate-certs
 
 # Copy and configure environment
 cp .env.example .env
 # Edit .env with your specific configuration
+```
+
+#### Running
+```bash
+# Development (with auto-reload)
+npm run dev
+
+# Production
+npm start
+```
+
+### 🔵 .NET Core 8 Implementation
+
+#### Prerequisites
+- .NET Core 8 SDK
+- Backend API running on the configured port
+
+#### Installation
+```bash
+# Navigate to .NET Core implementation
+cd proxy-server/csharp/MerchantInsightsProxy
+
+# Restore dependencies
+dotnet restore
+```
+
+#### Configuration
+Create `appsettings.Development.json` for local development:
+```json
+{
+  "Proxy": {
+    "Port": "5443",
+    "ProxyUrl": "https://localhost:5443",
+    "BackendApiUrl": "http://localhost:3001"
+  },
+  "OAuth": {
+    "Enabled": true,
+    "ClientId": "your-client-id",
+    "ClientSecret": "your-client-secret"
+  },
+  "Security": {
+    "CookieEncryptionKey": "your-32-byte-encryption-key-here-12345",
+    "SessionSecret": "your-session-secret-here"
+  }
+}
+```
+
+#### Running
+```bash
+# Development
+dotnet run
+
+# Production
+dotnet run --configuration Release
 ```
 
 ### Configuration
@@ -83,6 +144,7 @@ npm start
 | `/signin-nbg/` | GET | OAuth2 callback handler |
 | `/logout` | GET/POST | Clears auth and redirects |
 | `/auth/status` | GET | Returns authentication status |
+| `/userinfo` | GET | OpenID Connect user information (protected) |
 | `/api/*` | ANY | Proxies to backend with auth |
 
 ### Security Features
@@ -101,6 +163,32 @@ npm start
 4. Proxy exchanges code for tokens → encrypts and stores in cookie
 5. User redirected to original destination
 6. Subsequent API calls automatically include Bearer token
+
+### UserInfo Endpoint Behavior
+
+Both proxy implementations provide consistent `/userinfo` endpoint behavior:
+
+**Response Priority**:
+1. **Primary**: Call OAuth provider's userinfo endpoint with access token
+2. **Fallback**: Decode ID token if OAuth provider call fails  
+3. **Last Resort**: Return minimal user info with guaranteed fields
+
+**Critical Requirements**:
+- The `/userinfo` endpoint **must** return `preferred_username` field
+- React frontend depends on this field to proceed with authentication flow
+- OAuth provider call returns rich user data including `preferred_username`
+- Fallback mechanisms ensure the field is never null
+
+**Expected Response Structure**:
+```json
+{
+  "sub": "user-id",
+  "preferred_username": "USERNAME", 
+  "name": "User Name",
+  "email": "user@example.com",
+  // ... additional provider-specific fields
+}
+```
 
 ## Development
 
@@ -210,6 +298,12 @@ pm2 save
    - Verify `BACKEND_API_URL` is correct
    - Ensure backend is running and accessible
    - Check network connectivity and firewall rules
+
+5. **Frontend Loading Issues**
+   - **Symptom**: App stuck on "Loading Application" screen
+   - **Cause**: `/userinfo` endpoint not returning `preferred_username`
+   - **Solution**: Verify OAuth provider userinfo endpoint is accessible
+   - **Debug**: Check network logs for `/userinfo` response structure
 
 ### Logs
 
