@@ -33,9 +33,9 @@ Choose your preferred implementation:
 cd proxy-server/node
 npm install
 
-# SSL certificates are automatically managed by start.sh
-# Uses .NET Core development certificates when available, 
-# falls back to OpenSSL generation otherwise
+# SSL certificates are automatically generated and managed
+# Custom OpenSSL certificates shared between both implementations
+# Includes automatic macOS keychain installation for trusted HTTPS
 
 # Copy and configure environment
 cp .env.example .env
@@ -135,25 +135,43 @@ npm start
 
 ## 🔒 SSL Certificate Management
 
-Both Node.js and .NET Core implementations use **unified certificate management** for seamless switching:
+Both Node.js and .NET Core implementations use **identical custom SSL certificates** for perfect development symmetry:
 
-### **Smart Certificate Strategy**
-1. **Primary**: .NET Core development certificates (when available)
-2. **Fallback**: OpenSSL self-signed certificates
+### **Unified Certificate Strategy**
+- **Single Source**: Custom OpenSSL-generated certificates shared by both implementations
+- **System Integration**: Automatic installation to macOS system keychain
+- **Zero Conflicts**: Identical certificates eliminate browser switching issues
+- **Professional Experience**: No manual certificate acceptance required
 
-### **Seamless Switching**
-- **With .NET installed**: Both implementations use identical .NET certificates
-- **Without .NET**: Node.js falls back to OpenSSL certificates  
-- **Transition detection**: Automatic warnings when certificate source changes
+### **Certificate Generation**
+```bash
+# Automatic generation (called by start.sh scripts)
+npm run generate-certs
 
-### **When Browser Cache Clearing is Needed**
-✅ **Required**: Switching between OpenSSL ↔ .NET certificate sources  
-❌ **NOT required**: Switching between Node.js ↔ .NET implementations (same certificates)
+# Manual generation
+cd proxy-server/certs
+./generate-certs.sh
+```
 
-**Cache Clearing Steps:**
-- **Chrome**: Settings → Privacy → Clear browsing data → Cookies and other site data
-- **Firefox**: Settings → Privacy → Certificates → View Certificates → Delete localhost
-- **Safari**: Keychain Access → System → Delete localhost certificates
+### **Generated Certificate Files**
+```
+proxy-server/certs/
+├── localhost.pem              # SSL certificate (used by both implementations)
+├── localhost-key.pem          # Private key (used by both implementations)
+├── localhost-combined.pem     # Combined format for compatibility
+└── localhost.pfx              # PKCS#12 format for .NET Core
+```
+
+### **System Keychain Integration**
+- **macOS**: Automatically adds certificate to system keychain with `sudo security add-trusted-cert`
+- **Linux**: Provides instructions for `update-ca-certificates`
+- **Windows**: Provides manual certificate import instructions
+
+### **Benefits**
+✅ **No Browser Warnings**: Certificate trusted system-wide after installation  
+✅ **Perfect Symmetry**: Both implementations use identical certificate files  
+✅ **One-Time Setup**: Install certificate once, works for both proxies  
+✅ **Zero Cache Conflicts**: No certificate switching between implementations
 
 ## Architecture
 

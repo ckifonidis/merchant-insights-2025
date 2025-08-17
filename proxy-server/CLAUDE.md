@@ -155,45 +155,82 @@ OAuth2 implicit flow support with client-side fragment extraction:
 
 ## 🔒 UNIFIED CERTIFICATE MANAGEMENT
 
-### **Smart Certificate Strategy**
+### **Shared Custom Certificate Strategy**
 
-Both Node.js and .NET Core implementations use **intelligent certificate management** to eliminate browser conflicts:
+Both Node.js and .NET Core implementations use **identical custom SSL certificates** for perfect symmetry:
 
-**Certificate Source Priority:**
-1. **.NET Core Development Certificates** (Primary)
-   - Used when `dotnet` is available
-   - Automatically created/trusted if missing
-   - Exported to PEM format for Node.js compatibility
-
-2. **OpenSSL Generated Certificates** (Fallback)  
-   - Used when .NET Core unavailable
-   - Original Node.js certificate generation approach
-   - Self-signed certificates for development
-
-### **Transition Detection & Cache Management**
-
-The system automatically detects certificate source changes and provides clear guidance:
-
-```bash
-⚠️  Certificate source changed: openssl → dotnet
-🔄 Browser certificate cache clearing may be required
-
-📋 To clear certificate cache:
-   Chrome: Settings → Privacy → Clear browsing data → Advanced → Cookies and other site data
-   Firefox: Settings → Privacy → Certificates → View Certificates → Servers → Delete localhost
-   Safari: Keychain Access → System → Delete localhost certificates
+**Architecture:**
+```
+proxy-server/
+├── certs/
+│   ├── generate-certs.sh          # Unified certificate generation script
+│   ├── localhost.pem              # SSL certificate (shared)
+│   ├── localhost-key.pem          # Private key (shared)
+│   ├── localhost-combined.pem     # Combined format for compatibility
+│   └── localhost.pfx              # PKCS#12 format for .NET Core
+├── node/                          # Node.js implementation
+└── csharp/                        # .NET Core implementation
 ```
 
-**When Cache Clearing is Needed:**
-- ✅ **Transition scenarios**: OpenSSL ↔ .NET certificates
-- ❌ **NOT needed**: Node.js ↔ .NET Core (same .NET certificates)
-- ❌ **NOT needed**: Consistent certificate source
+### **Certificate Generation**
 
-### **Benefits**
-- **Seamless Switching**: When using same certificate source
-- **Automatic Detection**: Warns when manual intervention needed  
-- **Fallback Support**: Works without .NET Core installation
-- **Developer Friendly**: Clear instructions for manual steps
+**Automated Script:** `proxy-server/certs/generate-certs.sh`
+- **OpenSSL-based**: Generates self-signed certificates for localhost development
+- **Multiple Formats**: Creates PEM, combined PEM, and PKCS#12 formats for maximum compatibility
+- **System Integration**: Automatically installs certificate to macOS system keychain
+- **Cross-Platform**: Supports macOS, Linux, and Windows with appropriate instructions
+
+**Usage:**
+```bash
+# From either implementation directory:
+npm run generate-certs
+
+# Or directly:
+cd proxy-server/certs
+./generate-certs.sh
+```
+
+### **Implementation Symmetry**
+
+**Node.js Configuration:**
+- Uses separate `localhost.pem` and `localhost-key.pem` files
+- Standard Express.js HTTPS server with fs.readFileSync()
+- Path: `../certs/localhost-key.pem` and `../certs/localhost.pem`
+
+**.NET Core Configuration:**
+- Uses `X509Certificate2.CreateFromPemFile(certPath, keyPath)`
+- Same certificate and key files as Node.js implementation
+- Automatic fallback to .NET development certificates if files missing
+
+### **System Keychain Integration**
+
+**macOS Automatic Installation:**
+```bash
+# Automatically executed by generate-certs.sh
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.pem
+```
+
+**Benefits:**
+- **No Browser Warnings**: Certificate trusted system-wide
+- **Professional Development**: Eliminates manual certificate acceptance
+- **One-Time Setup**: Install once, works for both implementations
+- **True Symmetry**: Identical certificates = zero browser conflicts
+
+### **Cross-Platform Support**
+
+**macOS**: Automatic keychain installation with `security` command
+**Linux**: Instructions for `update-ca-certificates` (Ubuntu/Debian)
+**Windows**: Manual certificate import instructions
+
+### **Certificate Properties**
+
+```
+Subject: C=GR, ST=Attica, L=Athens, O=NBG, OU=IT Department, CN=localhost
+SAN: DNS:localhost, DNS:*.localhost, IP:127.0.0.1, IP:::1
+Validity: 365 days from generation
+Algorithm: RSA 2048-bit with SHA-256
+Usage: Digital Signature, Key Encipherment, Server Authentication
+```
 
 ---
 
@@ -218,9 +255,9 @@ OAUTH_REDIRECT_URI=https://your-domain.com/signin-provider/
 COOKIE_ENCRYPTION_KEY=your-secure-32char-encryption-key
 SESSION_SECRET=your-secure-session-secret
 
-# SSL Configuration
-SSL_KEY_PATH=./certs/server-key.pem
-SSL_CERT_PATH=./certs/server-cert.pem
+# SSL Configuration (shared certificates)
+SSL_KEY_PATH=../certs/localhost-key.pem
+SSL_CERT_PATH=../certs/localhost.pem
 
 # Feature Flags
 OAUTH_ENABLED=true

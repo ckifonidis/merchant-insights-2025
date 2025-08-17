@@ -21,6 +21,7 @@ public class TokenResponse
 
 public class UserInfo
 {
+    // Standard OpenID Connect claims
     public string sub { get; set; } = string.Empty;
     public string? name { get; set; }
     public string? preferred_username { get; set; }
@@ -30,4 +31,18 @@ public class UserInfo
     public string? aud { get; set; }
     public long? iat { get; set; }
     public long? exp { get; set; }
+    
+    // NBG-specific claims
+    public string? idp_provider { get; set; }
+    public string? picture { get; set; }
+    public string? ibank_user_id { get; set; }
+    public string? sms_otp_mobile { get; set; }
+    public string? phone_number { get; set; }
+    public string? PhoneNumberVerified { get; set; }
+    public string? customer_code { get; set; }
+    public string? amount_limit_per_transaction { get; set; }
+    public string? authorization_level { get; set; }
+    public string? number_of_approvals { get; set; }
+    public string? phone_number_verified { get; set; }
+    public string? role { get; set; }
 }

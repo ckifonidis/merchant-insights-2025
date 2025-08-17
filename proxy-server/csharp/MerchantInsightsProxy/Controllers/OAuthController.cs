@@ -348,10 +348,11 @@ public class OAuthController : ControllerBase
             }
             
             var json = await response.Content.ReadAsStringAsync();
-            var userInfo = JsonSerializer.Deserialize<UserInfo>(json);
             
-            _logger.LogInformation("[{RequestId}] UserInfo fetched from OAuth provider: sub={Sub}, name={Name}", 
-                requestId, userInfo?.sub, userInfo?.name);
+            // Deserialize to strongly-typed UserInfo with all NBG claims
+            var userInfo = JsonSerializer.Deserialize<UserInfo>(json);
+            _logger.LogInformation("[{RequestId}] UserInfo fetched from OAuth provider: sub={Sub}, preferred_username={PreferredUsername}, role={Role}", 
+                requestId, userInfo?.sub, userInfo?.preferred_username, userInfo?.role);
             
             return userInfo;
         }
