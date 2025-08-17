@@ -153,6 +153,50 @@ OAuth2 implicit flow support with client-side fragment extraction:
 
 ---
 
+## 🔒 UNIFIED CERTIFICATE MANAGEMENT
+
+### **Smart Certificate Strategy**
+
+Both Node.js and .NET Core implementations use **intelligent certificate management** to eliminate browser conflicts:
+
+**Certificate Source Priority:**
+1. **.NET Core Development Certificates** (Primary)
+   - Used when `dotnet` is available
+   - Automatically created/trusted if missing
+   - Exported to PEM format for Node.js compatibility
+
+2. **OpenSSL Generated Certificates** (Fallback)  
+   - Used when .NET Core unavailable
+   - Original Node.js certificate generation approach
+   - Self-signed certificates for development
+
+### **Transition Detection & Cache Management**
+
+The system automatically detects certificate source changes and provides clear guidance:
+
+```bash
+⚠️  Certificate source changed: openssl → dotnet
+🔄 Browser certificate cache clearing may be required
+
+📋 To clear certificate cache:
+   Chrome: Settings → Privacy → Clear browsing data → Advanced → Cookies and other site data
+   Firefox: Settings → Privacy → Certificates → View Certificates → Servers → Delete localhost
+   Safari: Keychain Access → System → Delete localhost certificates
+```
+
+**When Cache Clearing is Needed:**
+- ✅ **Transition scenarios**: OpenSSL ↔ .NET certificates
+- ❌ **NOT needed**: Node.js ↔ .NET Core (same .NET certificates)
+- ❌ **NOT needed**: Consistent certificate source
+
+### **Benefits**
+- **Seamless Switching**: When using same certificate source
+- **Automatic Detection**: Warns when manual intervention needed  
+- **Fallback Support**: Works without .NET Core installation
+- **Developer Friendly**: Clear instructions for manual steps
+
+---
+
 ## 🔧 CONFIGURATION SYSTEM
 
 ### **Environment Variables**

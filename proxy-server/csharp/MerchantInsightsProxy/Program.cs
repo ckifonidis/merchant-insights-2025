@@ -44,14 +44,41 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddSwaggerGen();
 }
 
-// HTTPS configuration - use .NET Core development certificates
+// HTTPS configuration - use shared custom certificates
 builder.WebHost.ConfigureKestrel(options =>
 {
     var port = int.Parse(builder.Configuration["Proxy:Port"] ?? "5443");
+    var certPath = Path.Combine("..", "..", "certs", "localhost.pem");
+    var keyPath = Path.Combine("..", "..", "certs", "localhost-key.pem");
     
     options.ListenAnyIP(port, listenOptions =>
     {
-        listenOptions.UseHttps(); // Uses .NET Core development certificate
+        // Use separate certificate and key files (like Node.js)
+        if (File.Exists(certPath) && File.Exists(keyPath))
+        {
+            try
+            {
+                // Load certificate and private key using X509Certificate2
+                var cert = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+                listenOptions.UseHttps(cert);
+                Console.WriteLine($"🔒 Using shared custom certificates:");
+                Console.WriteLine($"   📄 Certificate: {Path.GetFullPath(certPath)}");
+                Console.WriteLine($"   🔑 Private Key: {Path.GetFullPath(keyPath)}");
+                Console.WriteLine($"   🔗 Same certificates as Node.js implementation");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Failed to load custom certificates: {ex.Message}");
+                Console.WriteLine("🔄 Falling back to .NET development certificates");
+                listenOptions.UseHttps(); // Fallback to .NET development certificates
+            }
+        }
+        else
+        {
+            Console.WriteLine("❌ Shared certificates not found, falling back to .NET development certificates");
+            Console.WriteLine($"   Expected: {Path.GetFullPath(certPath)} and {Path.GetFullPath(keyPath)}");
+            listenOptions.UseHttps(); // Fallback to .NET development certificates
+        }
     });
 });
 

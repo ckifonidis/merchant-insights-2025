@@ -8,7 +8,7 @@ A secure HTTPS proxy server with OAuth2 authentication for the NBG Merchant Insi
 
 ## Features
 
-- 🔒 **HTTPS/SSL** - Secure communication with self-signed certificates for development
+- 🔒 **Unified SSL Certificates** - Smart certificate management with seamless switching between implementations
 - 🔐 **OAuth2 Integration** - Full authorization code flow with NBG Identity Server
 - 🍪 **Encrypted Cookies** - AES-256-GCM encryption for secure token storage
 - 🔄 **API Proxy** - Seamless proxying to backend API with automatic token injection
@@ -33,8 +33,9 @@ Choose your preferred implementation:
 cd proxy-server/node
 npm install
 
-# Generate SSL certificates (shared between implementations)
-npm run generate-certs
+# SSL certificates are automatically managed by start.sh
+# Uses .NET Core development certificates when available, 
+# falls back to OpenSSL generation otherwise
 
 # Copy and configure environment
 cp .env.example .env
@@ -131,6 +132,28 @@ npm run dev
 # Production
 npm start
 ```
+
+## 🔒 SSL Certificate Management
+
+Both Node.js and .NET Core implementations use **unified certificate management** for seamless switching:
+
+### **Smart Certificate Strategy**
+1. **Primary**: .NET Core development certificates (when available)
+2. **Fallback**: OpenSSL self-signed certificates
+
+### **Seamless Switching**
+- **With .NET installed**: Both implementations use identical .NET certificates
+- **Without .NET**: Node.js falls back to OpenSSL certificates  
+- **Transition detection**: Automatic warnings when certificate source changes
+
+### **When Browser Cache Clearing is Needed**
+✅ **Required**: Switching between OpenSSL ↔ .NET certificate sources  
+❌ **NOT required**: Switching between Node.js ↔ .NET implementations (same certificates)
+
+**Cache Clearing Steps:**
+- **Chrome**: Settings → Privacy → Clear browsing data → Cookies and other site data
+- **Firefox**: Settings → Privacy → Certificates → View Certificates → Delete localhost
+- **Safari**: Keychain Access → System → Delete localhost certificates
 
 ## Architecture
 
