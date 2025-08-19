@@ -6,6 +6,7 @@ import ChartSelector from './ChartSelector';
 import ChartTable from './ChartTable';
 import { ChangeIndicator } from '../metrics';
 import { CHART_CONFIG } from '../../../utils/constants';
+import { formatCompactNumber } from '../../../utils/formatters';
 
 // TypeScript interfaces
 export type ChartType = 'line' | 'bar' | 'table';
@@ -250,10 +251,11 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
 
   // Render chart based on type
   const renderChart = (): React.ReactElement | null => {
-    // Responsive margin configuration for rotated labels
-    const rotatedLabelMargins = {
+    // Responsive margin configuration for rotated labels and Y-axis space
+    const responsiveMargins = {
       ...CHART_CONFIG.margins,
-      bottom: window.innerWidth < 768 ? 15 : 20
+      bottom: window.innerWidth < 768 ? 15 : 20,
+      left: window.innerWidth < 768 ? 45 : 60
     };
 
     // Responsive tick configuration for mobile vs desktop
@@ -263,11 +265,16 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
       height: window.innerWidth < 768 ? 60 : 80
     };
 
+    // Smart Y-axis formatter based on data type
+    const yAxisFormatter = yAxisMode === 'percentage' 
+      ? (value: number) => `${value}%`
+      : formatCompactNumber;
+
     if (chartType === 'line') {
       return (
         <LineChart 
           data={chartData}
-          margin={rotatedLabelMargins}
+          margin={responsiveMargins}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -277,7 +284,10 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
             textAnchor="end"
             height={responsiveTickProps.height}
           />
-          <YAxis tickFormatter={valueFormatter} />
+          <YAxis 
+            tickFormatter={yAxisFormatter}
+            width={window.innerWidth < 768 ? 40 : 55}
+          />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Line
@@ -306,7 +316,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
       return (
         <BarChart 
           data={chartData}
-          margin={rotatedLabelMargins}
+          margin={responsiveMargins}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -316,7 +326,10 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
             textAnchor="end"
             height={responsiveTickProps.height}
           />
-          <YAxis tickFormatter={valueFormatter} />
+          <YAxis 
+            tickFormatter={yAxisFormatter}
+            width={window.innerWidth < 768 ? 40 : 55}
+          />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Bar 

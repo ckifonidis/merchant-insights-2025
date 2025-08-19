@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { formatCompactNumber } from '../../../utils/formatters';
 
 // TypeScript interfaces
 export interface BarChartDataPoint {
@@ -172,15 +173,27 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
       fontSize: isMobile ? 9 : 11,
       angle: isMobile ? -30 : -45,
       height: isMobile ? 60 : 80,
-      bottomMargin: isMobile ? 60 : 80
+      bottomMargin: isMobile ? 60 : 80,
+      leftMargin: isMobile ? 45 : 60
     };
+
+    // Detect if this is a percentage chart by testing formatValue output
+    const isPercentageChart = formatValue(100).includes('%');
+    const yAxisFormatter = isPercentageChart 
+      ? (value: number) => `${value}%`
+      : formatCompactNumber;
 
     return (
       <div className="h-80 md:h-96">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 5, right: 30, left: 20, bottom: responsiveConfig.bottomMargin }}
+            margin={{ 
+              top: 5, 
+              right: 30, 
+              left: responsiveConfig.leftMargin, 
+              bottom: responsiveConfig.bottomMargin 
+            }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
@@ -192,6 +205,8 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
             />
             <YAxis 
               label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
+              tickFormatter={yAxisFormatter}
+              width={isMobile ? 40 : 55}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
