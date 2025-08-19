@@ -165,33 +165,43 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
   );
 
   // Render bar chart
-  const renderBarChart = () => (
-    <div className="h-96">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 80 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis 
-            dataKey="category" 
-            tick={{ fontSize: 11 }}
-            angle={-45}
-            textAnchor="end"
-            height={80}
-          />
-          <YAxis 
-            label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <Bar 
-            dataKey="merchant" 
-            fill={merchantColor} 
-            name={t('dashboard.merchant')}
-          />
-          <Bar 
-            dataKey="competitor" 
+  const renderBarChart = () => {
+    // Responsive configuration for mobile vs desktop
+    const isMobile = window.innerWidth < 768;
+    const responsiveConfig = {
+      fontSize: isMobile ? 9 : 11,
+      angle: isMobile ? -30 : -45,
+      height: isMobile ? 60 : 80,
+      bottomMargin: isMobile ? 60 : 80
+    };
+
+    return (
+      <div className="h-80 md:h-96">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ top: 5, right: 30, left: 20, bottom: responsiveConfig.bottomMargin }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="category" 
+              tick={{ fontSize: responsiveConfig.fontSize }}
+              angle={responsiveConfig.angle}
+              textAnchor="end"
+              height={responsiveConfig.height}
+            />
+            <YAxis 
+              label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Bar 
+              dataKey="merchant" 
+              fill={merchantColor} 
+              name={t('dashboard.merchant')}
+            />
+            <Bar 
+              dataKey="competitor" 
             fill={competitorColor} 
             name={t('dashboard.competition')}
           />
@@ -199,6 +209,7 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
+  };
 
   return (
     <div>

@@ -250,16 +250,33 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
 
   // Render chart based on type
   const renderChart = (): React.ReactElement | null => {
-    const commonProps = {
-      data: chartData,
-      margin: CHART_CONFIG.margins
+    // Responsive margin configuration for rotated labels
+    const rotatedLabelMargins = {
+      ...CHART_CONFIG.margins,
+      bottom: window.innerWidth < 768 ? 15 : 20
+    };
+
+    // Responsive tick configuration for mobile vs desktop
+    const responsiveTickProps = {
+      fontSize: window.innerWidth < 768 ? 9 : 11,
+      angle: window.innerWidth < 768 ? -30 : -45,
+      height: window.innerWidth < 768 ? 60 : 80
     };
 
     if (chartType === 'line') {
       return (
-        <LineChart {...commonProps}>
+        <LineChart 
+          data={chartData}
+          margin={rotatedLabelMargins}
+        >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
+          <XAxis 
+            dataKey="date" 
+            tick={{ fontSize: responsiveTickProps.fontSize }}
+            angle={responsiveTickProps.angle}
+            textAnchor="end"
+            height={responsiveTickProps.height}
+          />
           <YAxis tickFormatter={valueFormatter} />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
@@ -287,9 +304,18 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
 
     if (chartType === 'bar') {
       return (
-        <BarChart {...commonProps}>
+        <BarChart 
+          data={chartData}
+          margin={rotatedLabelMargins}
+        >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
+          <XAxis 
+            dataKey="date" 
+            tick={{ fontSize: responsiveTickProps.fontSize }}
+            angle={responsiveTickProps.angle}
+            textAnchor="end"
+            height={responsiveTickProps.height}
+          />
           <YAxis tickFormatter={valueFormatter} />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
@@ -360,7 +386,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
     <ChartContainer title={title} className={className} controls={controls}>
       {/* Chart Rendering */}
       {chartType !== 'table' ? (
-        <div className="h-64 w-full">
+        <div className="h-72 md:h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             {renderChart() || <div />}
           </ResponsiveContainer>
