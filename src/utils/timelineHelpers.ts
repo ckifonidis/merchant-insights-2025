@@ -125,7 +125,7 @@ const processWeeklyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] =>
         competitorTransactions: Math.round(sum(group.competitorTransactions)),
         merchantRevenue: Math.round(sum(group.merchantRevenue)),
         competitorRevenue: Math.round(sum(group.competitorRevenue)),
-        merchantCustomers: Math.round(sum(group.merchantCustomers))
+        merchantCustomers: Math.round(average(group.merchantCustomers))
       };
     });
 };
@@ -173,7 +173,7 @@ const processMonthlyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] =
         competitorTransactions: Math.round(sum(group.competitorTransactions)),
         merchantRevenue: Math.round(sum(group.merchantRevenue)),
         competitorRevenue: Math.round(sum(group.competitorRevenue)),
-        merchantCustomers: Math.round(sum(group.merchantCustomers))
+        merchantCustomers: Math.round(average(group.merchantCustomers))
       };
     });
 };
@@ -227,7 +227,7 @@ const processQuarterlyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[]
         competitorTransactions: Math.round(sum(group.competitorTransactions)),
         merchantRevenue: Math.round(sum(group.merchantRevenue)),
         competitorRevenue: Math.round(sum(group.competitorRevenue)),
-        merchantCustomers: Math.round(sum(group.merchantCustomers))
+        merchantCustomers: Math.round(average(group.merchantCustomers))
       };
     });
 };
@@ -274,7 +274,7 @@ const processYearlyData = (data: TimeSeriesDataPoint[]): ProcessedDataPoint[] =>
         competitorTransactions: Math.round(sum(group.competitorTransactions)),
         merchantRevenue: Math.round(sum(group.merchantRevenue)),
         competitorRevenue: Math.round(sum(group.competitorRevenue)),
-        merchantCustomers: Math.round(sum(group.merchantCustomers))
+        merchantCustomers: Math.round(average(group.merchantCustomers))
       };
     });
 };
