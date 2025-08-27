@@ -128,7 +128,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
 
   const sidebarClasses = `
     ${isMobile
-      ? `fixed inset-0 z-50 bg-white transform transition-transform duration-300 overflow-x-hidden w-full ${
+      ? `fixed inset-0 z-50 bg-white transform transition-transform duration-300 w-full ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`
       : `w-80 bg-white border-r border-gray-200 ${isOpen ? 'block' : 'hidden'}`
@@ -152,7 +152,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
         </div>
       )}
 
-      <div className={`${isMobile ? 'p-4 w-full max-w-full' : 'p-4'} h-full overflow-y-auto overflow-x-hidden`}>
+      <div className={`${isMobile ? 'p-4 w-full max-w-full' : 'p-4'} h-full overflow-y-auto overflow-x-visible`}>
         {!isMobile && (
           <h2 className="text-lg font-semibold mb-4">{t('filters.title')}</h2>
         )}
@@ -173,6 +173,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
               maxDate={subDays(new Date(), 1)}
               className="w-full p-2 border border-gray-300 rounded-md text-sm"
               placeholderText="Start Date"
+              popperPlacement="bottom-start"
             />
             <DatePicker
               selected={endDate}
@@ -184,6 +185,7 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
               maxDate={subDays(new Date(), 1)}
               className="w-full p-2 border border-gray-300 rounded-md text-sm"
               placeholderText="End Date"
+              popperPlacement="bottom-start"
             />
           </div>
         </div>
