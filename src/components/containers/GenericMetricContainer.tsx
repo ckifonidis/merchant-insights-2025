@@ -17,6 +17,7 @@ interface GenericMetricContainerProps {
   valueType: ValueType;
   icon: React.ReactNode;
   variant?: MetricVariant;
+  hideCompetitorAbsolute?: boolean;
 }
 
 /**
@@ -31,7 +32,8 @@ const GenericMetricContainer: React.FC<GenericMetricContainerProps> = ({
   metricId,
   valueType,
   icon,
-  variant = METRIC_VARIANTS.detailed as MetricVariant
+  variant = METRIC_VARIANTS.detailed as MetricVariant,
+  hideCompetitorAbsolute = false
 }) => {
   // Connect to store using the provided metricId
   const metricData = useSelector(createMetricSelector(metricId));
@@ -66,6 +68,7 @@ const GenericMetricContainer: React.FC<GenericMetricContainerProps> = ({
       valueType={valueType}
       isLoading={isLoading}
       error={error}
+      hideCompetitorAbsolute={hideCompetitorAbsolute}
     />
   );
 };

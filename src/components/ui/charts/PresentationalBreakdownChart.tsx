@@ -22,6 +22,7 @@ interface PresentationalBreakdownChartProps {
   note?: string | undefined;
   loading?: boolean;
   error?: string | null;
+  hideCompetitorAbsolute?: boolean;
 }
 
 /**
@@ -38,7 +39,8 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
   showAbsoluteValues = false,
   note,
   loading = false,
-  error = null
+  error = null,
+  hideCompetitorAbsolute = false
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('stacked');
@@ -265,9 +267,9 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
               {data.map((item, index) => {
                 const color = colors[item.category];
                 const absoluteValue = item.competitorAbsolute;
-                const formattedAbsolute = formatTooltipValue && absoluteValue ? 
+                const formattedAbsolute = !hideCompetitorAbsolute && formatTooltipValue && absoluteValue ? 
                   formatTooltipValue(absoluteValue) : 
-                  (absoluteValue ? absoluteValue.toLocaleString() : '');
+                  (!hideCompetitorAbsolute && absoluteValue ? absoluteValue.toLocaleString() : '');
                 
                 return (
                   <div
@@ -289,9 +291,9 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
             {data.map((item, index) => {
               const color = colors[item.category];
               const absoluteValue = item.competitorAbsolute;
-              const formattedAbsolute = formatTooltipValue && absoluteValue ? 
+              const formattedAbsolute = !hideCompetitorAbsolute && formatTooltipValue && absoluteValue ? 
                 formatTooltipValue(absoluteValue) : 
-                (absoluteValue ? absoluteValue.toLocaleString() : '');
+                (!hideCompetitorAbsolute && absoluteValue ? absoluteValue.toLocaleString() : '');
               
               return (
                 <div key={index} className="flex items-center">
@@ -319,7 +321,7 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
           {/* Merchant Pie Chart */}
           <div className="flex flex-col items-center min-h-0">
             <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.merchant')}</h4>
-            <div className="w-full h-56 min-h-0">
+            <div className="w-full h-48 min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -344,7 +346,7 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
           {/* Competitor Pie Chart */}
           <div className="flex flex-col items-center min-h-0">
             <h4 className="text-sm font-medium text-gray-700 mb-2">{t('dashboard.competition')}</h4>
-            <div className="w-full h-56 min-h-0">
+            <div className="w-full h-48 min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -368,7 +370,7 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
         </div>
 
         {/* Common Color Legend */}
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-2">
           <div className="flex items-center space-x-6 flex-wrap">
             {Object.entries(colors).map(([key, color]) => (
               <div key={key} className="flex items-center">
@@ -421,7 +423,7 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
       {/* Chart */}
       <div className={
         chartType === 'table' ? 'max-h-64 overflow-y-auto' :
-        isMobile && chartType === 'pie' ? 'h-auto min-h-96' :
+        chartType === 'pie' ? 'h-auto' :
         'h-64'
       }>
         {renderChart()}

@@ -39,6 +39,7 @@ export interface PresentationalMetricCardProps {
   iconBackground?: string;
   layout?: LayoutType;
   size?: SizeType;
+  hideCompetitorAbsolute?: boolean;
 }
 
 /**
@@ -70,7 +71,8 @@ const PresentationalMetricCard: React.FC<PresentationalMetricCardProps> = ({
   showIcon = true,
   iconBackground = 'bg-gray-50',
   layout = 'horizontal',
-  size = 'medium'
+  size = 'medium',
+  hideCompetitorAbsolute = false
 }) => {
   const { t } = useTranslation();
 
@@ -257,7 +259,7 @@ const PresentationalMetricCard: React.FC<PresentationalMetricCardProps> = ({
               </p>
               <div className="flex items-center">
                 <h3 className="text-2xl font-bold">
-                  {competitorData.value !== null ? formatValue(competitorData.value, valueType) : '-'}
+                  {!hideCompetitorAbsolute && competitorData.value !== null ? formatValue(competitorData.value, valueType) : '-'}
                 </h3>
                 {competitorData.change !== null && competitorData.change !== undefined && (
                   <div className={`rounded-full p-1.5 ml-2 ${

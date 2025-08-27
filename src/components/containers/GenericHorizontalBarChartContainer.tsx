@@ -31,6 +31,7 @@ interface GenericHorizontalBarChartContainerProps {
   showTable?: boolean;
   note?: string;
   context?: string; // Tab context for compound key resolution
+  hideCompetitorAbsolute?: boolean;
 }
 
 /**
@@ -50,7 +51,8 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
   maxCategories,
   showTable = true,
   note,
-  context
+  context,
+  hideCompetitorAbsolute = false
 }) => {
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo(() => {
@@ -136,9 +138,9 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
         };
       });
 
-      // Sort by total percentage (merchant + competitor) and limit if maxCategories is set
+      // Sort by merchant percentage in descending order
       result = result
-        .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
+        .sort((a, b) => b.merchant - a.merchant);
       
       if (maxCategories) {
         result = result.slice(0, maxCategories);
@@ -147,7 +149,7 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
       // Truncate long category names for horizontal display
       result = result.map(item => ({
         ...item,
-        category: item.category.length > 20 ? item.category.substring(0, 20) + '...' : item.category
+        category: item.category.length > 35 ? item.category.substring(0, 35) + '...' : item.category
       }));
 
       return result;
@@ -184,9 +186,23 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
         };
       });
 
-      // Sort by total percentage (merchant + competitor)
+      // Sort by predefined chronological age order: Gen Z, Millennials, Gen X, Baby Boomers, Silent Gen
+      const ageGroupOrder = ['18-24', '25-40', '41-56', '57-75', '76-96'];
       result = result
-        .sort((a, b) => (b.merchant + b.competitor) - (a.merchant + a.competitor));
+        .sort((a, b) => {
+          // Find the age group key from the category name
+          const getAgeKey = (category: string) => {
+            return Object.keys(AGE_GROUP_LABELS).find(key => AGE_GROUP_LABELS[key] === category) || '';
+          };
+          
+          const aKey = getAgeKey(a.category);
+          const bKey = getAgeKey(b.category);
+          
+          const aIndex = ageGroupOrder.indexOf(aKey);
+          const bIndex = ageGroupOrder.indexOf(bKey);
+          
+          return aIndex - bIndex;
+        });
       
       if (maxCategories) {
         result = result.slice(0, maxCategories);
@@ -227,6 +243,7 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
         note={note || null}
         loading={isLoading}
         error={error}
+        hideCompetitorAbsolute={hideCompetitorAbsolute}
       />
     </div>
   );

@@ -73,6 +73,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
             </div>
           }
           variant="detailed"
+          hideCompetitorAbsolute={true}
         />
       </div>
 
@@ -84,12 +85,12 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           metricId="converted_customers_by_gender"
           colors={{
             'Male': '#3B82F6',
-            'Female': '#F472B6',
-            'Other': '#6B7280'
+            'Female': '#F472B6'
           }}
           formatValue={(value: number) => `${value}%`}
           formatTooltipValue={(absoluteValue: number) => `${absoluteValue} customers`}
           showAbsoluteValues={true}
+          hideCompetitorAbsolute={true}
         />
 
         {/* Age Group Chart */}
@@ -97,10 +98,11 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           title={t('demographics.customersByAge')}
           metricId="converted_customers_by_age"
           merchantColor="#3B82F6"
-          competitorColor="#EF4444"
+          competitorColor="#000000"
           formatValue={(value: number) => `${value}%`}
           formatTooltipValue={(value: number) => `${value} customers`}
           maxCategories={6}
+          hideCompetitorAbsolute={true}
         />
 
         {/* Shopping Interests Chart */}
@@ -113,6 +115,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           formatValue={(value: number) => `${value}%`}
           formatTooltipValue={(value: number) => `${value} customers`}
           maxCategories={8}
+          hideCompetitorAbsolute={true}
         />
       </div>
 

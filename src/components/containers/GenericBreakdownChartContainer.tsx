@@ -29,6 +29,7 @@ interface GenericBreakdownChartContainerProps {
   showAbsoluteValues?: boolean;
   note?: string;
   context?: string; // Tab context for compound key resolution
+  hideCompetitorAbsolute?: boolean;
 }
 
 /**
@@ -46,7 +47,8 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
   formatTooltipValue,
   showAbsoluteValues = false,
   note,
-  context
+  context,
+  hideCompetitorAbsolute = false
 }) => {
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo(() => {
@@ -137,7 +139,7 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
       const competitorData = rawData.competitor?.current || {};
       
       // Gender categories are stored as keys in the normalized data
-      const genderCategories = ['male', 'female', 'other'];
+      const genderCategories = ['male', 'female'];
       
       // Calculate totals for percentage calculation
       const merchantTotal = genderCategories.reduce((sum, gender) => sum + (merchantData[gender] || 0), 0);
@@ -146,8 +148,7 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
       // Map gender keys to display names
       const genderLabels: Record<string, string> = {
         'male': 'Male',
-        'female': 'Female', 
-        'other': 'Other'
+        'female': 'Female'
       };
       
       return genderCategories
@@ -244,6 +245,7 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
         note={note}
         loading={isLoading}
         error={error}
+        hideCompetitorAbsolute={hideCompetitorAbsolute}
       />
     </div>
   );

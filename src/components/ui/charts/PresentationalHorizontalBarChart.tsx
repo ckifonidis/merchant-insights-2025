@@ -21,6 +21,7 @@ interface PresentationalHorizontalBarChartProps {
   note?: string | null;
   loading?: boolean;
   error?: string | null;
+  hideCompetitorAbsolute?: boolean;
 }
 
 /**
@@ -38,7 +39,8 @@ const PresentationalHorizontalBarChart: React.FC<PresentationalHorizontalBarChar
   showTable = true,
   note,
   loading = false,
-  error = null
+  error = null,
+  hideCompetitorAbsolute = false
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState('bars');
@@ -82,13 +84,13 @@ const PresentationalHorizontalBarChart: React.FC<PresentationalHorizontalBarChar
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-2/5 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Category
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-3/10 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {t('dashboard.merchant')} (%)
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-3/10 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {t('dashboard.competition')} (%)
             </th>
           </tr>
@@ -109,7 +111,7 @@ const PresentationalHorizontalBarChart: React.FC<PresentationalHorizontalBarChar
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {formatValue(row.competitor)}
-                {row.competitorAbsolute !== undefined && formatTooltipValue && (
+                {!hideCompetitorAbsolute && row.competitorAbsolute !== undefined && formatTooltipValue && (
                   <span className="text-gray-400 ml-1">
                     ({formatTooltipValue(row.competitorAbsolute)})
                   </span>
