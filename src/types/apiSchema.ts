@@ -110,21 +110,21 @@ export interface AnalyticsApiResponse extends ApiResponse {
  * API Schema Utilities
  */
 export const SHOPPING_INTERESTS = {
-  SHOPINT1: 'Αυτοκίνητο & Καύσιμα',
-  SHOPINT2: 'Εκπαίδευση', 
-  SHOPINT3: 'Ένδυση, Ομορφιά & Κόσμημα',
+  SHOPINT1: 'Αυτοκίνητα & Καύσιμα',
+  SHOPINT2: 'Εκπαίδευση',
+  SHOPINT3: 'Μόδα, Καλλυντικά & Κοσμήματα',
   SHOPINT4: 'Ηλεκτρονικά & Οικιακές Συσκευές',
   SHOPINT5: 'Κατοικίδια',
   SHOPINT6: 'Παιχνίδια',
-  SHOPINT7: 'Προσωπική Φροντίδα',
+  SHOPINT7: 'Ευεξία & Προσωπική Φροντίδα',
   SHOPINT8: 'Σπίτι & Κήπος',
-  SHOPINT9: 'Ταξίδι & Μεταφορικά Μέσα',
+  SHOPINT9: 'Ταξίδια & Μεταφορές',
   SHOPINT10: 'Τηλεπικοινωνίες',
   SHOPINT11: 'Τουρισμός',
-  SHOPINT12: 'Τρόφιμα, Ποτά & Supermarket',
-  SHOPINT13: 'Υπηρεσίες Εστίασης',
-  SHOPINT14: 'Υπηρεσίες Υγείας',
-  SHOPINT15: 'Ψυχαγωγία & Hobbies'
+  SHOPINT12: 'Φαγητό & Ποτά',
+  SHOPINT13: 'Εστιατόρια, Μπαρ, Fast Food & Καφετέριες',
+  SHOPINT14: 'Υγεία & Ιατρική Περίθαλψη',
+  SHOPINT15: 'Ψυχαγωγία & Χόμπι'
 } as const;
 
 export const ANALYTICS_PROVIDERS = {

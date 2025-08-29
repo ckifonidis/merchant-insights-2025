@@ -99,7 +99,7 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
     name: item.category,
     value: typeof item.competitor === 'number' && !isNaN(item.competitor) ? item.competitor : 0,
     percentage: typeof item.competitor === 'number' && !isNaN(item.competitor) ? item.competitor : 0,
-    absoluteValue: typeof item.competitorAbsolute === 'number' && !isNaN(item.competitorAbsolute) ? item.competitorAbsolute : null,
+    absoluteValue: !hideCompetitorAbsolute && typeof item.competitorAbsolute === 'number' && !isNaN(item.competitorAbsolute) ? item.competitorAbsolute : null,
     color: colors[item.category] || '#999999'
   }));
 
@@ -165,11 +165,6 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {t('dashboard.merchant')} (%)
             </th>
-            {showAbsoluteValues && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('dashboard.merchant')} (Value)
-              </th>
-            )}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {t('dashboard.competition')} (%)
             </th>
@@ -184,17 +179,19 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatValue(row.merchant)}
+                  {showAbsoluteValues && row.merchantAbsolute && formatTooltipValue && (
+                    <span className="text-gray-400 ml-1">
+                      ({formatTooltipValue(row.merchantAbsolute)})
+                    </span>
+                  )}
                 </td>
-                {showAbsoluteValues && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {row.merchantAbsolute ? 
-                      (formatTooltipValue ? formatTooltipValue(row.merchantAbsolute) : row.merchantAbsolute.toLocaleString()) : 
-                      '-'
-                    }
-                  </td>
-                )}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatValue(row.competitor)}
+                  {!hideCompetitorAbsolute && showAbsoluteValues && row.competitorAbsolute && formatTooltipValue && (
+                    <span className="text-gray-400 ml-1">
+                      ({formatTooltipValue(row.competitorAbsolute)})
+                    </span>
+                  )}
                 </td>
               </tr>
             );

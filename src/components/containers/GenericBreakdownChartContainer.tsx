@@ -231,7 +231,7 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
 
     // Default case - no data
     return [];
-  }, [rawData, metricId]);
+  }, [rawData, metricId, t]);
 
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200">

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { createSelector } from '@reduxjs/toolkit';
 import { 
   selectDataLoading,
@@ -54,6 +55,8 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
   context,
   hideCompetitorAbsolute = false
 }) => {
+  const { t } = useTranslation();
+  
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo(() => {
     return createSelector(
@@ -119,10 +122,11 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
       const merchantTotal = Object.values(merchantData).reduce((sum: number, val: any) => sum + (val || 0), 0);
       const competitorTotal = Object.values(competitorData).reduce((sum: number, val: any) => sum + (val || 0), 0);
       
-      // Shopping interest labels mapping - use our single source of truth
-      const SHOPPING_INTEREST_LABELS: Record<string, string> = {
-        ...SHOPPING_INTERESTS,
-        'other_category': 'Other'
+      // Shopping interest labels mapping - use translations
+      const getShoppingInterestLabel = (interest: string): string => {
+        if (interest === 'other_category') return 'Other';
+        // Use translation keys for SHOPINT1-15
+        return t(`shoppingInterests.${interest}`) || interest;
       };
       
       let result = Object.keys(merchantData).map(interest => {
@@ -130,7 +134,7 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
         const competitorAbsolute = competitorData[interest] || 0;
         
         return {
-          category: SHOPPING_INTEREST_LABELS[interest] || interest,
+          category: getShoppingInterestLabel(interest),
           merchant: merchantTotal > 0 ? Number(((merchantAbsolute / merchantTotal) * 100).toFixed(2)) : 0,
           competitor: competitorTotal > 0 ? Number(((competitorAbsolute / competitorTotal) * 100).toFixed(2)) : 0,
           merchantAbsolute,
@@ -213,7 +217,7 @@ const GenericHorizontalBarChartContainer: React.FC<GenericHorizontalBarChartCont
 
     // Default case - no data
     return [];
-  }, [rawData, metricId, maxCategories]);
+  }, [rawData, metricId, maxCategories, t]);
 
   // Debug loading state for shopping interests
   if (metricId === 'converted_customers_by_interest') {

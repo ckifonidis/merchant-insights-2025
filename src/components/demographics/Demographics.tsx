@@ -111,7 +111,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           metricId="converted_customers_by_interest"
           context="demographics"
           merchantColor="#10B981"
-          competitorColor="#EF4444"
+          competitorColor="#000000"
           formatValue={(value: number) => `${value}%`}
           formatTooltipValue={(value: number) => `${value} customers`}
           maxCategories={8}
