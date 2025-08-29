@@ -7,43 +7,20 @@ import { RootState } from '../index';
 
 const POST_PROMOTION_ANALYTICS = '56f9cf99-3727-4f2f-bf1c-58dc532ebaf5';
 
-// Static filter options based on types from filters.ts
-const CHANNEL_OPTIONS: FilterOption[] = [
-  { value: 'all', label: 'All Channels' },
-  { value: 'physical', label: 'Physical Stores' },
-  { value: 'ecommerce', label: 'E-commerce' }
-];
-
-const GENDER_OPTIONS: FilterOption[] = [
-  { value: 'a', label: 'All Genders' },
-  { value: 'm', label: 'Male' },
-  { value: 'f', label: 'Female' }
-];
-
-const AGE_GROUP_OPTIONS: FilterOption[] = [
+// Static filter value arrays - labels will be handled by components with translations
+const CHANNEL_VALUES = ['all', 'physical', 'ecommerce'];
+const GENDER_VALUES = ['a', 'm', 'f'];
+const AGE_GROUP_VALUES = [
   { value: 'generation_z', label: 'Generation Z (18-24)' },
   { value: 'millennials', label: 'Millennials (25-40)' },
   { value: 'generation_x', label: 'Generation X (41-56)' },
   { value: 'baby_boomers', label: 'Baby Boomers (57-75)' },
   { value: 'silent_generation', label: 'Silent Generation (76-96)' }
 ];
-
-const SHOPPING_INTEREST_OPTIONS: FilterOption[] = [
-  { value: 'SHOPINT1', label: 'Fashion & Apparel' },
-  { value: 'SHOPINT2', label: 'Electronics & Technology' },
-  { value: 'SHOPINT3', label: 'Home & Garden' },
-  { value: 'SHOPINT4', label: 'Health & Beauty' },
-  { value: 'SHOPINT5', label: 'Sports & Outdoor' },
-  { value: 'SHOPINT6', label: 'Books & Media' },
-  { value: 'SHOPINT7', label: 'Food & Beverages' },
-  { value: 'SHOPINT8', label: 'Automotive' },
-  { value: 'SHOPINT9', label: 'Travel & Leisure' },
-  { value: 'SHOPINT10', label: 'Jewelry & Accessories' },
-  { value: 'SHOPINT11', label: 'Baby & Kids' },
-  { value: 'SHOPINT12', label: 'Pet Supplies' },
-  { value: 'SHOPINT13', label: 'Office & Business' },
-  { value: 'SHOPINT14', label: 'Arts & Crafts' },
-  { value: 'SHOPINT15', label: 'Other Interests' }
+const SHOPPING_INTEREST_VALUES = [
+  'SHOPINT1', 'SHOPINT2', 'SHOPINT3', 'SHOPINT4', 'SHOPINT5',
+  'SHOPINT6', 'SHOPINT7', 'SHOPINT8', 'SHOPINT9', 'SHOPINT10',
+  'SHOPINT11', 'SHOPINT12', 'SHOPINT13', 'SHOPINT14', 'SHOPINT15'
 ];
 
 const REGION_OPTIONS: FilterOption[] = [
@@ -459,12 +436,12 @@ export const selectFilterSummary = createSelector(
   }
 );
 
-// Static filter options selectors (no async loading needed)
-export const selectChannelOptions = (state: RootState): FilterOption[] => CHANNEL_OPTIONS;
-export const selectGenderOptions = (state: RootState): FilterOption[] => GENDER_OPTIONS;
-export const selectAgeGroupOptions = (state: RootState): FilterOption[] => AGE_GROUP_OPTIONS;
+// Static filter value selectors - components will handle translations
+export const selectChannelValues = (state: RootState): string[] => CHANNEL_VALUES;
+export const selectGenderValues = (state: RootState): string[] => GENDER_VALUES;
+export const selectAgeGroupOptions = (state: RootState): FilterOption[] => AGE_GROUP_VALUES;
 export const selectRegionOptions = (state: RootState): FilterOption[] => REGION_OPTIONS;
-export const selectShoppingInterestOptions = (state: RootState): FilterOption[] => SHOPPING_INTEREST_OPTIONS;
+export const selectShoppingInterestValues = (state: RootState): string[] => SHOPPING_INTEREST_VALUES;
 
 
 export const selectGoForMoreAvailable = createSelector(

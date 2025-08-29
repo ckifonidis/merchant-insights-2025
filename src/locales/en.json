@@ -47,6 +47,23 @@
     "yes": "Yes",
     "no": "No"
   },
+  "shoppingInterests": {
+    "SHOPINT1": "Fashion & Apparel",
+    "SHOPINT2": "Electronics & Technology", 
+    "SHOPINT3": "Home & Garden",
+    "SHOPINT4": "Health & Beauty",
+    "SHOPINT5": "Sports & Outdoor",
+    "SHOPINT6": "Books & Media",
+    "SHOPINT7": "Food & Beverages",
+    "SHOPINT8": "Automotive",
+    "SHOPINT9": "Travel & Leisure",
+    "SHOPINT10": "Jewelry & Accessories",
+    "SHOPINT11": "Baby & Kids",
+    "SHOPINT12": "Pet Supplies",
+    "SHOPINT13": "Office & Business",
+    "SHOPINT14": "Arts & Crafts",
+    "SHOPINT15": "Other Interests"
+  },
   "dashboard": {
     "title": "Metrics Dashboard",
     "subtitle": "Overview of transaction volumes for the selected time period",

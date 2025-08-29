@@ -128,7 +128,7 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
             </th>
             {showAbsoluteValues && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Merchant (Value)
+                {t('dashboard.merchant')} (Value)
               </th>
             )}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

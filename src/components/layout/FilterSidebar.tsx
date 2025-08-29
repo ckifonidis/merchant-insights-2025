@@ -6,11 +6,11 @@ import Select from 'react-select';
 import { subDays, startOfYear } from 'date-fns';
 import { 
   selectFilters,
-  selectChannelOptions,
-  selectGenderOptions,
+  selectChannelValues,
+  selectGenderValues,
   selectAgeGroupOptions,
   selectRegionOptions,
-  selectShoppingInterestOptions,
+  selectShoppingInterestValues,
     selectGoForMoreAvailable,
   setCustomDateRange,
   setChannel,
@@ -33,12 +33,28 @@ const FilterSidebar = ({ isOpen, onClose, isMobile }) => {
   // Get filters from Redux (single source of truth)
   const filters = useSelector(selectFilters);
   
-  // Get static options (no async loading)
-  const channelOptions = useSelector(selectChannelOptions);
-  const genderOptions = useSelector(selectGenderOptions);
+  // Get static values and create translated options
+  const channelValues = useSelector(selectChannelValues);
+  const genderValues = useSelector(selectGenderValues);
   const ageGroupOptions = useSelector(selectAgeGroupOptions);
   const regionOptions = useSelector(selectRegionOptions);
-  const shoppingInterestOptions = useSelector(selectShoppingInterestOptions);
+  const shoppingInterestValues = useSelector(selectShoppingInterestValues);
+
+  // Create translated options
+  const channelOptions = channelValues.map(value => ({
+    value,
+    label: value === 'all' ? t('channels.all') : t(`channels.${value}`)
+  }));
+
+  const genderOptions = genderValues.map(value => ({
+    value,
+    label: value === 'a' ? t('genders.all') : t(`genders.${value === 'm' ? 'male' : 'female'}`)
+  }));
+
+  const shoppingInterestOptions = shoppingInterestValues.map(value => ({
+    value,
+    label: t(`shoppingInterests.${value}`)
+  }));
   
   // Get dynamic options
   const goForMoreAvailable = useSelector(selectGoForMoreAvailable);

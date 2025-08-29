@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { createSelector } from '@reduxjs/toolkit';
 import { 
   selectDataLoading,
@@ -50,6 +51,7 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
   context,
   hideCompetitorAbsolute = false
 }) => {
+  const { t } = useTranslation();
   // Memoized selector for raw metric data
   const selectRawMetricData = useMemo(() => {
     return createSelector(
@@ -117,14 +119,14 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
       
       return [
         {
-          category: 'Physical Store',
+          category: t('channels.physical'),
           merchant: merchantTotal > 0 ? Number((((merchantData.physical || 0) / merchantTotal) * 100).toFixed(2)) : 0,
           competitor: competitorTotal > 0 ? Number((((competitorData.physical || 0) / competitorTotal) * 100).toFixed(2)) : 0,
           merchantAbsolute: merchantData.physical || 0,
           competitorAbsolute: competitorData.physical || 0
         },
         {
-          category: 'E-commerce', 
+          category: t('channels.ecommerce'), 
           merchant: merchantTotal > 0 ? Number((((merchantData.ecommerce || 0) / merchantTotal) * 100).toFixed(2)) : 0,
           competitor: competitorTotal > 0 ? Number((((competitorData.ecommerce || 0) / competitorTotal) * 100).toFixed(2)) : 0,
           merchantAbsolute: merchantData.ecommerce || 0,
@@ -145,10 +147,10 @@ const GenericBreakdownChartContainer: React.FC<GenericBreakdownChartContainerPro
       const merchantTotal = genderCategories.reduce((sum, gender) => sum + (merchantData[gender] || 0), 0);
       const competitorTotal = genderCategories.reduce((sum, gender) => sum + (competitorData[gender] || 0), 0);
       
-      // Map gender keys to display names
+      // Map gender keys to display names using translations
       const genderLabels: Record<string, string> = {
-        'male': 'Male',
-        'female': 'Female'
+        'male': t('genders.male'),
+        'female': t('genders.female')
       };
       
       return genderCategories
