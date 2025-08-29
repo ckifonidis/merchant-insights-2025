@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboard": "Πίνακας Ελέγχου",
-    "revenue": "Έσοδα",
+    "revenue": "Τζίρος",
     "demographics": "Δημογραφικά Πελατών",
     "competition": "Ανταγωνισμός"
   },
@@ -53,11 +53,11 @@
     "merchant": "Έμπορος",
     "competition": "Ανταγωνισμός",
     "totalTransactions": "Συνολικές Συναλλαγές",
-    "totalRevenue": "Συνολικά Έσοδα",
+    "totalRevenue": "Συνολικός Τζίρος",
     "avgTransaction": "Μέσο Ποσό ανά Συναλλαγή",
     "customers": "Μέσος όρος πελατών",
     "transactions": "Συναλλαγές",
-    "revenue": "Έσοδα",
+    "revenue": "Τζίρος",
     "vsLastYear": "σε σχέση με πέρυσι",
     "vsLastWeek": "σε σχέση με προηγούμενη εβδομάδα",
     "vsLastMonth": "σε σχέση με προηγούμενο μήνα",
@@ -66,24 +66,24 @@
     "changeFromLastYear": "Μεταβολή από πέρυσι"
   },
   "revenue": {
-    "title": "Αναλυτικά Εσόδων",
-    "subtitle": "Εις βάθος ανάλυση εσόδων για τον έμπορο και τον ανταγωνισμό",
-    "totalRevenue": "Συνολικά Έσοδα",
-    "avgDailyRevenue": "Μέσα Ημερήσια Έσοδα",
+    "title": "Αναλυτικά Τζίρου",
+    "subtitle": "Εις βάθος ανάλυση τζίρου για τον έμπορο και τον ανταγωνισμό",
+    "totalRevenue": "Συνολικός Τζίρος",
+    "avgDailyRevenue": "Μέσος Ημερήσιος Τζίρος",
     "avgTransaction": "Μέσο Ποσό ανά Συναλλαγή",
     "goForMore": "Go For More",
-    "goForMoreTotal": "Συνολικά Έσοδα Go For More",
+    "goForMoreTotal": "Συνολικός Τζίρος Go For More",
     "rewarded": "Συνολικές Ανταμοιβές",
     "redeemed": "Συνολικές Εξαργυρώσεις",
-    "goForMoreRevenue": "Συνολικά Έσοδα",
+    "goForMoreRevenue": "Συνολικός Τζίρος",
     "goForMoreRewarded": "Συνολικό Ποσό Ανταμοιβών",
     "goForMoreRedeemed": "Συνολικό Ποσό Εξαργύρωσης",
-    "revenueTrend": "Τάση Εσόδων",
-    "revenueChange": "Μεταβολή Εσόδων % από Πέρυσι",
-    "trends": "Τάσεις Εσόδων",
-    "changes": "Μεταβολές Εσόδων",
-    "byShoppingInterests": "Έσοδα ανά Ενδιαφέροντα Αγορών",
-    "byChannel": "Έσοδα ανά Κανάλι"
+    "revenueTrend": "Τάση Τζίρου",
+    "revenueChange": "Μεταβολή Τζίρου % από Πέρυσι",
+    "trends": "Τάσεις Τζίρου",
+    "changes": "Μεταβολές Τζίρου",
+    "byShoppingInterests": "Τζίρος ανά Ενδιαφέροντα Αγορών",
+    "byChannel": "Τζίρος ανά Κανάλι"
   },
   "demographics": {
     "title": "Αναλυτικά Πελατών",
@@ -102,7 +102,7 @@
   "competition": {
     "title": "Αναλυτικά Ανταγωνισμού",
     "subtitle": "Σύγκριση με τον Ανταγωνισμό για την επιλεγμένη χρονική περίοδο",
-    "revenue": "Έσοδα",
+    "revenue": "Τζίρος",
     "transactions": "Συναλλαγές",
     "avgTransactionAmount": "Μέσο Ποσό Συναλλαγής",
     "comparedToLastYear": "Σε σχέση με πέρυσι",
