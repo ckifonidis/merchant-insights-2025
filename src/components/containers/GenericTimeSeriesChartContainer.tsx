@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import PresentationalTimeSeriesChart from '../ui/charts/PresentationalTimeSeriesChart';
 import { 
   selectDataLoading,
@@ -50,6 +51,7 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
   filters,
   yAxisMode = 'absolute'
 }) => {
+  const { t } = useTranslation();
   const [timeline, setTimeline] = useState<TimelineType>('daily');
   
   // Connect to store using the provided selector
@@ -273,7 +275,7 @@ const GenericTimeSeriesChartContainer: React.FC<GenericTimeSeriesChartContainerP
       allowedChartTypes={['line', 'bar', 'table']}
       colors={{ merchant: '#007B85', competitor: '#73AA3C' }}
       formatValue={formatValue}
-      labels={{ merchant: merchantLabel, competitor: 'Competition' }}
+      labels={{ merchant: merchantLabel, competitor: t('dashboard.competition') }}
       title={title}
       isLoading={isLoading}
       error={error}

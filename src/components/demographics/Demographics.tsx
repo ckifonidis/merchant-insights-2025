@@ -84,8 +84,8 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           title={t('demographics.customersByGender')}
           metricId="converted_customers_by_gender"
           colors={{
-            'Male': '#3B82F6',
-            'Female': '#F472B6'
+            [t('genders.male')]: '#3B82F6',
+            [t('genders.female')]: '#F472B6'
           }}
           formatValue={(value: number) => `${value}%`}
           formatTooltipValue={(absoluteValue: number) => `${absoluteValue} customers`}

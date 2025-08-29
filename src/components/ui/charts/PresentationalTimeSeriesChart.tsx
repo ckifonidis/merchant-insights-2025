@@ -80,7 +80,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
   allowedChartTypes = ['line', 'bar', 'table'],
   colors = { merchant: '#007B85', competitor: '#73AA3C' },
   formatValue = (value: number) => value.toString(),
-  labels = { merchant: 'Merchant', competitor: 'Competition' },
+  labels,
   
   // State props
   isLoading = false,
@@ -97,6 +97,12 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
 }) => {
   const { t } = useTranslation();
   const [chartType, setChartType] = useState<ChartType>(allowedChartTypes[0] || 'line');
+  
+  // Set default translated labels if not provided
+  const translatedLabels = labels || { 
+    merchant: t('dashboard.merchant'), 
+    competitor: t('dashboard.competition') 
+  };
 
   // Type-safe option generators
   const getChartTypeOptions = (): ChartTypeOption[] => {
@@ -166,7 +172,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
       },
       {
         key: 'merchant',
-        label: labels.merchant,
+        label: translatedLabels.merchant,
         render: (value: number, row: ChartDataPoint) => (
           <div className="flex items-center justify-between">
             <span>{valueFormatter(value)}</span>
@@ -187,7 +193,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
     if (showCompetitor) {
       columns.push({
         key: 'competitor',
-        label: labels.competitor,
+        label: translatedLabels.competitor,
         render: (value: number, row: ChartDataPoint) => (
           <div className="flex items-center justify-between">
             <span>{valueFormatter(value)}</span>
@@ -295,7 +301,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
             dataKey="merchant"
             stroke={colors.merchant}
             strokeWidth={2}
-            name={labels.merchant}
+            name={translatedLabels.merchant}
             isAnimationActive={false}
           />
           {showCompetitor && (
@@ -304,7 +310,7 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
               dataKey="competitor"
               stroke={colors.competitor}
               strokeWidth={2}
-              name={labels.competitor}
+              name={translatedLabels.competitor}
               isAnimationActive={false}
             />
           )}
@@ -335,14 +341,14 @@ const PresentationalTimeSeriesChart: React.FC<PresentationalTimeSeriesChartProps
           <Bar 
             dataKey="merchant" 
             fill={colors.merchant} 
-            name={labels.merchant} 
+            name={translatedLabels.merchant} 
             isAnimationActive={false}
           />
           {showCompetitor && (
             <Bar 
               dataKey="competitor" 
               fill={colors.competitor} 
-              name={labels.competitor} 
+              name={translatedLabels.competitor} 
               isAnimationActive={false}
             />
           )}

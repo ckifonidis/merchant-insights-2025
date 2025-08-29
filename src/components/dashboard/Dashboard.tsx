@@ -115,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
           selector={selectRevenuePerDay}
           formatValue={formatCurrency}
           showCompetitor={true}
-          merchantLabel="Merchant"
+          merchantLabel={t('dashboard.merchant')}
           hasCompetitorData={true}
           filters={filters}
           yAxisMode="absolute"
@@ -127,7 +127,7 @@ const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
           selector={selectTransactionsPerDay}
           formatValue={(value: number) => value.toLocaleString()}
           showCompetitor={true}
-          merchantLabel="Merchant"
+          merchantLabel={t('dashboard.merchant')}
           hasCompetitorData={true}
           filters={filters}
           yAxisMode="absolute"
@@ -139,7 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({ filters }) => {
           selector={selectCustomersPerDay}
           formatValue={(value: number) => value.toLocaleString()}
           showCompetitor={false}
-          merchantLabel="Customers"
+          merchantLabel={t('dashboard.merchant')}
           hasCompetitorData={false}
           filters={filters}
           yAxisMode="absolute"

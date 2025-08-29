@@ -130,6 +130,8 @@
     "bars": "Bars",
     "line": "Line",
     "table": "Table",
+    "stacked": "Stacked Bar",
+    "pie": "Pie Charts",
     "daily": "Daily",
     "weekly": "Weekly",
     "monthly": "Monthly",

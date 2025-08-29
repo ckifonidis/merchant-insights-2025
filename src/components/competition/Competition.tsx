@@ -129,7 +129,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
           selector={selectRevenuePerDay}
           formatValue={(value: number) => `${value.toFixed(1)}%`}
           showCompetitor={true}
-          merchantLabel="Merchant"
+          merchantLabel={t('dashboard.merchant')}
           hasCompetitorData={true}
           filters={filters}
           yAxisMode='percentage'

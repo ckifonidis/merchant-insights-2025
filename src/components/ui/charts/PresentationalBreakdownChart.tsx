@@ -75,8 +75,8 @@ const PresentationalBreakdownChart: React.FC<PresentationalBreakdownChartProps> 
 
   // Chart type options
   const chartTypeOptions = [
-    { value: 'stacked', label: 'Stacked Bar' },
-    { value: 'pie', label: 'Pie Charts' },
+    { value: 'stacked', label: t('chartOptions.stacked') },
+    { value: 'pie', label: t('chartOptions.pie') },
     { value: 'table', label: t('chartOptions.table') }
   ];
 

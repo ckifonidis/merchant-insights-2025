@@ -173,7 +173,7 @@ const Revenue: React.FC<RevenueProps> = ({ filters }) => {
           selector={selectRevenuePerDay}
           formatValue={formatCurrency}
           showCompetitor={true}
-          merchantLabel="Merchant"
+          merchantLabel={t('dashboard.merchant')}
           hasCompetitorData={true}
           filters={filters}
         />
@@ -184,7 +184,7 @@ const Revenue: React.FC<RevenueProps> = ({ filters }) => {
           selector={selectRevenuePerDay}
           formatValue={(value: number) => `${value}%`}
           showCompetitor={true}
-          merchantLabel="Revenue Change"
+          merchantLabel={t('dashboard.merchant')}
           hasCompetitorData={true}
           filters={filters}
           yAxisMode="percentage"
@@ -214,8 +214,8 @@ const Revenue: React.FC<RevenueProps> = ({ filters }) => {
             title={t('revenue.byChannel')}
             metricId="revenue_by_channel"
             colors={{
-              'Physical Store': '#007B85',
-              'E-commerce': '#7BB3C0'
+              [t('channels.physical')]: '#007B85',
+              [t('channels.ecommerce')]: '#7BB3C0'
             }}
             formatValue={(value: number) => `${value}%`}
             formatTooltipValue={(absoluteValue: number) => 
