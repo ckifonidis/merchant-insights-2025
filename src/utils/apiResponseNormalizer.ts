@@ -9,10 +9,8 @@ import {
   type MetricResponse,
   type SeriesValue,
   type SeriesPoint,
-  type MetricId,
   type MetricCategory,
   type EntityType,
-  type EntityData,
   type MetricData,
   ApiSchema,
   METRICS
@@ -159,7 +157,7 @@ function validateValue(value: number | null, metricId: string): number | null {
         METRICS.SCALAR.REDEEMED_AMOUNT
       ];
       
-      if (revenueMetrics.includes(metricId)) {
+      if (revenueMetrics.includes(metricId as any)) {
         return Math.max(0, value);
       }
 
@@ -171,7 +169,7 @@ function validateValue(value: number | null, metricId: string): number | null {
         METRICS.SCALAR.REDEEMED_POINTS
       ];
       
-      if (countMetrics.includes(metricId)) {
+      if (countMetrics.includes(metricId as any)) {
         return Math.max(0, Math.round(value));
       }
 
@@ -216,7 +214,7 @@ function transformScalarMetric(metric: MetricResponse, errors: ProcessingError[]
       metricId: metric.metricID,
       entityType: determineEntityType(metric.merchantId),
       errorType: 'unknown',
-      message: `Scalar transformation error: ${error.message}`
+      message: `Scalar transformation error: ${error instanceof Error ? error.message : String(error)}`
     });
     return null;
   }
@@ -247,7 +245,7 @@ function transformTimeSeriesMetric(metric: MetricResponse, errors: ProcessingErr
 
       series.seriesPoints.forEach((point: SeriesPoint) => {
         // value2 is the date, value1 is the numeric value
-        const date = parseDate(point.value2);
+        const date = parseDate(String(point.value2));
         const value = parseNumericValue(point.value1);
 
         if (date === null) {
@@ -283,7 +281,7 @@ function transformTimeSeriesMetric(metric: MetricResponse, errors: ProcessingErr
       metricId: metric.metricID,
       entityType: determineEntityType(metric.merchantId),
       errorType: 'unknown',
-      message: `Time series transformation error: ${error.message}`
+      message: `Time series transformation error: ${error instanceof Error ? error.message : String(error)}`
     });
     return null;
   }
@@ -317,8 +315,8 @@ function transformCategoricalMetric(metric: MetricResponse, errors: ProcessingEr
         let category = point.value2;
         const value = parseNumericValue(point.value1);
 
-        // Handle empty category names
-        if (!category || category.trim() === '') {
+        // Handle empty category names (for string categories only)
+        if (typeof category === 'string' && (!category || category.trim() === '')) {
           category = 'other_category';
         }
 
@@ -348,7 +346,7 @@ function transformCategoricalMetric(metric: MetricResponse, errors: ProcessingEr
       metricId: metric.metricID,
       entityType: determineEntityType(metric.merchantId),
       errorType: 'unknown',
-      message: `Categorical transformation error: ${error.message}`
+      message: `Categorical transformation error: ${error instanceof Error ? error.message : String(error)}`
     });
     return null;
   }
@@ -357,60 +355,72 @@ function transformCategoricalMetric(metric: MetricResponse, errors: ProcessingEr
 /**
  * Map category values to standardized format
  */
-function mapCategoryValue(metricId: string, category: string): string {
+function mapCategoryValue(metricId: string, category: string | boolean): string {
   // Gender mapping
   if (metricId.includes('gender')) {
-    const genderMap: Record<string, string> = {
-      'm': 'male',
-      'f': 'female',
-      'M': 'male',
-      'F': 'female',
-      'male': 'male',
-      'female': 'female',
-      'other': 'other'
-    };
-    return genderMap[category] || category;
+    if (typeof category === 'string') {
+      const genderMap: Record<string, string> = {
+        'm': 'male',
+        'f': 'female',
+        'M': 'male',
+        'F': 'female',
+        'male': 'male',
+        'female': 'female',
+        'other': 'other'
+      };
+      return genderMap[category] || category;
+    }
+    return String(category);
   }
 
   // Age groups - keep as-is
   if (metricId.includes('age')) {
-    return category;
+    return String(category);
   }
 
   // Shopping interests - ensure SHOPINT format
   if (metricId.includes('interest')) {
-    if (category.toUpperCase().startsWith('SHOPINT')) {
-      return category.toUpperCase();
+    const categoryStr = String(category);
+    if (categoryStr.toUpperCase().startsWith('SHOPINT')) {
+      return categoryStr.toUpperCase();
     }
     // Handle numeric interest IDs
-    if (/^\d+$/.test(category)) {
-      const num = parseInt(category);
+    if (/^\d+$/.test(categoryStr)) {
+      const num = parseInt(categoryStr);
       if (num >= 1 && num <= 15) {
         return `SHOPINT${num}`;
       }
     }
-    return category;
+    return categoryStr;
   }
 
   // Geographic regions - keep as-is
   if (metricId.includes('geo')) {
-    return category;
+    return String(category);
   }
 
   // Channel mapping
   if (metricId.includes('channel')) {
-    const channelMap: Record<string, string> = {
-      'physical': 'physical',
-      'ecommerce': 'ecommerce',
-      'e-commerce': 'ecommerce',
-      'online': 'ecommerce',
-      'store': 'physical',
-      'retail': 'physical'
-    };
-    return channelMap[category?.toLowerCase()] || category;
+    // Handle boolean values from real API (false = physical, true = ecommerce)
+    if (typeof category === 'boolean') {
+      return category ? 'ecommerce' : 'physical';
+    }
+    
+    // Handle string values for backward compatibility
+    if (typeof category === 'string') {
+      const channelMap: Record<string, string> = {
+        'physical': 'physical',
+        'ecommerce': 'ecommerce',
+        'e-commerce': 'ecommerce',
+        'online': 'ecommerce',
+        'store': 'physical',
+        'retail': 'physical'
+      };
+      return channelMap[category.toLowerCase()] || category;
+    }
   }
 
-  return category;
+  return String(category);
 }
 
 // === METRIC GROUPING ===
@@ -516,24 +526,23 @@ function mergeCurrentAndPrevious(
     const current = currentMetrics[metricId];
     const previous = previousMetrics[metricId];
 
-    merged[metricId] = {
-      merchant: current.merchant ? {
+    const mergedMetric: MetricData = {};
+    
+    if (current.merchant) {
+      mergedMetric.merchant = {
         current: current.merchant.current,
         previous: previous?.merchant?.current || null
-      } : undefined,
-      competitor: current.competitor ? {
+      };
+    }
+    
+    if (current.competitor) {
+      mergedMetric.competitor = {
         current: current.competitor.current,
         previous: previous?.competitor?.current || null
-      } : undefined
-    };
-
-    // Clean up undefined entities
-    if (!merged[metricId].merchant) {
-      delete merged[metricId].merchant;
+      };
     }
-    if (!merged[metricId].competitor) {
-      delete merged[metricId].competitor;
-    }
+    
+    merged[metricId] = mergedMetric;
   });
 
   return merged;
@@ -615,7 +624,7 @@ export function normalizeApiResponseToStore(
           metricId,
           entityType: 'merchant',
           errorType: 'unknown',
-          message: `Processing error: ${error.message}`
+          message: `Processing error: ${error instanceof Error ? error.message : String(error)}`
         });
       }
     });
@@ -641,7 +650,7 @@ export function normalizeApiResponseToStore(
             metricId,
             entityType: 'merchant',
             errorType: 'unknown',
-            message: `Previous data processing error: ${error.message}`
+            message: `Previous data processing error: ${error instanceof Error ? error.message : String(error)}`
           });
         }
       });
@@ -676,7 +685,7 @@ export function normalizeApiResponseToStore(
     console.error('💥 Fatal error during normalization:', error);
     return {
       metrics: {},
-      errors: [`Fatal normalization error: ${error.message}`],
+      errors: [`Fatal normalization error: ${error instanceof Error ? error.message : String(error)}`],
       stats: { totalProcessed: 0, merchantMetrics: 0, competitorMetrics: 0, errorCount: 1 }
     };
   }

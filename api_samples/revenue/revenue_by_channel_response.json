@@ -11,11 +11,11 @@
                         "seriesPoints": [
                             {
                                 "value1": "6292.23",
-                                "value2": "physical"
+                                "value2": false
                             },
                             {
                                 "value1": "16643.36",
-                                "value2": "ecommerce"
+                                "value2": true
                             }
                         ]
                     }
@@ -32,11 +32,11 @@
                         "seriesPoints": [
                             {
                                 "value1": "10934.73",
-                                "value2": "physical"
+                                "value2": false
                             },
                             {
                                 "value1": "28045.79",
-                                "value2": "ecommerce"
+                                "value2": true
                             }
                         ]
                     }

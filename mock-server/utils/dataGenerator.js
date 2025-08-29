@@ -236,10 +236,10 @@ function generateChannelPoints(isCompetition = false) {
   const points = [];
   const competitionMultiplier = isCompetition ? 1.2 : 1.0; // Competition typically has higher values
   
-  // Based on the API sample, channels are 'physical' and 'ecommerce'
+  // Based on the real API, channels are boolean values (false = physical, true = ecommerce)
   const channels = [
-    { code: 'physical', baseRevenue: Math.random() * 500000 + 200000 },
-    { code: 'ecommerce', baseRevenue: Math.random() * 800000 + 300000 }
+    { code: false, baseRevenue: Math.random() * 500000 + 200000 }, // false = physical
+    { code: true, baseRevenue: Math.random() * 800000 + 300000 }   // true = ecommerce
   ];
   
   channels.forEach(channel => {

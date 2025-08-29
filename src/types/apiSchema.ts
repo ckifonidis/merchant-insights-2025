@@ -94,7 +94,7 @@ export interface SeriesValue {
  */
 export interface SeriesPoint {
   value1: string; // Primary value (numeric as string)
-  value2: string; // Secondary value (date, category, etc.)
+  value2: string | boolean; // Secondary value (date, category, boolean for channels, etc.)
 }
 
 /**
