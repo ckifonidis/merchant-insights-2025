@@ -165,6 +165,7 @@
     "currency": "€",
     "close": "Close",
     "open": "Open",
-    "merchantDataOnly": "Merchant data only (compliance requirement)"
+    "merchantDataOnly": "Merchant data only (compliance requirement)",
+    "customersLabel": "customers"
   }
 }

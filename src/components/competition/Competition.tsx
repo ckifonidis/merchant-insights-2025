@@ -32,7 +32,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">Loading competition metrics...</div>
+          <div className="text-lg text-gray-600">{t('common.loading')}</div>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800">Error loading competition metrics: {error}</div>
+          <div className="text-red-800">{t('common.error')}: {error}</div>
         </div>
       </div>
     );
@@ -127,7 +127,7 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
         <GenericCalendarHeatmapContainer
           title={t('competition.monthlyTurnover')}
           metricId="revenue_per_day"
-          valueLabel="Revenue"
+          valueLabel={t('competition.revenue')}
           showMerchantAndCompetition={true}
           dateRange={filters?.dateRange ? {
             start: new Date(filters.dateRange.start || ''),

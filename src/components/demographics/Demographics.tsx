@@ -32,7 +32,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">Loading demographics metrics...</div>
+          <div className="text-lg text-gray-600">{t('common.loading')}</div>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-red-600">Error loading demographics data</div>
+          <div className="text-lg text-red-600">{t('common.error')}</div>
         </div>
       </div>
     );
@@ -88,7 +88,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
             [t('genders.female')]: '#F472B6'
           }}
           formatValue={(value: number) => `${value}%`}
-          formatTooltipValue={(absoluteValue: number) => `${absoluteValue} customers`}
+          formatTooltipValue={(absoluteValue: number) => `${absoluteValue} ${t('common.customersLabel')}`}
           showAbsoluteValues={true}
           hideCompetitorAbsolute={true}
         />
@@ -100,7 +100,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           merchantColor="#3B82F6"
           competitorColor="#000000"
           formatValue={(value: number) => `${value}%`}
-          formatTooltipValue={(value: number) => `${value} customers`}
+          formatTooltipValue={(value: number) => `${value} ${t('common.customersLabel')}`}
           maxCategories={6}
           hideCompetitorAbsolute={true}
         />
@@ -113,7 +113,7 @@ const Demographics: React.FC<DemographicsProps> = ({ filters }) => {
           merchantColor="#10B981"
           competitorColor="#000000"
           formatValue={(value: number) => `${value}%`}
-          formatTooltipValue={(value: number) => `${value} customers`}
+          formatTooltipValue={(value: number) => `${value} ${t('common.customersLabel')}`}
           maxCategories={8}
           hideCompetitorAbsolute={true}
         />

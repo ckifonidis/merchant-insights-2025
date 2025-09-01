@@ -89,10 +89,10 @@ export const getDaysBetween = (startDate: string, endDate: string): number => {
 /**
  * Format date for display
  * @param dateString - Date in YYYY-MM-DD format
- * @param locale - Locale for formatting (default: 'en-US')
+ * @param locale - Locale for formatting (default: 'el-GR')
  * @returns Formatted date
  */
-export const formatDateForDisplay = (dateString: string, locale: string = 'en-US'): string => {
+export const formatDateForDisplay = (dateString: string, locale: string = 'el-GR'): string => {
   if (!dateString) return '';
   
   try {
