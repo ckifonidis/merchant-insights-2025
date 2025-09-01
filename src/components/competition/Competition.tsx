@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import CampaignButton from '../ui/CampaignButton';
-import { useMetricData } from '../../hooks/useNormalizedData';
+import { useCompetitionData } from '../../hooks/useNormalizedData';
 import GenericMetricContainer from '../containers/GenericMetricContainer';
 import GenericTimeSeriesChartContainer from '../containers/GenericTimeSeriesChartContainer';
 import GenericCalendarHeatmapContainer from '../containers/GenericCalendarHeatmapContainer';
@@ -23,20 +23,9 @@ interface CompetitionProps {
 
 const Competition: React.FC<CompetitionProps> = ({ filters }) => {
   const { t } = useTranslation();
-
-  // Competition metrics
-  const competitionMetrics = [
-    'total_revenue',
-    'total_transactions',
-    'avg_ticket_per_user',
-    'revenue_per_day'
-  ];
-
+  
   // Get competition data with automatic fetching and year-over-year comparison
-  const { isLoading: loading, error } = useMetricData(competitionMetrics, { 
-    autoFetch: true, 
-    yearOverYear: true 
-  });
+  const { isLoading: loading, error } = useCompetitionData();
 
   // Show loading state while data is being fetched
   if (loading) {

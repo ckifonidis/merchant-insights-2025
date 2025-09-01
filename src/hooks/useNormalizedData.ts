@@ -199,3 +199,20 @@ export const useDemographicsData = () => {
     context: 'demographics' // Pass demographics context for compound keys
   });
 };
+
+/**
+ * Competition metrics - uses generic hook
+ */
+export const useCompetitionData = () => {
+  const competitionMetrics = [
+    'total_revenue',
+    'total_transactions',
+    'avg_ticket_per_user',
+    'revenue_per_day'
+  ];
+
+  return useMetricData(competitionMetrics, { 
+    autoFetch: true, 
+    yearOverYear: true 
+  });
+};
