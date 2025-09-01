@@ -1,0 +1,89 @@
+{
+    "payload": {
+      "metrics": [
+        {
+          "metricID": "total_revenue",
+          "percentageValue": false,
+          "scalarValue": "909221.80",
+          "seriesValues": null,
+          "merchantId": "merchant_name"
+        },
+        {
+          "metricID": "total_transactions",
+          "percentageValue": false,
+          "scalarValue": "25246.0",
+          "seriesValues": null,
+          "merchantId": "merchant_name"
+        },
+        {
+          "metricID": "avg_ticket_per_user",
+          "percentageValue": false,
+          "scalarValue": "36.014489424067179",
+          "seriesValues": null,
+          "merchantId": "merchant_name"
+        },
+        {
+          "metricID": "revenue_per_day",
+          "percentageValue": false,
+          "scalarValue": null,
+          "seriesValues": [
+            {
+              "seriesID": "revenue",
+              "seriesPoints": [
+                { "value1": "28500.45", "value2": "2025-07-01" },
+                { "value1": "31200.80", "value2": "2025-07-02" },
+                { "value1": "29800.65", "value2": "2025-07-03" },
+                { "value1": "27900.30", "value2": "2025-07-04" },
+                { "value1": "33100.75", "value2": "2025-07-05" }
+                // ... continues for all days in July
+              ]
+            }
+          ],
+          "merchantId": "merchant_name"
+        },
+        {
+          "metricID": "total_revenue",
+          "percentageValue": false,
+          "scalarValue": "164228.618",
+          "seriesValues": null,
+          "merchantId": "competition"
+        },
+        {
+          "metricID": "total_transactions",
+          "percentageValue": false,
+          "scalarValue": "4265.4",
+          "seriesValues": null,
+          "merchantId": "competition"
+        },
+        {
+          "metricID": "avg_ticket_per_user",
+          "percentageValue": false,
+          "scalarValue": "38.502512777230740",
+          "seriesValues": null,
+          "merchantId": "competition"
+        },
+        {
+          "metricID": "revenue_per_day",
+          "percentageValue": false,
+          "scalarValue": null,
+          "seriesValues": [
+            {
+              "seriesID": "revenue",
+              "seriesPoints": [
+                { "value1": "5200.25", "value2": "2025-07-01" },
+                { "value1": "5680.40", "value2": "2025-07-02" },
+                { "value1": "5450.80", "value2": "2025-07-03" },
+                { "value1": "5100.60", "value2": "2025-07-04" },
+                { "value1": "6020.15", "value2": "2025-07-05" }
+                // ... continues for all days in July
+              ]
+            }
+          ],
+          "merchantId": "competition"
+        }
+      ]
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 1.4
+  }
