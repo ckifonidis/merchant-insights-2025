@@ -24,10 +24,19 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Generate SSL certificates if they don't exist
-if [ ! -f "certs/localhost-key.pem" ] || [ ! -f "certs/localhost.pem" ]; then
-    echo "🔐 Generating SSL certificates..."
-    npm run generate-certs
+# Generate shared SSL certificates if they don't exist
+if [ ! -f "../certs/localhost-key.pem" ] || [ ! -f "../certs/localhost.pem" ]; then
+    echo "🔐 Generating shared SSL certificates for both Node.js and .NET Core..."
+    
+    # Use the dedicated certificate generation script
+    cd ../certs
+    ./generate-certs.sh
+    cd ../node
+else
+    echo "✅ Shared SSL certificates already exist"
+    echo "   📄 Certificate: ../certs/localhost.pem"
+    echo "   🔑 Private Key: ../certs/localhost-key.pem"
+    echo "   🔗 Used by both Node.js and .NET Core implementations"
 fi
 
 # Check if .env file exists

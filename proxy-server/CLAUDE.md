@@ -153,6 +153,87 @@ OAuth2 implicit flow support with client-side fragment extraction:
 
 ---
 
+## 🔒 UNIFIED CERTIFICATE MANAGEMENT
+
+### **Shared Custom Certificate Strategy**
+
+Both Node.js and .NET Core implementations use **identical custom SSL certificates** for perfect symmetry:
+
+**Architecture:**
+```
+proxy-server/
+├── certs/
+│   ├── generate-certs.sh          # Unified certificate generation script
+│   ├── localhost.pem              # SSL certificate (shared)
+│   ├── localhost-key.pem          # Private key (shared)
+│   ├── localhost-combined.pem     # Combined format for compatibility
+│   └── localhost.pfx              # PKCS#12 format for .NET Core
+├── node/                          # Node.js implementation
+└── csharp/                        # .NET Core implementation
+```
+
+### **Certificate Generation**
+
+**Automated Script:** `proxy-server/certs/generate-certs.sh`
+- **OpenSSL-based**: Generates self-signed certificates for localhost development
+- **Multiple Formats**: Creates PEM, combined PEM, and PKCS#12 formats for maximum compatibility
+- **System Integration**: Automatically installs certificate to macOS system keychain
+- **Cross-Platform**: Supports macOS, Linux, and Windows with appropriate instructions
+
+**Usage:**
+```bash
+# From either implementation directory:
+npm run generate-certs
+
+# Or directly:
+cd proxy-server/certs
+./generate-certs.sh
+```
+
+### **Implementation Symmetry**
+
+**Node.js Configuration:**
+- Uses separate `localhost.pem` and `localhost-key.pem` files
+- Standard Express.js HTTPS server with fs.readFileSync()
+- Path: `../certs/localhost-key.pem` and `../certs/localhost.pem`
+
+**.NET Core Configuration:**
+- Uses `X509Certificate2.CreateFromPemFile(certPath, keyPath)`
+- Same certificate and key files as Node.js implementation
+- Automatic fallback to .NET development certificates if files missing
+
+### **System Keychain Integration**
+
+**macOS Automatic Installation:**
+```bash
+# Automatically executed by generate-certs.sh
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.pem
+```
+
+**Benefits:**
+- **No Browser Warnings**: Certificate trusted system-wide
+- **Professional Development**: Eliminates manual certificate acceptance
+- **One-Time Setup**: Install once, works for both implementations
+- **True Symmetry**: Identical certificates = zero browser conflicts
+
+### **Cross-Platform Support**
+
+**macOS**: Automatic keychain installation with `security` command
+**Linux**: Instructions for `update-ca-certificates` (Ubuntu/Debian)
+**Windows**: Manual certificate import instructions
+
+### **Certificate Properties**
+
+```
+Subject: C=GR, ST=Attica, L=Athens, O=NBG, OU=IT Department, CN=localhost
+SAN: DNS:localhost, DNS:*.localhost, IP:127.0.0.1, IP:::1
+Validity: 365 days from generation
+Algorithm: RSA 2048-bit with SHA-256
+Usage: Digital Signature, Key Encipherment, Server Authentication
+```
+
+---
+
 ## 🔧 CONFIGURATION SYSTEM
 
 ### **Environment Variables**
@@ -174,9 +255,9 @@ OAUTH_REDIRECT_URI=https://your-domain.com/signin-provider/
 COOKIE_ENCRYPTION_KEY=your-secure-32char-encryption-key
 SESSION_SECRET=your-secure-session-secret
 
-# SSL Configuration
-SSL_KEY_PATH=./certs/server-key.pem
-SSL_CERT_PATH=./certs/server-cert.pem
+# SSL Configuration (shared certificates)
+SSL_KEY_PATH=../certs/localhost-key.pem
+SSL_CERT_PATH=../certs/localhost.pem
 
 # Feature Flags
 OAUTH_ENABLED=true

@@ -1,0 +1,6 @@
+@MerchantInsightsProxy_HostAddress = http://localhost:5118
+
+GET {{MerchantInsightsProxy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

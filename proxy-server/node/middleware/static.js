@@ -6,7 +6,7 @@ const fs = require('fs');
  * Create static file serving middleware with SPA fallback
  */
 function createStaticMiddleware() {
-  const distPath = path.join(__dirname, '../../dist');
+  const distPath = path.join(__dirname, '../../../dist');
   
   // Check if dist directory exists
   if (!fs.existsSync(distPath)) {
@@ -56,7 +56,7 @@ function createSpaFallback() {
     }
 
     // Check if it's a request for a static file that exists
-    const distPath = path.join(__dirname, '../../dist');
+    const distPath = path.join(__dirname, '../../../dist');
     const filePath = path.join(distPath, req.path);
     
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -105,7 +105,7 @@ function createSpaFallback() {
  */
 function createHealthCheck() {
   return (req, res) => {
-    const distPath = path.join(__dirname, '../../dist');
+    const distPath = path.join(__dirname, '../../../dist');
     const indexExists = fs.existsSync(path.join(distPath, 'index.html'));
     
     res.json({

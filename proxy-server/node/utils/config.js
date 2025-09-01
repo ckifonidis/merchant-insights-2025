@@ -19,9 +19,9 @@ const config = {
   COOKIE_ENCRYPTION_KEY: process.env.COOKIE_ENCRYPTION_KEY || 'default-dev-key-change-in-production-123',
   SESSION_SECRET: process.env.SESSION_SECRET || 'default-session-secret-change-in-production',
 
-  // SSL Configuration
-  SSL_KEY_PATH: process.env.SSL_KEY_PATH || './certs/localhost-key.pem',
-  SSL_CERT_PATH: process.env.SSL_CERT_PATH || './certs/localhost.pem',
+  // SSL Configuration (shared certificates)
+  SSL_KEY_PATH: process.env.SSL_KEY_PATH || '../certs/localhost-key.pem',
+  SSL_CERT_PATH: process.env.SSL_CERT_PATH || '../certs/localhost.pem',
 
   // Feature Flags
   NBG_OAUTH_ENABLED: process.env.NBG_OAUTH_ENABLED === 'true' || true,
