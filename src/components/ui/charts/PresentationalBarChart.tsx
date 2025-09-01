@@ -124,15 +124,10 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
               Category
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {t('dashboard.merchant')} (%)
+              {t('dashboard.merchant')}
             </th>
-            {showAbsoluteValues && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('dashboard.merchant')} (Value)
-              </th>
-            )}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {t('dashboard.competition')} (%)
+              {t('dashboard.competition')}
             </th>
           </tr>
         </thead>
@@ -145,17 +140,19 @@ const PresentationalBarChart: React.FC<PresentationalBarChartProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatValue(row.merchant)}
+                  {showAbsoluteValues && row.merchantAbsolute && formatTooltipValue && (
+                    <span className="text-gray-400 ml-1">
+                      ({formatTooltipValue(row.merchantAbsolute)})
+                    </span>
+                  )}
                 </td>
-                {showAbsoluteValues && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {row.merchantAbsolute ? 
-                      (formatTooltipValue ? formatTooltipValue(row.merchantAbsolute) : row.merchantAbsolute.toLocaleString()) : 
-                      '-'
-                    }
-                  </td>
-                )}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatValue(row.competitor)}
+                  {showAbsoluteValues && row.competitorAbsolute && formatTooltipValue && (
+                    <span className="text-gray-400 ml-1">
+                      ({formatTooltipValue(row.competitorAbsolute)})
+                    </span>
+                  )}
                 </td>
               </tr>
             );

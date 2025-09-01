@@ -202,6 +202,8 @@ const Revenue: React.FC<RevenueProps> = ({ filters }) => {
             formatValue={(value: number) => `${value}%`}
             formatTooltipValue={(absoluteValue: number) => 
               new Intl.NumberFormat('el-GR', {
+                style: 'currency',
+                currency: 'EUR',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
               }).format(absoluteValue)
