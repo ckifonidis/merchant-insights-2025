@@ -20,6 +20,12 @@ export interface PresentationalCalendarHeatmapProps {
   initialMonth?: Date | null;
   formatTooltip?: (value: number) => string;
   
+  // Filter props
+  dateRange?: {
+    start: Date;
+    end: Date;
+  } | null;
+  
   // State props
   isLoading?: boolean;
   error?: string | null;
@@ -45,6 +51,9 @@ const PresentationalCalendarHeatmap: React.FC<PresentationalCalendarHeatmapProps
   initialMonth = null,
   formatTooltip = (value: number) => value?.toLocaleString(),
   
+  // Filter props
+  dateRange = null,
+  
   // State props
   isLoading = false,
   error = null,
@@ -53,6 +62,7 @@ const PresentationalCalendarHeatmap: React.FC<PresentationalCalendarHeatmapProps
   className = ''
 }) => {
   const { t } = useTranslation();
+
 
   // Initialize currentMonth state
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
@@ -72,8 +82,35 @@ const PresentationalCalendarHeatmap: React.FC<PresentationalCalendarHeatmapProps
     }
   }, [heatmapData, initialMonth]);
 
-  // Get color class based on revenue value
-  const getColorClass = (value: number | undefined, median: number): string => {
+  // Check if a date is within the selected date range
+  const isDateInRange = (date: Date): boolean => {
+    if (!dateRange) return true; // If no date range filter, all dates are "in range"
+    
+    // Convert date to YYYY-MM-DD string without timezone conversion
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    // Convert filter dates to YYYY-MM-DD strings without timezone conversion
+    const startYear = dateRange.start.getFullYear();
+    const startMonth = String(dateRange.start.getMonth() + 1).padStart(2, '0');
+    const startDay = String(dateRange.start.getDate()).padStart(2, '0');
+    const startStr = `${startYear}-${startMonth}-${startDay}`;
+    
+    const endYear = dateRange.end.getFullYear();
+    const endMonth = String(dateRange.end.getMonth() + 1).padStart(2, '0');
+    const endDay = String(dateRange.end.getDate()).padStart(2, '0');
+    const endStr = `${endYear}-${endMonth}-${endDay}`;
+    
+    return dateStr >= startStr && dateStr <= endStr;
+  };
+
+  // Get color class based on revenue value and date range
+  const getColorClass = (value: number | undefined, median: number, date: Date): string => {
+    const inRange = isDateInRange(date);
+    
+    if (!inRange) return 'outside-range';
     if (!value) return 'out-of-period';
 
     const ratio = value / median;
@@ -176,10 +213,14 @@ const PresentationalCalendarHeatmap: React.FC<PresentationalCalendarHeatmapProps
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-      const dateKey = date.toISOString().split('T')[0];
+      // Generate date key without timezone conversion
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(date.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${dayStr}`;
       const dayData = monthlyHeatmapData[dateKey]; // Use filtered monthly data
       const value = dayData ? dayData[dataType] : undefined;
-      const colorClass = getColorClass(value, median);
+      const colorClass = getColorClass(value, median, date);
 
       calendarDays.push(
         <div key={day} className={`heatmap-cell ${colorClass}`}>

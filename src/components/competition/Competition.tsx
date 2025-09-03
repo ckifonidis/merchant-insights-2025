@@ -130,8 +130,8 @@ const Competition: React.FC<CompetitionProps> = ({ filters }) => {
           valueLabel={t('competition.revenue')}
           showMerchantAndCompetition={true}
           dateRange={filters?.dateRange ? {
-            start: new Date(filters.dateRange.start || ''),
-            end: new Date(filters.dateRange.end || '')
+            start: new Date(filters.dateRange.start),
+            end: new Date(filters.dateRange.end)
           } : null}
         />
       </div>
