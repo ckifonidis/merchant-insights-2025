@@ -268,30 +268,49 @@ function applyGeneralFilter(data, parsedFilters) {
   return data;
 }
 
-// Check if dataset meets minimum size requirements
-function validateDatasetSize(data, minimumSize = 10) {
+// Check if dataset has sufficient underlying data for meaningful analytics
+function validateDatasetSize(data, parsedFilters = {}) {
   if (!data) return false;
   
-  if (data.scalarValue) {
-    const value = parseFloat(data.scalarValue);
-    return !isNaN(value) && value >= minimumSize;
-  }
+  // Calculate reduction factor from filters
+  const reductionFactor = calculateFilterReduction(parsedFilters);
   
+  // Define baseline data availability (simulate realistic merchant data)
+  const baselineData = {
+    totalTransactions: 50000,    // Monthly transactions
+    totalCustomers: 15000,       // Active customers  
+    dailyTransactions: 1600      // Average daily transactions
+  };
+  
+  // Estimate remaining data after filtering
+  const estimatedTransactions = Math.floor(baselineData.totalTransactions * reductionFactor);
+  const estimatedCustomers = Math.floor(baselineData.totalCustomers * reductionFactor);
+  
+  // Define minimum thresholds for meaningful analytics
+  const minTransactionsThreshold = 100;  // Need at least 100 transactions
+  const minCustomersThreshold = 50;      // Need at least 50 customers
+  
+  // Check for time series data (demographic breakdowns, daily data, etc.)
   if (data.seriesValues && data.seriesValues[0] && data.seriesValues[0].seriesPoints) {
-    // For demographic data, check if we have any data points rather than total value
     const points = data.seriesValues[0].seriesPoints;
     if (points.length === 0) return false;
     
-    // Check if at least one point has meaningful data
+    // For demographic data, ensure we have enough customers for breakdown
     const hasValidData = points.some(point => {
       const value = parseFloat(point.value1);
       return !isNaN(value) && value > 0;
     });
     
-    return hasValidData;
+    if (!hasValidData) return false;
+    
+    // Check if we have enough customers for demographic analysis
+    return estimatedCustomers >= minCustomersThreshold;
   }
   
-  return true; // Default to valid if we can't determine
+  // For scalar metrics, check if we have enough underlying transactions
+  // Small metric values (like €2 avg_ticket_per_user) are perfectly valid
+  // as long as we have sufficient transaction volume to calculate them
+  return estimatedTransactions >= minTransactionsThreshold;
 }
 
 // Create insufficient data response
@@ -321,8 +340,8 @@ function generateFilterAwareMetric(metricID, options = {}) {
   // Apply filters to the data
   data = applyFiltersToData(metricID, data, parsedFilters);
   
-  // Validate dataset size
-  if (!validateDatasetSize(data)) {
+  // Validate dataset size based on underlying data availability
+  if (!validateDatasetSize(data, parsedFilters)) {
     console.log(`⚠️  Insufficient data for ${metricID} after filtering`);
     return createInsufficientDataResponse(metricID, data.merchantId);
   }
