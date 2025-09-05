@@ -2,11 +2,15 @@ import { useTranslation } from 'react-i18next';
 import GenericMetricContainer from './containers/GenericMetricContainer';
 import GenericTimeSeriesChartContainer from './containers/GenericTimeSeriesChartContainer';
 import GenericCalendarHeatmapContainer from './containers/GenericCalendarHeatmapContainer';
-import { METRIC_VARIANTS } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
+import { selectRevenuePerDay } from '../store/selectors/dataSelectors';
+import type { RootState } from '../store/index';
 
+interface FirstPageProps {
+  onInterestClick: () => void;
+}
 
-const FirstPage = ({ onInterestClick }) => {
+const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
   const { t } = useTranslation();
 
   // Icons for metrics
@@ -30,10 +34,8 @@ const FirstPage = ({ onInterestClick }) => {
     </svg>
   );
 
-  const defaultFilters = {
-    dateRange: { start: null, end: null },
-    timeline: 'daily'
-  };
+  // Revenue chart selector function
+  const revenueSelector = (state: RootState) => selectRevenuePerDay(state);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,7 +86,7 @@ const FirstPage = ({ onInterestClick }) => {
               title={t('competition.revenue')}
               metricId="total_revenue"
               valueType="currency"
-              variant={METRIC_VARIANTS.competition}
+              variant="competition"
               icon={<RevenueIcon />}
             />
 
@@ -93,7 +95,7 @@ const FirstPage = ({ onInterestClick }) => {
               title={t('competition.transactions')}
               metricId="total_transactions"
               valueType="number"
-              variant={METRIC_VARIANTS.competition}
+              variant="competition"
               icon={<TransactionsIcon />}
             />
 
@@ -102,7 +104,7 @@ const FirstPage = ({ onInterestClick }) => {
               title={t('competition.avgTransactionAmount')}
               metricId="avg_ticket_per_user"
               valueType="currency"
-              variant={METRIC_VARIANTS.competition}
+              variant="competition"
               icon={<AvgTransactionIcon />}
             />
           </div>
@@ -117,6 +119,7 @@ const FirstPage = ({ onInterestClick }) => {
             <GenericTimeSeriesChartContainer
               title={t('dashboard.revenue')}
               metricId="revenue_per_day"
+              selector={revenueSelector}
               formatValue={formatCurrency}
               showCompetitor={false}
               merchantLabel="Your Business"
