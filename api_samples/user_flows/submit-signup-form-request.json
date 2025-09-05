@@ -1,0 +1,13 @@
+/onboarding/submitSignupForm
+{
+    "header": {
+        "ID": "{{$guid}}",
+        "application": "{{application}}"
+    },
+    "payload": {
+        "userID": "XANDRH004400003",
+        "merchantEmail":"CREEPYMAIL01@GMAIL.COM",
+        "otherBankMIDs":[],
+        "extraData":null
+    }
+}

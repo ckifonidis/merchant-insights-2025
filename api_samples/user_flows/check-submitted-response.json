@@ -1,0 +1,9 @@
+{
+    "payload": {
+        "submittedBySameUserId": true,
+        "submittedByOtherUserId": false
+    },
+    "exception": null,
+    "messages": null,
+    "executionTime": 0
+}

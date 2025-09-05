@@ -1,0 +1,11 @@
+/onboarding/get-email
+
+{
+    "header": {
+        "ID": "{{$guid}}",
+        "application": "{{application}}"
+    },
+    "payload": {
+        "userID": "XANDRH004400003"
+    }
+}
