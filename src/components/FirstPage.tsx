@@ -1,9 +1,13 @@
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import GenericMetricContainer from './containers/GenericMetricContainer';
 import GenericTimeSeriesChartContainer from './containers/GenericTimeSeriesChartContainer';
 import GenericCalendarHeatmapContainer from './containers/GenericCalendarHeatmapContainer';
+import SignupFormContainer from './containers/SignupFormContainer';
 import { formatCurrency } from '../utils/formatters';
 import { selectRevenuePerDay } from '../store/selectors/dataSelectors';
+import { selectUserInfo, selectNeedsSignup } from '../store/slices/authSlice';
 import type { RootState } from '../store/index';
 
 interface FirstPageProps {
@@ -12,6 +16,13 @@ interface FirstPageProps {
 
 const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
   const { t } = useTranslation();
+  
+  // Redux state
+  const userInfo = useSelector(selectUserInfo);
+  const needsSignup = useSelector(selectNeedsSignup);
+  
+  // Local state for signup form
+  const [showSignupForm, setShowSignupForm] = useState(false);
 
   // Icons for metrics
   const RevenueIcon = () => (
@@ -37,6 +48,27 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
   // Revenue chart selector function
   const revenueSelector = (state: RootState) => selectRevenuePerDay(state);
 
+  // Signup flow handlers
+  const handleInterestClick = () => {
+    if (needsSignup) {
+      // User needs signup, show signup form
+      setShowSignupForm(true);
+    } else {
+      // User is already signed up, use original behavior
+      onInterestClick();
+    }
+  };
+
+  const handleSignupSuccess = () => {
+    setShowSignupForm(false);
+    // Note: User status will be updated on next app reload when backend processes the signup
+    // For now, just show success and close the form
+  };
+
+  const handleSignupCancel = () => {
+    setShowSignupForm(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -53,7 +85,7 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
             </div>
             <div className="flex-shrink-0">
               <button
-                onClick={onInterestClick}
+                onClick={handleInterestClick}
                 className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg"
               >
                 I'm Interested
@@ -152,13 +184,22 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
             detailed customer demographics, competitive benchmarking, and actionable insights to grow your business.
           </p>
           <button
-            onClick={onInterestClick}
+            onClick={handleInterestClick}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg"
           >
             I'm Interested - Show Me More
           </button>
         </div>
       </div>
+
+      {/* Signup Form Modal */}
+      {showSignupForm && userInfo?.preferred_username && (
+        <SignupFormContainer
+          userID={userInfo.preferred_username}
+          onSuccess={handleSignupSuccess}
+          onCancel={handleSignupCancel}
+        />
+      )}
     </div>
   );
 };

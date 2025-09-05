@@ -8,6 +8,7 @@ const analyticsRoutes = require('./routes/analytics');
 const authRoutes = require('./routes/authorization');
 const configRoutes = require('./routes/configuration');
 const merchantRoutes = require('./routes/merchant');
+const onboardingRoutes = require('./routes/onboarding');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -69,6 +70,7 @@ app.use('/api/ANALYTICS', analyticsRoutes);
 app.use('/api/authorization', authRoutes);
 app.use('/api/CONFIGURATION', configRoutes);
 app.use('/api/merchant', merchantRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -83,7 +85,10 @@ app.get('/health', (req, res) => {
       '/api/CONFIGURATION/ADMIN/GET',
       '/api/CONFIGURATION/MERCHANT/GET',
       '/api/configuration/user/get',
-      '/api/merchant/get'
+      '/api/merchant/get',
+      '/api/onboarding/get-email',
+      '/api/onboarding/submitSignupForm',
+      '/api/onboarding/checkIfSubmitted'
     ]
   });
 });

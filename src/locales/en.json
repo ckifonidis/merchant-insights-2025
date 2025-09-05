@@ -167,5 +167,36 @@
     "open": "Open",
     "merchantDataOnly": "Merchant data only (compliance requirement)",
     "customersLabel": "customers"
+  },
+  "signup": {
+    "title": "Join NBG Business Insights",
+    "subtitle": "Get access to comprehensive business analytics and insights to grow your business.",
+    "form": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "emailNote": "This email address is associated with your account",
+      "merchantIdsLabel": "Other Bank Merchant IDs",
+      "merchantIdsOptional": "(Optional)",
+      "merchantIdsPlaceholder": "Enter merchant IDs, one per line",
+      "merchantIdsNote": "If you have merchant accounts with other banks, you can list their IDs here for comprehensive analytics",
+      "submitButton": "Submit Application",
+      "cancelButton": "Cancel",
+      "submitting": "Submitting..."
+    },
+    "validation": {
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Please enter a valid email address",
+      "merchantIdsInvalid": "Please enter valid merchant IDs"
+    },
+    "status": {
+      "loadingInfo": "Loading your information...",
+      "submissionSuccess": "Application submitted successfully!",
+      "alreadySubmitted": "You have already submitted an application for NBG Business Insights.",
+      "alreadySubmittedNote": "We'll review your application and get back to you soon.",
+      "submittedByOther": "An application has already been submitted with these details.",
+      "cannotLoad": "Unable to Load Signup Form",
+      "closeButton": "Close"
+    },
+    "footer": "By submitting this application, you agree to receive business insights and analytics from NBG. Your data will be processed according to our privacy policy."
   }
 }

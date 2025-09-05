@@ -1,6 +1,7 @@
 /**
  * Authentication and User Type Definitions
  */
+import type { SignupStep, SubmissionStatus } from './onboarding';
 
 // User authentication status
 export type UserStatus = 'signedup' | 'notsigned' | 'noaccess' | null;
@@ -56,6 +57,14 @@ export interface AuthState {
   userStatus: UserStatus;
   serviceLoading: boolean;
   serviceError: string | null;
+  
+  // Signup/Onboarding State (simplified)
+  signupLoading: boolean;
+  signupError: string | null;
+  signupSuccess: boolean;
+  userEmail: string | null;
+  submissionStatus: SubmissionStatus | null;
+  signupStep: SignupStep;
   
   // Execution control
   isAuthenticating: boolean;

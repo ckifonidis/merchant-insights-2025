@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, AuthData, UserInfo, UserStatus } from '../../types/auth';
+import type { SignupStep, SubmissionStatus } from '../../types/onboarding';
 import { RootState } from '../index';
 
 /**
@@ -18,6 +19,14 @@ const initialState: AuthState = {
   userStatus: null, // null = loading, 'signedup', 'notsigned', 'noaccess'
   serviceLoading: false,
   serviceError: null,
+  
+  // Signup/Onboarding State (simplified)
+  signupLoading: false,
+  signupError: null,
+  signupSuccess: false,
+  userEmail: null,
+  submissionStatus: null,
+  signupStep: 'idle',
   
   // Execution control
   isAuthenticating: false,
@@ -56,6 +65,26 @@ const authSlice = createSlice({
       state.userStatus = action.payload;
     },
     
+    // Signup/Onboarding Actions (simplified)
+    setSignupLoading: (state, action: PayloadAction<boolean>) => {
+      state.signupLoading = action.payload;
+    },
+    setSignupError: (state, action: PayloadAction<string | null>) => {
+      state.signupError = action.payload;
+    },
+    setSignupSuccess: (state, action: PayloadAction<boolean>) => {
+      state.signupSuccess = action.payload;
+    },
+    setUserEmail: (state, action: PayloadAction<string | null>) => {
+      state.userEmail = action.payload;
+    },
+    setSubmissionStatus: (state, action: PayloadAction<SubmissionStatus | null>) => {
+      state.submissionStatus = action.payload;
+    },
+    setSignupStep: (state, action: PayloadAction<SignupStep>) => {
+      state.signupStep = action.payload;
+    },
+    
     // Control Actions
     setAuthenticating: (state, action: PayloadAction<boolean>) => {
       state.isAuthenticating = action.payload;
@@ -76,6 +105,14 @@ const authSlice = createSlice({
       state.serviceError = null;
       state.isAuthenticating = false;
     },
+    resetSignupState: (state) => {
+      state.signupLoading = false;
+      state.signupError = null;
+      state.signupSuccess = false;
+      state.userEmail = null;
+      state.submissionStatus = null;
+      state.signupStep = 'idle';
+    },
     
     // Bulk update for efficiency
     updateAuthState: (state, action) => {
@@ -95,9 +132,16 @@ export const {
   setServiceLoading,
   setServiceError,
   setUserStatus,
+  setSignupLoading,
+  setSignupError,
+  setSignupSuccess,
+  setUserEmail,
+  setSubmissionStatus,
+  setSignupStep,
   setAuthenticating,
   updateLastUpdated,
   resetAuthState,
+  resetSignupState,
   updateAuthState
 } = authSlice.actions;
 
@@ -143,6 +187,24 @@ export const selectTimeUntilExpiry = (state: RootState): number | null => {
   const authData = state.auth.authData;
   if (!authData || !authData.expires_at) return null;
   return Math.max(0, authData.expires_at - Math.floor(Date.now() / 1000));
+};
+
+// Signup/Onboarding selectors
+export const selectSignupLoading = (state: RootState): boolean => state.auth.signupLoading;
+export const selectSignupError = (state: RootState): string | null => state.auth.signupError;
+export const selectSignupSuccess = (state: RootState): boolean => state.auth.signupSuccess;
+export const selectUserEmail = (state: RootState): string | null => state.auth.userEmail;
+export const selectSubmissionStatus = (state: RootState) => state.auth.submissionStatus;
+export const selectSignupStep = (state: RootState) => state.auth.signupStep;
+
+// Computed signup selectors
+export const selectCanSubmitSignup = (state: RootState): boolean => {
+  const status = state.auth.submissionStatus;
+  return status ? status.canProceed : false;
+};
+
+export const selectShouldShowSignupForm = (state: RootState): boolean => {
+  return state.auth.userStatus === 'notsigned' && state.auth.signupStep === 'form';
 };
 
 export default authSlice.reducer;
