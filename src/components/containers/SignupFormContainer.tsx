@@ -212,31 +212,9 @@ const SignupFormContainer: React.FC<SignupFormContainerProps> = ({
     );
   }
 
-  // Show success state
+  // If user already submitted, don't show modal (FirstPage banner handles this)
   if (formInitialized && submissionStatus?.submittedBySameUserId) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
-          <div className="text-center">
-            <div className="mb-4">
-              <svg className="mx-auto h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('signup.status.alreadySubmitted')}</h3>
-            <p className="text-gray-600 mb-4">
-              {t('signup.status.alreadySubmittedNote')}
-            </p>
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {t('signup.status.closeButton')}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // Render the main signup form

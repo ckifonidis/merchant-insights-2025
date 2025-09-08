@@ -29,14 +29,14 @@ const PresentationalSignupForm: React.FC<PresentationalSignupFormProps> = ({
   const merchantIDsValue = otherBankMIDs.join('\n');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 lg:p-8 max-w-sm sm:max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             {t('signup.title')}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             {t('signup.subtitle')}
           </p>
         </div>
@@ -60,7 +60,7 @@ const PresentationalSignupForm: React.FC<PresentationalSignupFormProps> = ({
               id="email"
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+              className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-base min-h-[44px]"
               placeholder={t('signup.form.emailPlaceholder')}
               required
               disabled={isLoading}
@@ -81,9 +81,9 @@ const PresentationalSignupForm: React.FC<PresentationalSignupFormProps> = ({
               id="merchantIds"
               value={merchantIDsValue}
               onChange={(e) => handleMerchantIDsChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-base"
               placeholder={t('signup.form.merchantIdsPlaceholder')}
-              rows={4}
+              rows={3}
               disabled={isLoading}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -91,20 +91,20 @@ const PresentationalSignupForm: React.FC<PresentationalSignupFormProps> = ({
             </p>
           </div>
 
-          {/* Form Actions */}
-          <div className="flex space-x-3">
+          {/* Form Actions - Mobile-optimized button layout */}
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
             <button
               type="button"
               onClick={onCancel}
               disabled={isLoading}
-              className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full sm:flex-1 px-4 py-3 sm:py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[44px]"
             >
               {t('signup.form.cancelButton')}
             </button>
             <button
               type="submit"
               disabled={!canSubmit || isLoading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+              className="w-full sm:flex-1 px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center min-h-[44px]"
             >
               {isLoading ? (
                 <>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import ApplicationHeader from './layout/ApplicationHeader';
+import { useResponsive } from '../hooks/useResponsive';
 import GenericMetricContainer from './containers/GenericMetricContainer';
 import GenericTimeSeriesChartContainer from './containers/GenericTimeSeriesChartContainer';
 import GenericCalendarHeatmapContainer from './containers/GenericCalendarHeatmapContainer';
@@ -25,6 +26,9 @@ interface FirstPageProps {
 const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  
+  // Responsive design integration
+  const { isMobile, isTablet, width } = useResponsive();
   
   // Redux state
   const userInfo = useSelector(selectUserInfo);
@@ -95,6 +99,11 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
 
   // Signup flow handlers
   const handleInterestClick = () => {
+    // If user already submitted, don't open modal (banner shows status)
+    if (submissionStatus?.submittedBySameUserId) {
+      return;
+    }
+    
     if (needsSignup) {
       // User needs signup, show signup form
       setShowSignupForm(true);
@@ -149,23 +158,23 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
 
       {/* Hero Section with Preview Introduction */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
           <div className="text-center">
-            {/* Marketing-Focused Hero Title */}
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            {/* Marketing-Focused Hero Title - Mobile-first responsive */}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
               {t('firstPage.heroTitle')}
             </h1>
             
-            {/* Comprehensive Hero Description */}
-            <p className="text-lg text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
+            {/* Comprehensive Hero Description - Mobile-optimized */}
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-3xl lg:max-w-4xl mx-auto leading-relaxed">
               {t('firstPage.heroDescription')}
             </p>
             
-            {/* Show button only if user hasn't submitted */}
+            {/* Show button only if user hasn't submitted - Touch-optimized */}
             {!submissionStatus?.submittedBySameUserId && !isCheckingStatus && (
               <button
                 onClick={handleInterestClick}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg text-lg"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 sm:py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg text-base sm:text-lg min-h-[44px]"
               >
                 {t('firstPage.interestedButton')}
               </button>
@@ -174,11 +183,11 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
 
         {/* Competition Metrics Preview */}
-        <div className="mb-12">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+        <div className="mb-8 sm:mb-12">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             {t('firstPage.preview.competitionAnalysis')}
           </h3>
           <div className="space-y-4">
@@ -212,8 +221,8 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
         </div>
 
         {/* Revenue Chart Preview */}
-        <div className="mb-12">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+        <div className="mb-8 sm:mb-12">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             {t('firstPage.preview.revenueTrends')}
           </h3>
           <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -230,8 +239,8 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
         </div>
 
         {/* Monthly Turnover Heatmap Preview */}
-        <div className="mb-12">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+        <div className="mb-8 sm:mb-12">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             {t('firstPage.preview.monthlyTurnoverHeatmap')}
           </h3>
           <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -245,16 +254,16 @@ const FirstPage: React.FC<FirstPageProps> = ({ onInterestClick }) => {
 
         {/* Call to Action - Only show if user hasn't submitted */}
         {!submissionStatus?.submittedBySameUserId && (
-          <div className="text-center bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+          <div className="text-center bg-white p-6 sm:p-8 rounded-lg border border-gray-200 shadow-sm">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
               {t('firstPage.callToAction.title')}
             </h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-2xl mx-auto">
               {t('firstPage.callToAction.description')}
             </p>
             <button
               onClick={handleInterestClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 sm:py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg text-base sm:text-lg min-h-[44px]"
             >
               {t('firstPage.callToAction.button')}
             </button>
