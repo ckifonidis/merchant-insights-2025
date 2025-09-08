@@ -2,11 +2,31 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatValue } from '../../../utils/formatters';
 
+// TypeScript interfaces
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+  formatter?: (value: number, name: string, props: any) => string;
+  labelFormatter?: (value: string) => string;
+  showChange?: boolean;
+  currency?: boolean;
+  className?: string;
+}
+
+interface TooltipEntry {
+  value: number;
+  dataKey: string;
+  name?: string;
+  color?: string;
+  payload?: Record<string, any>;
+}
+
 /**
  * Standardized tooltip component for charts
  * Consolidates the repeated CustomTooltip implementations
  */
-const ChartTooltip = ({ 
+const ChartTooltip: React.FC<ChartTooltipProps> = ({ 
   active, 
   payload, 
   label,
@@ -23,10 +43,10 @@ const ChartTooltip = ({
   }
 
   // Default label formatter
-  const formatLabel = labelFormatter || ((value) => value);
+  const formatLabel = labelFormatter || ((value: string) => value);
 
   // Default value formatter
-  const formatTooltipValue = formatter || ((value, name, props) => {
+  const formatTooltipValue = formatter || ((value: number, name: string, props: any) => {
     const valueType = currency ? 'currency' : 'number';
     let formattedValue = formatValue(value, valueType);
     
@@ -46,10 +66,10 @@ const ChartTooltip = ({
   return (
     <div className={`bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs ${className}`}>
       <p className="font-medium text-black mb-2">
-        {formatLabel(label)}
+        {formatLabel(label || '')}
       </p>
       
-      {payload.map((entry, index) => {
+      {payload.map((entry: TooltipEntry, index: number) => {
         const value = formatTooltipValue(entry.value, entry.dataKey, entry);
         const color = entry.color || '#007B85';
         

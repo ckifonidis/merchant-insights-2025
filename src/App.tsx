@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './store/index';
-import Header from './components/layout/Header';
+import ApplicationHeader from './components/layout/ApplicationHeader';
 import Footer from './components/layout/Footer';
 import TabNavigation from './components/layout/TabNavigation';
 import FilterSidebar from './components/layout/FilterSidebar';
@@ -68,7 +68,7 @@ function AppContent() {
   // Main authenticated application UI
   return (
     <div className="flex flex-col min-h-screen">
-      <Header onLogout={handleLogout} />
+      <ApplicationHeader />
       <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
       <div className="flex flex-1">

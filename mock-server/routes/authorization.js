@@ -13,7 +13,7 @@ router.post('/checkUserStatus', (req, res) => {
     console.log('🔍 Checking authorization for userID:', userID);
     
     // Mock user status - return 50-50 random between "signedup" and "notsigned"
-    const userStatus = Math.random() < 0.1 ? "signedup" : "notsigned";
+    const userStatus = Math.random() < 0.9 ? "signedup" : "notsigned";
     
     const response = {
       payload: {

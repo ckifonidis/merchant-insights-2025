@@ -197,6 +197,29 @@
       "cannotLoad": "Unable to Load Signup Form",
       "closeButton": "Close"
     },
+    "banner": {
+      "applicationUnderReview": "Application Under Review",
+      "applicationSubmittedTitle": "Your application for NBG Business Insights has been submitted",
+      "applicationSubmittedMessage": "We're currently reviewing your application. You'll receive an email notification once the review is complete and your access is activated.",
+      "checkingStatus": "Checking application status..."
+    },
     "footer": "By submitting this application, you agree to receive business insights and analytics from NBG. Your data will be processed according to our privacy policy."
+  },
+  "firstPage": {
+    "heroTitle": "Unlock Your Business Potential",
+    "heroDescription": "Transform data into actionable insights with our analytics platform. Explore revenue trends, competitor analysis, and customer insights that drive real growth. Preview our tools below and see how data-driven decisions can accelerate your business.",
+    "interestedButton": "I'm Interested",
+    "preview": {
+      "competitionAnalysis": "Competition Analysis Preview",
+      "revenueTrends": "Revenue Trends Preview",
+      "monthlyTurnoverHeatmap": "Monthly Turnover Heatmap Preview",
+      "yourBusiness": "Your Business",
+      "turnover": "Turnover"
+    },
+    "callToAction": {
+      "title": "Ready to unlock your business potential?",
+      "description": "This is just a taste of what NBG Business Insights can offer. Get access to comprehensive analytics, detailed customer demographics, competitive benchmarking, and actionable insights to grow your business.",
+      "button": "I'm Interested - Show Me More"
+    }
   }
 }
