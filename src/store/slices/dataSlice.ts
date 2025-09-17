@@ -121,7 +121,7 @@ export const fetchMetricsData = createAsyncThunk(
       // Create and cache the promise
       // Use context from options if provided, otherwise fallback to 'metrics'
       const tabContext = context || 'metrics';
-      const requestPromise = analyticsService.fetchTabData(tabContext, metricIDs, filters, { ...options, userID })
+      const requestPromise = analyticsService.fetchTabData(tabContext, metricIDs, filters, { userID })
         .then(apiResponse => {
           console.log(`📥 Raw API response:`, apiResponse);
           
@@ -234,7 +234,7 @@ export const fetchMetricsDataWithYearComparison = createAsyncThunk(
       // Create and cache the promise
       // Use context from options if provided, otherwise fallback to 'metrics'
       const tabContext = context || 'metrics';
-      const requestPromise = analyticsService.fetchTabDataWithYearComparison(tabContext, metricIDs, filters, { ...options, userID })
+      const requestPromise = analyticsService.fetchTabDataWithYearComparison(tabContext, metricIDs, filters, { userID })
         .then(result => {
           console.log(`📥 Raw year-over-year API response:`, result);
           console.log(`🔍 DEBUG Step 1 - API Response Structure:`, {

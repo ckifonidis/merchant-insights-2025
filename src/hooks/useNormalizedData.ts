@@ -10,11 +10,9 @@ import {
   fetchMetricsDataWithYearComparison 
 } from '../store/slices/dataSlice.js';
 import {
-  selectMetricsData,
   selectMetricsLoading,
   selectMetricsError,
 } from '../store/selectors/dataSelectors.js';
-import { createMetricKeyMapping } from '../utils/metricKeys.js';
 import { 
   selectAPIRequestParams,
   selectFiltersChanged,
@@ -56,11 +54,10 @@ export const useMetricData = (metricIds: string | string[] | null, options: UseM
     autoFetch = false,
     yearOverYear = false,
     selector = 'raw', // 'raw', 'card', 'timeSeries', 'categorical'
-    ...fetchOptions
+    context // Extract context as primitive value only
   } = options;
 
   // Core selectors
-  const allMetricsData = useSelector((state: RootState) => selectMetricsData(state));
   const isLoading = useSelector((state: RootState) => selectMetricsLoading(state));
   const error = useSelector((state: RootState) => selectMetricsError(state));
   const apiRequestParams = useSelector((state: RootState) => selectAPIRequestParams(state));
@@ -78,53 +75,34 @@ export const useMetricData = (metricIds: string | string[] | null, options: UseM
     }
 
     const fetchAction = yearOverYear ? fetchMetricsDataWithYearComparison : fetchMetricsData;
-    dispatch(fetchAction({ 
-      metricIDs: Array.isArray(metricIds) ? metricIds : [metricIds], 
-      filters: apiRequestParams, 
-      options: fetchOptions,
+    dispatch(fetchAction({
+      metricIDs: Array.isArray(metricIds) ? metricIds : [metricIds],
+      filters: apiRequestParams,
       userID,
-      context: fetchOptions.context // Pass context for compound key generation
+      context // Pass context for compound key generation
     }));
-  }, [dispatch, metricIds, apiRequestParams, yearOverYear, fetchOptions, userID]);
+  }, [dispatch, metricIds, apiRequestParams, yearOverYear, userID, context]);
 
-  // Auto-fetch on filter changes
+  // Simplified fetching: Only trigger on filter changes or tab changes
   useEffect(() => {
-    if (filtersChanged && autoFetch) {
+    if (!hasServiceAccess || !autoFetch || !metricIds || !userID) return;
+
+    // Auto-fetch on filter changes
+    if (filtersChanged) {
+      console.log('🔄 Fetching data due to filter change on tab:', selectedTab);
       fetchData();
       dispatch(markFiltersApplied());
+      return;
     }
-  }, [filtersChanged, autoFetch, fetchData, dispatch]);
+  }, [filtersChanged, hasServiceAccess, autoFetch, metricIds, userID, selectedTab, fetchData, dispatch]);
 
-  // Initial fetch when user is authenticated and has service access
+  // Fetch on tab change (initial load of tab)
   useEffect(() => {
-    if (!hasServiceAccess || !autoFetch || isLoading || !metricIds || !userID) return;
-    
-    // Check if we have data for ALL required metrics for this tab
-    const requiredMetrics = Array.isArray(metricIds) ? metricIds : [metricIds];
-    
-    // Create mapping of original metric IDs to their store keys (compound keys if needed)
-    const keyMapping = createMetricKeyMapping(requiredMetrics, fetchOptions.context);
-    
-    // Check if we have data for all metrics using their correct store keys
-    const hasAllRequiredData = requiredMetrics.every(metricId => {
-      const storeKey = keyMapping[metricId];
-      const hasData = allMetricsData[storeKey];
-      
-      console.log(`🔍 Data check for ${metricId}:`, {
-        originalId: metricId,
-        storeKey: storeKey,
-        hasData: !!hasData,
-        context: fetchOptions.context
-      });
-      
-      return hasData;
-    });
-    
-    if (!hasAllRequiredData) {
-      console.log('🔄 Initial/tab-change data fetch for metrics:', requiredMetrics, 'on tab:', selectedTab, 'context:', fetchOptions.context);
-      fetchData();
-    }
-  }, [hasServiceAccess, autoFetch, isLoading, metricIds, allMetricsData, selectedTab, fetchData, userID, fetchOptions.context]);
+    if (!hasServiceAccess || !autoFetch || !metricIds || !userID) return;
+
+    console.log('🔄 Fetching data due to tab change:', selectedTab, 'context:', context);
+    fetchData();
+  }, [selectedTab, hasServiceAccess, autoFetch, metricIds, userID, fetchData, context]);
 
   // Get processed data based on selector type
 

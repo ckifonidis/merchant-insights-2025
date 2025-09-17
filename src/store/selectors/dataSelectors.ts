@@ -121,6 +121,7 @@ export const selectRevenueByChannel = createMetricSelector(METRIC_IDS.REVENUE_BY
 // Context-specific selectors for metrics that require compound keys
 export const selectCustomersByInterestRevenue = createContextAwareMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_INTEREST, 'revenue');
 export const selectCustomersByInterestDemographics = createContextAwareMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_INTEREST, 'demographics');
+export const selectCustomersByAgeDemographics = createContextAwareMetricSelector(METRIC_IDS.CONVERTED_CUSTOMERS_BY_AGE, 'demographics');
 
 // =============================================================================
 // Entity-Specific Selectors (Merchant/Competitor)
@@ -262,8 +263,8 @@ export const selectRevenueData = createSelector(
 export const selectDemographicsData = createSelector(
   [
     selectCustomersByGender,
-    selectCustomersByAge,
-    selectCustomersByInterest,
+    selectCustomersByAgeDemographics,
+    selectCustomersByInterestDemographics,
     selectDataLoading,
     selectDataErrors
   ],

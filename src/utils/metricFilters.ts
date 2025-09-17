@@ -23,6 +23,26 @@ export const METRIC_SPECIFIC_FILTERS = {
         description: 'Determines if API returns revenue amounts or customer counts'
       }
     }
+  },
+  'converted_customers_by_age': {
+    // Required filters for age demographics metric
+    required: {
+      age_group_type: {
+        default: 'customers',
+        contexts: {
+          demographics: 'customers' // Demographics tab shows customer age groups
+        },
+        options: ['customers'], // Valid values
+        description: 'Age groups focused on customer demographics'
+      }
+    }
+  },
+  'converted_customers_by_gender': {
+    // Required filters for gender demographics metric
+    required: {
+      // Gender metric may need customer context filters in the future
+      // Currently using default behavior but configured for extensibility
+    }
   }
 };
 
