@@ -84,8 +84,8 @@ export function AuthenticationManager({ children }: AuthenticationManagerProps) 
               console.log('✅ User info fetched successfully');
               
               // Check user service enrollment
-              if (userInfoData.preferred_username) {
-                await checkUserServiceStatus(userInfoData.preferred_username);
+              if (userInfoData.ibank_user_id) {
+                await checkUserServiceStatus(userInfoData.ibank_user_id);
               }
             } else {
               console.warn('⚠️ User info could not be fetched');

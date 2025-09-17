@@ -44,5 +44,5 @@ public class UserInfo
     public string? authorization_level { get; set; }
     public string? number_of_approvals { get; set; }
     public string? phone_number_verified { get; set; }
-    public string? role { get; set; }
+    public object? role { get; set; }  // Can be string or string[] from OAuth provider
 }

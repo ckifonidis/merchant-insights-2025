@@ -351,8 +351,17 @@ public class OAuthController : ControllerBase
             
             // Deserialize to strongly-typed UserInfo with all NBG claims
             var userInfo = JsonSerializer.Deserialize<UserInfo>(json);
-            _logger.LogInformation("[{RequestId}] UserInfo fetched from OAuth provider: sub={Sub}, preferred_username={PreferredUsername}, role={Role}", 
-                requestId, userInfo?.sub, userInfo?.preferred_username, userInfo?.role);
+            var roleDisplay = userInfo?.role switch
+            {
+                string s => s,
+                string[] arr => string.Join(", ", arr),
+                JsonElement elem when elem.ValueKind == JsonValueKind.Array =>
+                    string.Join(", ", elem.EnumerateArray().Select(x => x.GetString())),
+                _ => userInfo?.role?.ToString()
+            };
+
+            _logger.LogInformation("[{RequestId}] UserInfo fetched from OAuth provider: sub={Sub}, preferred_username={PreferredUsername}, role={Role}",
+                requestId, userInfo?.sub, userInfo?.preferred_username, roleDisplay);
             
             return userInfo;
         }

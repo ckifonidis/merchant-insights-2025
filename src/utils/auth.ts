@@ -76,7 +76,9 @@ export async function fetchUserInfo(): Promise<UserInfo | null> {
         sub: userInfo.sub,
         name: userInfo.name,
         email: userInfo.email,
-        hasPreferredUsername: !!userInfo.preferred_username
+        hasPreferredUsername: !!userInfo.preferred_username,
+        ibank_user_id: userInfo.ibank_user_id,
+        customer_code: userInfo.customer_code
       });
       return userInfo;
     }
